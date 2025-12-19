@@ -1,0 +1,263 @@
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background & Surface */
+    --background: 40 33% 98%;
+    --foreground: 220 20% 15%;
+    
+    /* Cards & Elevated surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+    
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+    
+    /* Primary - Calming Teal */
+    --primary: 168 80% 32%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 168 60% 94%;
+    
+    /* Secondary - Soft neutral */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 25%;
+    
+    /* Muted */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 50%;
+    
+    /* Accent - Warm Amber */
+    --accent: 38 92% 50%;
+    --accent-foreground: 38 92% 15%;
+    --accent-light: 38 100% 95%;
+    
+    /* Status Colors */
+    --success: 152 69% 40%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 152 60% 94%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 15%;
+    --warning-light: 38 100% 95%;
+    
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-light: 0 100% 97%;
+    
+    --info: 200 90% 45%;
+    --info-foreground: 0 0% 100%;
+    --info-light: 200 100% 96%;
+    
+    /* Border & Input */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 168 80% 32%;
+    
+    --radius: 1rem;
+    
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 168 80% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 20% 25%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 168 80% 32%;
+    
+    /* Custom shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 20% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 20% 15% / 0.07), 0 2px 4px -2px hsl(220 20% 15% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(220 20% 15% / 0.08), 0 4px 6px -4px hsl(220 20% 15% / 0.05);
+    --shadow-card: 0 2px 8px -2px hsl(220 20% 15% / 0.08), 0 4px 16px -4px hsl(220 20% 15% / 0.06);
+  }
+
+  .dark {
+    --background: 220 20% 10%;
+    --foreground: 40 33% 98%;
+    
+    --card: 220 18% 14%;
+    --card-foreground: 40 33% 98%;
+    
+    --popover: 220 18% 14%;
+    --popover-foreground: 40 33% 98%;
+    
+    --primary: 168 70% 45%;
+    --primary-foreground: 220 20% 10%;
+    --primary-light: 168 50% 20%;
+    
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 40 33% 95%;
+    
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 60%;
+    
+    --accent: 38 85% 55%;
+    --accent-foreground: 220 20% 10%;
+    --accent-light: 38 50% 20%;
+    
+    --success: 152 60% 45%;
+    --success-light: 152 40% 18%;
+    
+    --warning: 38 85% 55%;
+    --warning-light: 38 50% 18%;
+    
+    --destructive: 0 65% 55%;
+    --destructive-light: 0 50% 18%;
+    
+    --info: 200 80% 55%;
+    --info-light: 200 50% 18%;
+    
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 168 70% 45%;
+    
+    --sidebar-background: 220 18% 12%;
+    --sidebar-foreground: 40 33% 98%;
+    --sidebar-primary: 168 70% 45%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 220 15% 20%;
+    --sidebar-accent-foreground: 40 33% 95%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 168 70% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Touch-friendly active states */
+.touch-active {
+  @apply transition-all duration-150 active:scale-[0.98] active:opacity-90;
+}
+
+/* Card hover effects */
+.card-interactive {
+  @apply transition-all duration-200 hover:shadow-lg active:scale-[0.99];
+}
+
+/* Bottom nav safe area */
+.bottom-nav-height {
+  height: calc(4rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
