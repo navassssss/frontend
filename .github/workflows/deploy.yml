@@ -42,5 +42,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           source: "dist/*"
-          target: "/home/afeej/academics/public"
+          target: "/home/afeej/academics/backend/public"
           strip_components: 1 # Removes the 'dist' parent folder so contents go directly into public
