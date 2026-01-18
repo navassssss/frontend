@@ -73,6 +73,24 @@ export const getStudents = async (params?: {
     return response.data;
 };
 
+// Get status counts (separate endpoint for performance)
+export const getStatusCounts = async (params?: {
+    classId?: number;
+    search?: string;
+}): Promise<{
+    paid: number;
+    partial: number;
+    due: number;
+    overpaid: number;
+}> => {
+    const queryParams: any = {};
+    if (params?.classId) queryParams.class_id = params.classId;
+    if (params?.search) queryParams.search = params.search;
+
+    const response = await api.get('/fees/status-counts', { params: queryParams });
+    return response.data;
+};
+
 // Get student fee overview
 export const getStudentOverview = async (studentId: number) => {
     const response = await api.get(`/fees/students/${studentId}`);
@@ -91,6 +109,7 @@ export const addPayment = async (data: {
     amount: number;
     payment_date: string;
     remarks?: string;
+    receipt_issued?: boolean;
 }) => {
     const response = await api.post('/fees/payments', data);
     return response.data;

@@ -98,6 +98,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
     const [showAdjustment, setShowAdjustment] = useState(false);
     const [adjustments, setAdjustments] = useState<Record<string, string>>({});
+    const [totalPendingFromBackend, setTotalPendingFromBackend] = useState(0);
 
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -133,29 +134,40 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         }
     }, [selectedStudent]);
 
-    const loadStudents = async () => {
-        const response = await feeApi.getStudents();
-        // Handle paginated response - get all students by fetching all pages
-        let allStudents = response.data;
+    // Load students based on search
+    useEffect(() => {
+        if (!open) return;
 
-        // If there are more pages, fetch them all
-        if (response.last_page > 1) {
-            const promises = [];
-            for (let page = 2; page <= response.last_page; page++) {
-                promises.push(feeApi.getStudents({ page, per_page: 20 }));
-            }
-            const results = await Promise.all(promises);
-            results.forEach(r => {
-                allStudents = [...allStudents, ...r.data];
+        const delayDebounceFn = setTimeout(() => {
+            searchStudents(searchQuery);
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery, open]);
+
+    const searchStudents = async (query: string) => {
+        try {
+            // Only search if query has length or just load recent/default
+            const response = await feeApi.getStudents({
+                search: query || undefined,
+                per_page: 20, // Limit results for performance
+                page: 1
             });
-        }
 
-        setStudents(allStudents.map(s => ({
-            id: s.id.toString(),
-            studentName: s.name,
-            className: s.class_name,
-            username: s.username, // Admission number
-        })));
+            setStudents(response.data.map((s: any) => ({
+                id: s.id.toString(),
+                studentName: s.name,
+                className: s.class_name,
+                username: s.username,
+            })));
+        } catch (error) {
+            console.error('Failed to search students', error);
+        }
+    };
+
+    // Keep the main load function for initial/specific loads if needed
+    const loadStudents = async () => {
+        await searchStudents('');
     };
 
     const loadStudentFeeDetails = async () => {
@@ -187,6 +199,9 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 adj[f.month] = f.expectedAmount.toString();
             });
             setAdjustments(adj);
+
+            // Store the backend's total_pending value (accounts for overpaid status)
+            setTotalPendingFromBackend(overview.total_pending || 0);
         } catch (error) {
             console.error('Error loading student fee details:', error);
             // Fallback to empty arrays if API fails
@@ -249,26 +264,16 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         return preview;
     }, [amount, monthlyStatus, adjustments]);
 
-    const totalPending = useMemo(() => {
-        return monthlyStatus.reduce((sum, s) => {
-            const adjusted = parseFloat(adjustments[s.month] || s.expectedAmount.toString());
-            return sum + Math.max(0, adjusted - s.paidAmount);
-        }, 0);
-    }, [monthlyStatus, adjustments]);
+    // Use backend's total_pending value which correctly accounts for overpaid students
+    // Frontend calculation would incorrectly show pending for partial future month payments
+    const totalPending = totalPendingFromBackend;
 
     const paymentAmount = parseFloat(amount) || 0;
     const isOverpayment = paymentAmount > totalPending;
     const remainingAfterPayment = Math.max(0, totalPending - paymentAmount);
 
-    const filteredStudents = useMemo(() => {
-        if (!searchQuery) return students;
-        const query = searchQuery.toLowerCase();
-        return students.filter(s =>
-            s.studentName.toLowerCase().includes(query) ||
-            s.className.toLowerCase().includes(query) ||
-            s.username.toLowerCase().includes(query) // Search by admission number
-        );
-    }, [students, searchQuery]);
+    // Client-side filtering removed in favor of server-side search
+    const filteredStudents = students;
 
     const handleAdjustmentChange = (month: string, value: string) => {
         setAdjustments(prev => ({ ...prev, [month]: value }));
@@ -286,16 +291,14 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
         setSubmitting(true);
         try {
-            // Add the payment directly (fee adjustments should be done separately)
+            // Add the payment directly
             await feeApi.addPayment({
                 student_id: parseInt(selectedStudent.id),
                 amount: parseFloat(amount),
                 payment_date: paymentDate,
                 remarks: remarks || undefined,
+                receipt_issued: receiptIssued,
             });
-
-            // Toggle receipt if needed
-            // Note: Backend doesn't support receipt toggle during creation yet
 
             // Add to session payments
             setSessionPayments(prev => [...prev, {
@@ -421,11 +424,13 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-[300px] p-0" align="start">
-                                    <Command>
+                                    <Command shouldFilter={false}>
                                         <CommandInput
                                             placeholder="Search by name, class, or Ad.No..."
                                             value={searchQuery}
-                                            onValueChange={setSearchQuery}
+                                            onValueChange={(val) => {
+                                                setSearchQuery(val);
+                                            }}
                                         />
                                         <CommandList>
                                             <CommandEmpty>No student found.</CommandEmpty>
@@ -469,7 +474,20 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                     <div className="flex items-center justify-between mt-1">
                                         <span className="text-xs text-muted-foreground">Unpaid months</span>
                                         <span className="text-sm">
-                                            {monthlyStatus.filter(s => s.status !== 'paid').length} months
+                                            {monthlyStatus.filter(s => {
+                                                // Only count past/current months that are unpaid or partial
+                                                const [year, month] = s.month.split('-').map(Number);
+                                                const now = new Date();
+                                                const currentYear = now.getFullYear();
+                                                const currentMonth = now.getMonth() + 1;
+
+                                                // Check if this month is in the past or current
+                                                const isPastOrCurrent = year < currentYear ||
+                                                    (year === currentYear && month <= currentMonth);
+
+                                                // Only count if past/current AND not fully paid
+                                                return isPastOrCurrent && s.status !== 'paid';
+                                            }).length} months
                                         </span>
                                     </div>
                                 </CardContent>

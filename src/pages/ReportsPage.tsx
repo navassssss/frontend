@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
@@ -30,6 +31,8 @@ interface ApiReport {
 }
 
 export default function ReportsPage() {
+  const { user } = useAuth();
+  const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
   const [reports, setReports] = useState<ApiReport[]>([]);
   const [activeFilter, setActiveFilter] = useState<ReportFilter>("all");
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -38,6 +41,14 @@ export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
+
+  // Redirect teachers to duties page
+  useEffect(() => {
+    if (!isPrincipal) {
+      toast.error('Access denied. This page is for principals only.');
+      navigate('/duties');
+    }
+  }, [isPrincipal, navigate]);
 
   const loadReports = () => {
     setIsLoading(true);
@@ -111,8 +122,8 @@ export default function ReportsPage() {
               key={tab}
               onClick={() => setActiveFilter(tab as ReportFilter)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${activeFilter === tab
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -221,8 +232,8 @@ export default function ReportsPage() {
                       key={duty}
                       onClick={() => setSelectedDuty(duty)}
                       className={`w-full px-4 py-3 rounded-full text-sm font-medium border ${selectedDuty === duty
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-foreground hover:bg-secondary/80'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80'
                         } transition-all`}
                     >
                       {duty === 'all' ? 'All Duties' : duty}
@@ -242,8 +253,8 @@ export default function ReportsPage() {
                       key={teacher}
                       onClick={() => setSelectedTeacher(teacher)}
                       className={`w-full px-4 py-3 rounded-full text-sm font-medium border ${selectedTeacher === teacher
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-foreground hover:bg-secondary/80'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80'
                         } transition-all`}
                     >
                       {teacher === 'all' ? 'All Teachers' : teacher}

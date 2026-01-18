@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Eye, EyeOff, ArrowRight, Trophy } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, ArrowRight, Trophy, ArrowLeft, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
 import { toast } from 'sonner';
 
@@ -41,104 +41,232 @@ export default function StudentLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md animate-slide-up">
-        {/* Logo & Title */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <GraduationCap className="w-10 h-10 text-primary" />
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Large Circle - Top Right */}
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-white/10 rounded-full"></div>
+
+        {/* Geometric Shapes - Left Side */}
+        <div className="absolute top-20 left-12 space-y-4">
+          {/* Semi Circle */}
+          <div className="w-24 h-12 bg-white/20 rounded-t-full"></div>
+          {/* Dotted Grid */}
+          <div className="grid grid-cols-5 gap-2">
+            {[...Array(15)].map((_, i) => (
+              <div key={i} className="w-1.5 h-1.5 bg-white/30 rounded-full"></div>
+            ))}
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Student Portal</h1>
-          <p className="text-muted-foreground mt-2">Access your achievements & account</p>
+          {/* Vertical Pills */}
+          <div className="flex gap-3">
+            <div className="w-6 h-32 bg-white/20 rounded-full"></div>
+            <div className="w-6 h-24 bg-white/15 rounded-full mt-4"></div>
+          </div>
         </div>
 
-        {/* Login Card */}
-        <Card variant="elevated" className="animate-scale-in">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-lg">Student Login</CardTitle>
-            <CardDescription>Enter your credentials to continue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Username</label>
-                <Input
-                  type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  variant="filled"
-                  className="h-12"
-                />
+        {/* Floating Elements - Top */}
+        <div className="absolute top-16 right-1/4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded-full"></div>
+            <div className="w-6 h-6 bg-white/15 rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Bottom Left Decorations */}
+        <div className="absolute bottom-20 left-16 flex items-end gap-3">
+          <div className="w-3 h-3 bg-cyan-300/40 rounded-full"></div>
+          <div className="space-y-2">
+            <div className="grid grid-cols-4 gap-1.5">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="w-1.5 h-1.5 bg-white/25 rounded-full"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Right - Large Decorative Circle */}
+        <div className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3">
+          <div className="relative w-80 h-80">
+            {/* Outer ring */}
+            <div className="absolute inset-0 border-8 border-white/20 rounded-full"></div>
+            {/* Inner gradient circle */}
+            <div className="absolute inset-12 bg-gradient-to-br from-cyan-300/30 to-blue-400/30 rounded-full"></div>
+            {/* Small circles on ring */}
+            <div className="absolute top-8 right-1/2 w-6 h-6 bg-cyan-300/50 rounded-full"></div>
+            <div className="absolute bottom-16 left-8 w-5 h-5 bg-white/30 rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Cross/X shape */}
+        <div className="absolute bottom-32 left-1/3">
+          <div className="relative w-8 h-8">
+            <div className="absolute inset-0 flex items-center justify-center text-white/20 text-3xl font-light">×</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        {/* Left Side - Text Content */}
+        <div className="text-white space-y-6 hidden lg:block animate-in fade-in slide-in-from-left duration-700">
+          <div className="inline-block">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/30">
+                <GraduationCap className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">DHIC eGov</h2>
+                <p className="text-white/70 text-sm">Student Portal</p>
+              </div>
+            </div>
+          </div>
+
+          <h1 className="text-6xl font-bold leading-tight">
+            Your Success<br />
+            Journey
+          </h1>
+          <p className="text-xl text-white/80 max-w-md">
+            Track your achievements, view your marks, and compete on the leaderboard
+          </p>
+        </div>
+
+        {/* Right Side - Login Card */}
+        <div className="flex justify-center lg:justify-end animate-in fade-in slide-in-from-right duration-700">
+          <Card className="w-full max-w-md bg-white shadow-2xl border-0 relative">
+            {/* Back Button - Mobile */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="absolute -top-12 left-0 text-white hover:bg-white/10 lg:hidden"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+
+            <CardContent className="p-8 lg:p-10">
+              {/* Logo - Mobile */}
+              <div className="lg:hidden text-center mb-8">
+                <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <GraduationCap className="w-10 h-10 text-primary" />
+                </div>
+                <h2 className="text-2xl font-bold">DHIC eGov</h2>
+                <p className="text-muted-foreground">Student Portal</p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Password</label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    variant="filled"
-                    className="h-12 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
+              {/* Welcome Text */}
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold mb-2">Hello! Welcome back</h3>
+                <p className="text-muted-foreground">Sign in to continue</p>
+              </div>
+
+              {/* Login Form */}
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Username</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Enter your username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="pl-10 h-12 bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 pr-10 h-12 bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="rounded border-gray-300" />
+                    <span className="text-muted-foreground">Remember me</span>
+                  </label>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-semibold"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      Login
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-muted-foreground">or</span>
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-center text-sm text-muted-foreground mb-4">
-                See who's on top
-              </p>
+              {/* Leaderboard Link */}
               <Button
                 variant="outline"
-                size="lg"
-                className="w-full"
+                className="w-full h-11 mb-4"
                 onClick={() => navigate('/leaderboard')}
               >
                 <Trophy className="w-5 h-5 mr-2" />
                 View Leaderboard
               </Button>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Staff Login Link */}
-        <div className="text-center mt-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="text-muted-foreground"
-          >
-            Staff Login →
-          </Button>
+              {/* Staff Portal Link */}
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Are you a staff?{' '}
+                  <button
+                    onClick={() => navigate('/staff/login')}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Staff Portal
+                  </button>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* Back Button - Desktop */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate('/')}
+        className="absolute top-6 left-6 text-white hover:bg-white/10 hidden lg:flex"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Home
+      </Button>
     </div>
   );
 }

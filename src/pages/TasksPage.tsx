@@ -17,8 +17,9 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
-type TaskFilter = 'today' | 'upcoming' | 'missed';
+type TaskFilter = 'all' | 'today' | 'completed';
 type ViewMode = 'mine' | 'all';
 
 type TaskStatus = 'pending' | 'completed' | 'missed';
@@ -33,9 +34,37 @@ interface ApiTask {
   assigned_to?: { id: number; name: string };
 }
 
+// Helper to convert name to title case
+const toTitleCase = (str: string) => {
+  return str.toLowerCase().split(' ').map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
+
+// Helper to format date
+const formatDate = (dateStr: string) => {
+  try {
+    return format(new Date(dateStr), 'MMM d, yyyy');
+  } catch {
+    return dateStr;
+  }
+};
+
+// Helper to get status badge
+const getStatusBadge = (status: TaskStatus) => {
+  switch (status) {
+    case 'completed':
+      return <Badge className="bg-green-100 text-green-700 border-green-200 font-medium px-2 py-0.5">Completed</Badge>;
+    case 'missed':
+      return <Badge className="bg-red-100 text-red-700 border-red-200 font-medium px-2 py-0.5">Overdue</Badge>;
+    default:
+      return <Badge className="bg-amber-100 text-amber-700 border-amber-200 font-medium px-2 py-0.5">Pending</Badge>;
+  }
+};
+
 export default function TasksPage() {
   const [tasks, setTasks] = useState<ApiTask[]>([]);
-  const [activeFilter, setActiveFilter] = useState<TaskFilter>('today');
+  const [activeFilter, setActiveFilter] = useState<TaskFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('mine');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,8 +101,6 @@ export default function TasksPage() {
 
   const filteredTasks = tasks.filter((task) => {
     if (!user) return false;
-    const notCompleted = task.status !== 'completed';
-    if (!notCompleted) return false;
 
     const mine = task.assigned_to?.id === user.id;
 
@@ -81,12 +108,22 @@ export default function TasksPage() {
       ? (viewMode === "all" || mine)
       : mine;
 
-    const dateMatch =
-      activeFilter === "today" ? isToday(task)
-        : activeFilter === "upcoming" ? isUpcoming(task)
-          : isMissed(task);
+    // For completed tab, show completed tasks
+    if (activeFilter === 'completed') {
+      return ownerMatch && task.status === 'completed';
+    }
 
-    return ownerMatch && dateMatch;
+    // For other tabs, exclude completed tasks
+    const notCompleted = task.status !== 'completed';
+    if (!notCompleted) return false;
+
+    // For 'all' tab, show all non-completed tasks
+    if (activeFilter === 'all') {
+      return ownerMatch;
+    }
+
+    // For 'today' tab, show only today's tasks
+    return ownerMatch && isToday(task);
   });
 
 
@@ -108,14 +145,22 @@ export default function TasksPage() {
   });
 
 
-  const todayCount = visibleTasks.filter((t) => isToday(t) && !isMissed(t)).length;
-  const upcomingCount = visibleTasks.filter((t) => isUpcoming(t)).length;
-  const missedCount = visibleTasks.filter((t) => isMissed(t)).length;
+  const allCount = visibleTasks.length;
+  const todayCount = visibleTasks.filter((t) => isToday(t)).length;
+
+  // Count completed tasks separately (not filtered by notCompleted)
+  const completedTasks = tasks.filter((task) => {
+    if (!user) return false;
+    const mine = task.assigned_to?.id === user.id;
+    const ownerMatch = isPrincipal ? (viewMode === "all" || mine) : mine;
+    return ownerMatch && task.status === 'completed';
+  });
+  const completedCount = completedTasks.length;
 
   const filterTabs: { id: TaskFilter; label: string; count: number }[] = [
+    { id: "all", label: "All", count: allCount },
     { id: "today", label: "Today", count: todayCount },
-    { id: "upcoming", label: "Upcoming", count: upcomingCount },
-    { id: "missed", label: "Missed", count: missedCount },
+    { id: "completed", label: "Completed", count: completedCount },
   ];
 
 
@@ -131,7 +176,7 @@ export default function TasksPage() {
 
   return (
     <AppLayout title="Tasks">
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
@@ -150,7 +195,7 @@ export default function TasksPage() {
               size="sm"
               onClick={() => navigate('/tasks/new')}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 mr-1" />
               Add
             </Button>
           )}
@@ -194,20 +239,21 @@ export default function TasksPage() {
                 }`}
             >
               {tab.label}
-              <span
-                className={`text-xs px-1.5 py-0.5 rounded-full ${activeFilter === tab.id
-                  ? 'bg-primary-foreground/20'
-                  : 'bg-muted-foreground/20'
+              <Badge
+                variant="secondary"
+                className={`text-xs font-semibold px-2 py-0.5 ${activeFilter === tab.id
+                  ? 'bg-primary-foreground/20 text-primary-foreground'
+                  : 'bg-muted text-foreground'
                   }`}
               >
                 {tab.count}
-              </span>
+              </Badge>
             </button>
           ))}
         </div>
 
         {/* Tasks List */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {filteredTasks.length === 0 ? (
             <Card variant="flat" className="animate-fade-in">
               <CardContent className="p-8 text-center">
@@ -224,53 +270,59 @@ export default function TasksPage() {
                 key={task.id}
                 variant="interactive"
                 onClick={() => navigate(`/tasks/${task.id}`)}
-                className="animate-slide-up"
+                className="animate-slide-up hover:border-primary/40 transition-all shadow-sm hover:shadow-md"
                 style={{
                   animationDelay: `${index * 0.05}s`,
                   animationFillMode: 'backwards',
                 }}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3">
                     <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${task.status === 'missed'
-                        ? 'bg-destructive-light'
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${task.status === 'missed'
+                        ? 'bg-red-100'
                         : task.status === 'completed'
-                          ? 'bg-success-light'
-                          : 'bg-warning-light'
+                          ? 'bg-green-100'
+                          : 'bg-amber-100'
                         }`}
                     >
                       {getStatusIcon(task.status)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            {task.duty?.name || 'Untitled Duty'}
-                          </p>
-                          <h3 className="font-semibold text-foreground">
-                            {task.title}
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                              {toTitleCase(task.duty?.name || 'General Task')}
+                            </p>
+                            {getStatusBadge(task.status)}
+                          </div>
+                          <h3 className="font-bold text-base text-foreground leading-tight">
+                            {toTitleCase(task.title)}
                           </h3>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 mt-2 flex-wrap">
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          {task.scheduled_date}
+                      <div className="flex items-center gap-3 mt-2 flex-wrap text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-teal-600" />
+                          <span className="font-medium">{formatDate(task.scheduled_date)}</span>
                         </div>
                         {task.scheduled_time && (
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Clock className="w-4 h-4" />
-                            {task.scheduled_time.slice(0, 5)}
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-teal-600" />
+                            <span className="font-medium">{task.scheduled_time.slice(0, 5)}</span>
                           </div>
                         )}
                         {isPrincipal &&
                           viewMode === 'all' &&
                           task.assigned_to?.name && (
-                            <Badge variant="secondary" className="text-xs">
-                              {task.assigned_to.name}
-                            </Badge>
+                            <div className="flex items-center gap-1">
+                              <User className="w-3.5 h-3.5" />
+                              <span className="font-medium">{toTitleCase(task.assigned_to.name)}</span>
+                            </div>
                           )}
                       </div>
                     </div>

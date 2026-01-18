@@ -107,13 +107,44 @@ export default function ForwardIssuePage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Assign To <span className="text-destructive">*</span></label>
                                 <Select value={selectedUser} onValueChange={setSelectedUser}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select staff member" />
+                                    <SelectTrigger className="h-12">
+                                        <SelectValue placeholder="Select staff member">
+                                            {selectedUser && (() => {
+                                                const teacher = teachers.find(t => t.id.toString() === selectedUser);
+                                                return teacher ? (
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-xs font-semibold text-primary-foreground">
+                                                                {teacher.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex flex-col items-start">
+                                                            <span className="font-medium">{teacher.name}</span>
+                                                            <span className="text-xs text-muted-foreground capitalize">{teacher.role}</span>
+                                                        </div>
+                                                    </div>
+                                                ) : null;
+                                            })()}
+                                        </SelectValue>
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="max-h-[300px]">
                                         {teachers.map((teacher) => (
-                                            <SelectItem key={teacher.id} value={teacher.id.toString()}>
-                                                {teacher.name} <span className="text-muted-foreground text-xs">({teacher.role})</span>
+                                            <SelectItem
+                                                key={teacher.id}
+                                                value={teacher.id.toString()}
+                                                className="h-16 cursor-pointer"
+                                            >
+                                                <div className="flex items-center gap-3 py-1">
+                                                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-sm font-semibold text-primary-foreground">
+                                                            {teacher.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-col items-start">
+                                                        <span className="font-medium text-sm">{teacher.name}</span>
+                                                        <span className="text-xs text-muted-foreground capitalize">{teacher.role}</span>
+                                                    </div>
+                                                </div>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

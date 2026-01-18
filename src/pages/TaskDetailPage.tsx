@@ -183,10 +183,10 @@ export default function TaskDetailPage() {
                   <div key={rep.id} className="relative">
                     {/* Timeline Dot */}
                     <div className={`absolute -left-2 top-1.5 w-3 h-3 rounded-full ${rep.status === "submitted"
-                        ? "bg-yellow-500"
-                        : rep.status === "approved"
-                          ? "bg-green-500"
-                          : "bg-red-500"
+                      ? "bg-yellow-500"
+                      : rep.status === "approved"
+                        ? "bg-green-500"
+                        : "bg-red-500"
                       }`} />
 
                     <p className="text-sm ms-2 font-semibold">
@@ -253,19 +253,21 @@ export default function TaskDetailPage() {
       {/* Bottom Action Button */}
       {isMine && !isCompleted && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
-          <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-5 h-5" />
-                Submit Report
-              </>
-            )}
-          </Button>
+          <div className="max-w-lg mx-auto">
+            <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5" />
+                  Submit Report
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       )}
     </div>

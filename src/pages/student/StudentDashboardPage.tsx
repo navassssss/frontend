@@ -74,64 +74,64 @@ export default function StudentDashboardPage() {
 
   return (
     <StudentLayout title={`Welcome, ${student?.name?.split(' ')[0] || 'Student'}!`}>
-      <div className="space-y-6 pb-24">
+      <div className="space-y-8 pb-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card variant="stat" className="animate-slide-up stagger-1">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-accent" fill="currentColor" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up stagger-1 group">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Star className="w-6 h-6 text-amber-500" fill="currentColor" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{stars}</p>
-                  <p className="text-xs text-muted-foreground">Total Stars</p>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{stars}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Stars</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card variant="stat" className="animate-slide-up stagger-2">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Trophy className="w-5 h-5 text-primary" />
+          <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up stagger-2 group">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Trophy className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalPoints}</p>
-                  <p className="text-xs text-muted-foreground">Total Points</p>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{totalPoints}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Points</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card variant="stat" className="animate-slide-up stagger-3">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-success" />
+          <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up stagger-3 group">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{monthlyPoints}</p>
-                  <p className="text-xs text-muted-foreground">This Month</p>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{monthlyPoints}</p>
+                  <p className="text-sm font-medium text-muted-foreground">This Month</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Wallet Balance */}
-          <Card variant="stat" className="animate-slide-up stagger-4">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(student?.walletBalance || 0) >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
-                  <Wallet className={`w-5 h-5 ${(student?.walletBalance || 0) >= 0 ? 'text-success' : 'text-destructive'}`} />
+          <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up stagger-4 group">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${(student?.walletBalance || 0) >= 0 ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
+                  <Wallet className={`w-6 h-6 ${(student?.walletBalance || 0) >= 0 ? 'text-emerald-500' : 'text-red-500'}`} />
                 </div>
                 <div>
-                  <p className={`text-xl font-bold ${(student?.walletBalance || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                  <p className={`text-2xl font-bold tracking-tight ${(student?.walletBalance || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                     ₹{Math.abs(student?.walletBalance || 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {(student?.walletBalance || 0) >= 0 ? 'Credit' : 'Due'}
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {(student?.walletBalance || 0) >= 0 ? 'Available Credit' : 'Payment Due'}
                   </p>
                 </div>
               </div>
@@ -139,155 +139,160 @@ export default function StudentDashboardPage() {
           </Card>
         </div>
 
-        {/* Progress to Next Star */}
-        <Card variant="elevated" className="animate-slide-up stagger-5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-foreground">Progress to Next Star</span>
-              <span className="text-sm text-muted-foreground">
-                {totalPoints % POINTS_PER_STAR}/{POINTS_PER_STAR} points
-              </span>
-            </div>
-            <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-accent to-accent/80 rounded-full transition-all duration-500"
-                style={{ width: `${(totalPoints % POINTS_PER_STAR) / POINTS_PER_STAR * 100}%` }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Main Content Area - Left 2/3 */}
+          <div className="lg:col-span-2 space-y-8">
 
-        {/* Quick Actions */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground px-1">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-auto py-4 flex-col gap-2 transition-transform active:scale-95"
-              onClick={() => navigate('/student/achievements/new')}
-            >
-              <Plus className="w-6 h-6" />
-              <span>Add Achievement</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-auto py-4 flex-col gap-2 transition-transform active:scale-95"
-              onClick={() => navigate('/student/account')}
-            >
-              <Wallet className="w-6 h-6" />
-              <span>View Account</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-auto py-4 flex-col gap-2 transition-transform active:scale-95"
-              onClick={() => navigate('/student/attendance')}
-            >
-              <Calendar className="w-6 h-6" />
-              <span>Attendance</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-auto py-4 flex-col gap-2 transition-transform active:scale-95"
-              onClick={() => navigate('/student/leaderboard')}
-            >
-              <Trophy className="w-6 h-6" />
-              <span>Leaderboard</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* Pending Achievements */}
-        {pendingCount > 0 && (
-          <Card
-            variant="interactive"
-            className="animate-slide-up cursor-pointer border-warning/20 bg-warning/5"
-            onClick={() => navigate('/student/achievements')}
-          >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-warning" />
+            {/* Progress to Next Star */}
+            <Card className="border-muted shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up stagger-5">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Progress to Next Star</h3>
+                    <p className="text-sm text-muted-foreground">Keep going! You're doing great.</p>
+                  </div>
+                  <Badge variant="outline" className="px-3 py-1 text-sm font-medium bg-background">
+                    {totalPoints % POINTS_PER_STAR} / {POINTS_PER_STAR} points
+                  </Badge>
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">{pendingCount} Pending Request{pendingCount !== 1 ? 's' : ''}</p>
-                  <p className="text-sm text-muted-foreground">Awaiting review</p>
+                <div className="w-full h-5 bg-secondary/50 rounded-full overflow-hidden ring-1 ring-border/50">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-1000 ease-out relative"
+                    style={{ width: `${(totalPoints % POINTS_PER_STAR) / POINTS_PER_STAR * 100}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-pulse-soft"></div>
+                  </div>
                 </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
 
-        {/* Recent Achievements */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-lg font-semibold text-foreground">Recent Achievements</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/student/achievements')}
-            >
-              View All
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            {isLoading ? (
-              <p className="text-sm text-muted-foreground px-1">Loading achievements...</p>
-            ) : recentAchievements.length > 0 ? (
-              recentAchievements.map((achievement, index) => (
-                <Card
-                  key={achievement.id}
-                  variant="interactive"
-                  className={`animate-slide-up stagger-${index + 1}`}
+            {/* Quick Actions */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-foreground tracking-tight">Quick Actions</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-auto py-6 flex-col gap-3 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-300 group shadow-sm"
+                  onClick={() => navigate('/student/achievements/new')}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Award className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-medium text-foreground truncate">{achievement.title}</p>
-                          <Badge variant="success" className="flex-shrink-0">
-                            +{achievement.points}pts
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">{achievement.category.name}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground px-1">No recent achievements found.</p>
-            )}
-          </div>
-        </div>
-
-        {/* View Public Profile */}
-        <Card
-          variant="interactive"
-          className="animate-slide-up cursor-pointer"
-          onClick={() => navigate(`/students/${student?.username}`)}
-        >
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
-                <Award className="w-5 h-5 text-info" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">View Public Profile</p>
-                <p className="text-sm text-muted-foreground">See what others see</p>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium">Add Achievement</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-6 flex-col gap-3 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-300 group shadow-sm"
+                  onClick={() => navigate('/student/account')}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Wallet className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium">View Account</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-6 flex-col gap-3 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-300 group shadow-sm"
+                  onClick={() => navigate('/student/attendance')}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium">Attendance</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-6 flex-col gap-3 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-300 group shadow-sm"
+                  onClick={() => navigate('/student/leaderboard')}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Trophy className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium">Leaderboard</span>
+                </Button>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </CardContent>
-        </Card>
+
+            {/* Pending Achievements */}
+            {pendingCount > 0 && (
+              <Card
+                className="cursor-pointer border-amber-200 bg-amber-50 hover:bg-amber-100/50 transition-colors shadow-sm"
+                onClick={() => navigate('/student/achievements')}
+              >
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-amber-200/50 flex items-center justify-center">
+                      <Calendar className="w-6 h-6 text-amber-700" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-amber-900 text-lg">{pendingCount} Pending Request{pendingCount !== 1 ? 's' : ''}</p>
+                      <p className="text-sm text-amber-700 font-medium">Awaiting teacher review</p>
+                    </div>
+                  </div>
+                  <div className="bg-white/50 p-2 rounded-full">
+                    <ChevronRight className="w-5 h-5 text-amber-700" />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+          </div>
+
+          {/* Right Column - Recent Activity */}
+          <div className="space-y-6">
+
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xl font-bold text-foreground tracking-tight">Recent</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary font-medium"
+                  onClick={() => navigate('/student/achievements')}
+                >
+                  View All
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground px-1">Loading achievements...</p>
+                ) : recentAchievements.length > 0 ? (
+                  recentAchievements.map((achievement, index) => (
+                    <Card
+                      key={achievement.id}
+                      className={`hover:shadow-md transition-all duration-200 border-border/50 group animate-slide-up stagger-${index + 1}`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+                            <Award className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-semibold text-foreground truncate">{achievement.title}</p>
+                              <Badge variant="success" className="flex-shrink-0 font-bold">
+                                +{achievement.points}
+                              </Badge>
+                            </div>
+                            <p className="text-xs font-medium text-muted-foreground mt-1">{achievement.category.name}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <Card className="border-dashed shadow-none bg-muted/30">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-muted-foreground">No recent achievements found.</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </StudentLayout>
   );

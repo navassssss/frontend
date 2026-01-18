@@ -84,7 +84,7 @@ export default function TeacherDetailPage() {
     api.post("/tasks", {
       title: newTask.title,
       duty_id: newTask.dutyId || null,
-      assigned_to: teacher.id,
+      teacher_ids: [teacher.id],  // Array required by backend
       scheduled_date: newTask.dueDate,
       scheduled_time: null,
       instructions: ""
@@ -154,19 +154,42 @@ export default function TeacherDetailPage() {
 
         {/* Summary */}
         <Card>
-          <CardContent className="grid grid-cols-3 text-center p-4">
-            <div>
-              <p className="text-xl font-bold">{teacher.duties.length}</p>
-              <p className="text-xs text-muted-foreground">Duties</p>
+          <CardContent className="p-4 space-y-4">
+            <div className="grid grid-cols-3 text-center">
+              <div>
+                <p className="text-xl font-bold">{teacher.duties.length}</p>
+                <p className="text-xs text-muted-foreground">Duties</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold text-accent">{teacher.pendingTasks}</p>
+                <p className="text-xs text-muted-foreground">Pending</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold text-success">{completionRate}%</p>
+                <p className="text-xs text-muted-foreground">Completion</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xl font-bold text-accent">{teacher.pendingTasks}</p>
-              <p className="text-xs text-muted-foreground">Pending</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold text-success">{completionRate}%</p>
-              <p className="text-xs text-muted-foreground">Completion</p>
-            </div>
+
+            {/* Achievement Review Permission */}
+            {isPrincipal && (
+              <div className="pt-3 border-t">
+                <Button
+                  variant={teacher.can_review_achievements ? "default" : "outline"}
+                  size="sm"
+                  className={`w-full ${teacher.can_review_achievements ? 'bg-success hover:bg-success/90' : ''}`}
+                  onClick={() => {
+                    api.post(`/teachers/${teacher.id}/toggle-review-permission`)
+                      .then(res => {
+                        setTeacher({ ...teacher, can_review_achievements: res.data.can_review_achievements });
+                        toast.success(`Review permission ${res.data.can_review_achievements ? 'granted' : 'revoked'}`);
+                      })
+                      .catch(() => toast.error('Failed to update permission'));
+                  }}
+                >
+                  {teacher.can_review_achievements ? '✓ Can Review Achievements' : 'Grant Achievement Review'}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 

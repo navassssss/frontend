@@ -3,7 +3,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 
 import { useNavigate } from 'react-router-dom';
-import { Plus, Filter, ChevronRight, RotateCcw, Briefcase, Users } from 'lucide-react';
+import { Plus, Filter, ChevronRight, RotateCcw, Briefcase, Users, Library, Bus, Award } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,60 +24,23 @@ interface Duty {
   assignedTo?: string;
 }
 
-// const duties: Duty[] = [
-//   {
-//     id: '1',
-//     name: 'Morning Assembly',
-//     description: 'Conduct morning assembly and announcements',
-//     category: 'rotational',
-//     frequency: 'Weekly',
-//     assignedCount: 5,
-//     nextDue: 'Tomorrow',
-//     assignedTo: 'John Smith',
-//   },
-//   {
-//     id: '2',
-//     name: 'Lab Supervision',
-//     description: 'Supervise science lab during practical sessions',
-//     category: 'responsibility',
-//     frequency: 'Daily',
-//     assignedCount: 2,
-//     assignedTo: 'Jane Doe',
-//   },
-//   {
-//     id: '3',
-//     name: 'Library Duty',
-//     description: 'Manage library during break hours',
-//     category: 'rotational',
-//     frequency: 'Weekly',
-//     assignedCount: 4,
-//     nextDue: 'Wed, Dec 4',
-//     assignedTo: 'Mike Johnson',
-//   },
-//   {
-//     id: '4',
-//     name: 'Sports Coordinator',
-//     description: 'Coordinate sports activities and events',
-//     category: 'responsibility',
-//     frequency: 'As needed',
-//     assignedCount: 1,
-//     assignedTo: 'Principal',
-//   },
-//   {
-//     id: '5',
-//     name: 'Bus Duty',
-//     description: 'Monitor student boarding and departure',
-//     category: 'rotational',
-//     frequency: 'Daily',
-//     assignedCount: 6,
-//     nextDue: 'Today',
-//     assignedTo: 'Sarah Williams',
-//   },
-// ];
+// Helper to convert name to title case
+const toTitleCase = (str: string) => {
+  return str.toLowerCase().split(' ').map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
 
-
-
-
+// Helper to get icon based on duty name
+const getDutyIcon = (dutyName: string) => {
+  const name = dutyName.toLowerCase();
+  if (name.includes('library')) return Library;
+  if (name.includes('bus')) return Bus;
+  if (name.includes('assembly')) return Users;
+  if (name.includes('sports') || name.includes('coordinator')) return Award;
+  if (name.includes('lab')) return Briefcase;
+  return RotateCcw; // Default for rotational duties
+};
 
 export default function DutiesPage() {
   const [duties, setDuties] = useState<Duty[]>([]);
@@ -106,15 +69,6 @@ export default function DutiesPage() {
 
   const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
 
-  // const filteredDuties = duties.filter(duty => {
-  //   const categoryMatch = activeCategory === 'all' || duty.category === activeCategory;
-  //   // For principals: show all or filter by "mine" (assigned to Principal)
-  //   // For teachers: always show their own
-  //   const ownerMatch = isPrincipal
-  //     ? (viewMode === 'all' || duty.assignedTo === 'Principal')
-  //     : true;
-  //   return categoryMatch && ownerMatch;
-  // });
   const filteredDuties = duties.filter((duty) => {
     if (isPrincipal) {
       return viewMode === 'all' || duty.assignedTo?.includes(user?.name);
@@ -134,7 +88,7 @@ export default function DutiesPage() {
   return (
     <AppLayout title="Duties">
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
@@ -145,8 +99,8 @@ export default function DutiesPage() {
           </div>
           {isPrincipal && (
             <Button variant="default" size="sm" onClick={() => navigate('/duties/new')}>
-              <Plus className="w-4 h-4" />
-              Create Duty
+              <Plus className="w-4 h-4 mr-1" />
+              Create
             </Button>
           )}
         </div>
@@ -177,53 +131,61 @@ export default function DutiesPage() {
           </div>
         )}
 
-
-
         {/* Duties List */}
-        <div className="space-y-3">
-          {filteredDuties.map((duty, index) => (
-            <Card
-              key={duty.id}
-              variant="interactive"
-              onClick={() => navigate(`/duties/${duty.id}`)}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'backwards' }}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary-light">
-                    <Briefcase className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-foreground">{duty.name}</h3>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
-                      {duty.description}
-                    </p>
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      <Badge variant="default">
-                        {duty.frequency}
-                      </Badge>
-                      {isPrincipal && viewMode === 'all' && duty.assignedTo && (
-                        <Badge variant="secondary">
-                          {duty.assignedTo}
-                        </Badge>
-                      )}
-                      {duty.nextDue && (
-                        <span className="text-xs text-muted-foreground">
-                          Next: {duty.nextDue}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <div className="space-y-2">
+          {filteredDuties.map((duty, index) => {
+            const DutyIcon = getDutyIcon(duty.name);
+            const isNoneFrequency = duty.frequency.toLowerCase() === 'none';
 
+            return (
+              <Card
+                key={duty.id}
+                variant="interactive"
+                onClick={() => navigate(`/duties/${duty.id}`)}
+                className="animate-slide-up hover:border-primary/40 transition-all shadow-sm hover:shadow-md"
+                style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'backwards' }}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10">
+                      <DutyIcon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3 className="font-bold text-base text-foreground leading-tight">{toTitleCase(duty.name)}</h3>
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {duty.description}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <Badge
+                          variant={isNoneFrequency ? "secondary" : "default"}
+                          className={`font-medium px-2.5 py-0.5 ${isNoneFrequency ? 'bg-muted text-muted-foreground' : ''}`}
+                        >
+                          {toTitleCase(duty.frequency)}
+                        </Badge>
+                        {isPrincipal && viewMode === 'all' && duty.assignedTo && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {duty.assignedCount} assigned
+                          </span>
+                        )}
+                        {duty.nextDue && (
+                          <span className="text-xs text-muted-foreground">
+                            Next: {duty.nextDue}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
       </div>
     </AppLayout>

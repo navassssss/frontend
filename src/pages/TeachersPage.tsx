@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, ChevronRight, Phone, Mail } from 'lucide-react';
+import { Plus, Search, ChevronRight, Phone, Mail, ClipboardList, CheckSquare, BookOpen, FileText, GraduationCap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ interface Teacher {
   email: string;
   phone?: string;
   role: string;
+  department: string;
   initials: string;
   dutiesCount: number;
   tasksCount: number;
@@ -171,19 +172,34 @@ export default function TeachersPage() {
   // };
 
   const handleAddTeacher = () => {
-    if (!newTeacher.name || !newTeacher.email || !newTeacher.role) {
+    if (!newTeacher.name || !newTeacher.email || !newTeacher.department) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     api.post('/teachers', newTeacher)
       .then(res => {
-        setTeachers([...teachers, res.data]);
+        const teacherWithInitials = {
+          ...res.data,
+          initials: res.data.name
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2),
+          dutiesCount: 0,
+          tasksCount: 0,
+        };
+        setTeachers([...teachers, teacherWithInitials]);
         setShowAddForm(false);
         toast.success('Teacher added successfully');
         setNewTeacher({ name: '', email: '', role: 'teacher', phone: '', department: '' });
       })
-      .catch(err => toast.error('Error adding teacher'));
+      .catch(err => {
+        console.error('Error adding teacher:', err);
+        const errorMsg = err.response?.data?.message || 'Error adding teacher';
+        toast.error(errorMsg);
+      });
   };
 
 
@@ -201,6 +217,74 @@ export default function TeachersPage() {
             Add
           </Button>
         </div>
+
+        {/* Quick Actions Bar */}
+        <Card className="animate-slide-up">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h3>
+            <div className="grid grid-cols-5 gap-2">
+              <button
+                onClick={() => navigate('/duties')}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-blue-600">
+                  <ClipboardList className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium text-center text-foreground">
+                  Duties
+                </span>
+              </button>
+
+              <button
+                onClick={() => navigate('/tasks')}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-green-600">
+                  <CheckSquare className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium text-center text-foreground">
+                  Tasks
+                </span>
+              </button>
+
+              <button
+                onClick={() => navigate('/subjects')}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-purple-600">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium text-center text-foreground">
+                  Subjects
+                </span>
+              </button>
+
+              <button
+                onClick={() => navigate('/cce/works')}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-orange-600">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium text-center text-foreground">
+                  CCE Works
+                </span>
+              </button>
+
+              <button
+                onClick={() => navigate('/reports')}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-teal-600">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium text-center text-foreground">
+                  Reports
+                </span>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Search */}
         <div className="relative animate-slide-up">
@@ -223,51 +307,48 @@ export default function TeachersPage() {
               className="animate-slide-up"
               style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'backwards' }}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-semibold text-primary-foreground">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  {/* Avatar */}
+                  <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                    <span className="text-base font-bold text-primary-foreground">
                       {teacher.initials}
                     </span>
                   </div>
+
+                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-semibold text-foreground">{teacher.name}</h3>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    {/* Name and Role */}
+                    <div className="mb-2">
+                      <h3 className="font-bold text-base text-foreground mb-0.5">{teacher.name}</h3>
+                      <p className="text-sm text-muted-foreground capitalize">{teacher.role}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{teacher.role}</p>
-                    <div className="flex items-center gap-3 mt-2">
-                      <Badge variant="secondary">{teacher.department}</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {teacher.dutiesCount} duties • {teacher.tasksCount} tasks
-                      </span>
+
+                    {/* Department and Stats */}
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <Badge variant="secondary" className="text-xs font-medium">
+                        {teacher.department}
+                      </Badge>
                       {teacher.can_review_achievements && (
                         <Badge variant="outline" className="text-xs border-success/30 text-success bg-success/5">
-                          Reviewer
+                          ✓ Reviewer
                         </Badge>
                       )}
                     </div>
+
+                    {/* Stats Row */}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold text-foreground">{teacher.dutiesCount}</span> duties
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold text-foreground">{teacher.tasksCount}</span> tasks
+                      </span>
+                    </div>
                   </div>
-                  <Button
-                    variant={teacher.can_review_achievements ? "default" : "outline"}
-                    size="sm"
-                    className={`ml-2 ${teacher.can_review_achievements ? 'bg-success hover:bg-success/90' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      api.post(`/teachers/${teacher.id}/toggle-review-permission`)
-                        .then(res => {
-                          setTeachers(prev => prev.map(t =>
-                            t.id === teacher.id
-                              ? { ...t, can_review_achievements: res.data.can_review_achievements }
-                              : t
-                          ));
-                          toast.success(`Permission ${res.data.can_review_achievements ? 'granted' : 'revoked'}`);
-                        })
-                        .catch(() => toast.error('Failed to update permission'));
-                    }}
-                  >
-                    {teacher.can_review_achievements ? 'Revoke Review' : 'Grant Review'}
-                  </Button>
+
+                  {/* Chevron Icon */}
+                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
                 </div>
               </CardContent>
             </Card>

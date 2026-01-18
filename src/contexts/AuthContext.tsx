@@ -22,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const api = axios.create({
-  baseURL: "http://192.168.1.118:8000/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 // Attach token to requests

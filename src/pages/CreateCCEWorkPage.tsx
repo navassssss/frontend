@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { format, addDays } from 'date-fns';
 import api from '@/lib/api';
 
@@ -40,6 +41,7 @@ interface Subject {
     id: string;
     name: string;
     className: string;
+    teacherName?: string;
 }
 
 export default function CreateCCEWorkPage() {
@@ -60,6 +62,8 @@ export default function CreateCCEWorkPage() {
         submission_type: 'offline' as 'online' | 'offline'
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showAllSubjects, setShowAllSubjects] = useState(false);
+    const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
 
     useEffect(() => {
         loadSubjects();
@@ -95,6 +99,22 @@ export default function CreateCCEWorkPage() {
     return (
         <AppLayout title="Create CCE Work" showBack>
             <div className="p-4 space-y-6 pb-24">
+                {/* Toggle for All Subjects (Principals only) */}
+                {isPrincipal && (
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                        <div className="flex-1">
+                            <Label className="text-sm font-semibold">Show All Subjects</Label>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {showAllSubjects ? 'Create work for any subject' : 'Create work for your subjects only'}
+                            </p>
+                        </div>
+                        <Switch
+                            checked={showAllSubjects}
+                            onCheckedChange={setShowAllSubjects}
+                        />
+                    </div>
+                )}
+
                 {/* Subject Selection */}
                 <div className="space-y-2">
                     <Label>Subject *</Label>
@@ -106,11 +126,17 @@ export default function CreateCCEWorkPage() {
                             <SelectValue placeholder="Select subject" />
                         </SelectTrigger>
                         <SelectContent>
-                            {subjects.map((subject) => (
-                                <SelectItem key={subject.id} value={subject.id}>
-                                    {subject.name} - {subject.className}
-                                </SelectItem>
-                            ))}
+                            {subjects
+                                .filter(subject => {
+                                    if (!isPrincipal) return true; // Teachers see all their subjects
+                                    if (showAllSubjects) return true; // Show all when toggle is on
+                                    return subject.teacherName === user?.name; // Show only principal's subjects
+                                })
+                                .map((subject) => (
+                                    <SelectItem key={subject.id} value={subject.id}>
+                                        {subject.name} - {subject.className}
+                                    </SelectItem>
+                                ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -159,7 +185,7 @@ export default function CreateCCEWorkPage() {
 
                 {/* Description */}
                 <div className="space-y-2">
-                    <Label>Description</Label>
+                    <Label>Description (Activity)</Label>
                     <Textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}

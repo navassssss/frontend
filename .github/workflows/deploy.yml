@@ -1,0 +1,46 @@
+name: Deploy Frontend to Laravel
+
+on:
+  push:
+    branches:
+      - main  # Set this to your default branch name
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. Install Dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # 4. Build the Project
+      - name: Build
+        run: npm run build
+        env:
+          # These will correspond to the secrets you add in GitHub
+          VITE_API_URL: ${{ secrets.VITE_API_URL }} 
+          VITE_STORAGE_URL: ${{ secrets.VITE_STORAGE_URL }}
+
+      # 5. Deploy to Server (Copy 'dist' folder to Laravel 'public')
+      - name: Copy to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: "dist/*"
+          target: "/home/afeej/academics/public"
+          strip_components: 1 # Removes the 'dist' parent folder so contents go directly into public

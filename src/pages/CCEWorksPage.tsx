@@ -44,6 +44,15 @@ interface Subject {
     isLocked: boolean;
 }
 
+interface SubjectSummary {
+    subject_id: string;
+    subject_name: string;
+    max_marks: number;
+    class_name: string;
+    total_works: number;
+    completed_works: number;
+}
+
 interface CCEWork {
     id: number;
     title: string;
@@ -69,10 +78,12 @@ export default function CCEWorksPage() {
     const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
 
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [subjectsSummary, setSubjectsSummary] = useState<SubjectSummary[]>([]);
     const [works, setWorks] = useState<CCEWork[]>([]);
-    const [selectedSubject, setSelectedSubject] = useState<string>('all');
-    const [selectedLevel, setSelectedLevel] = useState<string>('all');
+    const [selectedSubject, setSelectedSubject] = useState<string>(isPrincipal ? 'my' : 'all');
     const [loading, setLoading] = useState(true);
+    const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set());
+    const [showAllPerClass, setShowAllPerClass] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         loadData();
@@ -85,7 +96,8 @@ export default function CCEWorksPage() {
                 api.get('/cce/works')
             ]);
             setSubjects(subjectsRes.data);
-            setWorks(worksRes.data);
+            setWorks(worksRes.data.works || worksRes.data);
+            setSubjectsSummary(worksRes.data.subjects_summary || []);
         } catch (error) {
             console.error('Failed to load data', error);
         } finally {
@@ -94,8 +106,21 @@ export default function CCEWorksPage() {
     };
 
     const filteredWorks = works.filter(w => {
-        if (selectedSubject !== 'all' && w.subjectId !== selectedSubject) return false;
-        if (selectedLevel !== 'all' && w.level !== parseInt(selectedLevel)) return false;
+        // Determine which subjects to include based on tab selection
+        let allowedSubjects = subjects;
+        if (selectedSubject === 'my') {
+            allowedSubjects = subjects.filter(s => s.teacherName === user?.name);
+        }
+
+        // Handle specific subject filter
+        if (selectedSubject !== 'all' && selectedSubject !== 'my' && selectedSubject !== 'none') {
+            if (w.subjectId !== selectedSubject) return false;
+        }
+        // Handle 'my' tab - only show works from my subjects
+        else if (selectedSubject === 'my') {
+            if (!allowedSubjects.some(s => s.id === w.subjectId)) return false;
+        }
+
         return true;
     });
 
@@ -107,78 +132,185 @@ export default function CCEWorksPage() {
     return (
         <AppLayout title="CCE Works" showBack>
             <div className="p-4 space-y-6">
-                {/* Filters */}
-                <div className="grid grid-cols-2 gap-3">
-                    <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="All Subjects" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Subjects</SelectItem>
-                            {subjects.map((subject) => (
-                                <SelectItem key={subject.id} value={subject.id}>
-                                    {subject.name} - {subject.className}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                {/* Subject Tabs (for principals) */}
+                {isPrincipal && (
+                    <div className="flex gap-2">
+                        <Button
+                            variant={selectedSubject === 'all' ? 'default' : 'outline'}
+                            className="flex-1"
+                            onClick={() => setSelectedSubject('all')}
+                        >
+                            <BookOpen className="w-4 h-4 mr-2" />
+                            All Subjects
+                        </Button>
+                        <Button
+                            variant={selectedSubject === 'my' ? 'default' : 'outline'}
+                            className="flex-1"
+                            onClick={() => setSelectedSubject('my')}
+                        >
+                            <Award className="w-4 h-4 mr-2" />
+                            My Subjects
+                        </Button>
+                    </div>
+                )}
 
-                    <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="All Levels" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Levels</SelectItem>
-                            <SelectItem value="1">Level 1</SelectItem>
-                            <SelectItem value="2">Level 2</SelectItem>
-                            <SelectItem value="3">Level 3</SelectItem>
-                            <SelectItem value="4">Level 4</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+
 
                 {/* Create Work Button */}
-                <Button
-                    variant="touch"
-                    className="w-full"
-                    onClick={() => navigate('/cce/works/new')}
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Create CCE Work
-                </Button>
+                <div className="flex justify-end">
+                    <Button
+                        onClick={() => navigate('/cce/works/new')}
+                        className="w-full lg:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all px-6"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create CCE Work
+                    </Button>
+                </div>
 
-                {/* Subjects with Lock Status */}
+                {/* Subjects with Statistics - Grouped by Class */}
                 {isPrincipal && (
                     <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                            Subjects Status
+                            Subjects Status {selectedSubject !== 'all' && selectedSubject !== 'my' && '(Filtered)'}
                         </h3>
-                        <div className="grid grid-cols-2 gap-2">
-                            {subjects.slice(0, 4).map((subject) => (
-                                <Card
-                                    key={subject.id}
-                                    variant="interactive"
-                                    onClick={() => navigate(`/cce/subjects/${subject.id}`)}
-                                >
-                                    <CardContent className="p-3">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="font-medium text-foreground text-sm truncate">
-                                                {subject.name}
-                                            </span>
-                                            {subject.isLocked ? (
-                                                <Lock className="w-4 h-4 text-warning" />
-                                            ) : (
-                                                <Unlock className="w-4 h-4 text-success" />
-                                            )}
+
+                        {/* Group subjects by class */}
+                        {(() => {
+                            const ITEMS_PER_CLASS = 4;
+
+                            // Filter subjects based on tab
+                            const filteredSummary = subjectsSummary.filter(summary => {
+                                if (selectedSubject === 'my') {
+                                    const subject = subjects.find(s => s.id === summary.subject_id);
+                                    return subject?.teacherName === user?.name;
+                                }
+                                return true;
+                            });
+
+                            // Group by class
+                            const groupedByClass = filteredSummary.reduce((acc, summary) => {
+                                const className = summary.class_name;
+                                if (!acc[className]) acc[className] = [];
+                                acc[className].push(summary);
+                                return acc;
+                            }, {} as Record<string, SubjectSummary[]>);
+
+                            const classNames = Object.keys(groupedByClass).sort();
+
+                            return classNames.map(className => {
+                                const classSubjects = groupedByClass[className];
+                                const isExpanded = expandedClasses.has(className);
+                                const showAll = showAllPerClass.has(className);
+                                const displaySubjects = showAll ? classSubjects : classSubjects.slice(0, ITEMS_PER_CLASS);
+                                const hasMore = classSubjects.length > ITEMS_PER_CLASS;
+
+                                return (
+                                    <div key={className} className="space-y-2">
+                                        {/* Class Header */}
+                                        <div
+                                            className="flex items-center justify-between cursor-pointer p-2 bg-muted/30 rounded-lg"
+                                            onClick={() => {
+                                                const newExpanded = new Set(expandedClasses);
+                                                if (isExpanded) {
+                                                    newExpanded.delete(className);
+                                                } else {
+                                                    newExpanded.add(className);
+                                                }
+                                                setExpandedClasses(newExpanded);
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                                <span className="font-semibold text-sm">{className}</span>
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {classSubjects.length} {classSubjects.length === 1 ? 'subject' : 'subjects'}
+                                                </Badge>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">{subject.className}</p>
-                                        <Badge variant="outline" className="mt-2 text-xs">
-                                            Max: {subject.finalMaxMarks}
-                                        </Badge>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
+
+                                        {/* Subject Cards */}
+                                        {isExpanded && (
+                                            <div className="space-y-2">
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {displaySubjects.map((summary) => {
+                                                        const subject = subjects.find(s => s.id === summary.subject_id);
+                                                        const isSelected = selectedSubject === summary.subject_id;
+                                                        return (
+                                                            <Card
+                                                                key={summary.subject_id}
+                                                                variant="interactive"
+                                                                onClick={() => setSelectedSubject(isSelected ? (selectedSubject === 'my' ? 'my' : 'all') : summary.subject_id)}
+                                                                className={`cursor-pointer hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                                                            >
+                                                                <CardContent className="p-3">
+                                                                    <div className="flex items-center justify-between mb-1">
+                                                                        <span className="font-medium text-foreground text-sm truncate">
+                                                                            {summary.subject_name}
+                                                                        </span>
+                                                                        {subject?.isLocked ? (
+                                                                            <Lock className="w-4 h-4 text-warning" />
+                                                                        ) : (
+                                                                            <Unlock className="w-4 h-4 text-success" />
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center justify-between mb-2">
+                                                                        <Badge variant="outline" className="text-xs">
+                                                                            Max: {summary.max_marks}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <div className="text-center">
+                                                                            <p className="text-xs text-muted-foreground">Total</p>
+                                                                            <p className="text-sm font-bold">{summary.total_works}</p>
+                                                                        </div>
+                                                                        <div className="text-center">
+                                                                            <p className="text-xs text-muted-foreground">Done</p>
+                                                                            <p className="text-sm font-bold text-green-600">{summary.completed_works}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </CardContent>
+                                                            </Card>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                {/* Show More Button */}
+                                                {hasMore && !showAll && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        onClick={() => {
+                                                            const newShowAll = new Set(showAllPerClass);
+                                                            newShowAll.add(className);
+                                                            setShowAllPerClass(newShowAll);
+                                                        }}
+                                                    >
+                                                        Show {classSubjects.length - ITEMS_PER_CLASS} more
+                                                    </Button>
+                                                )}
+
+                                                {/* Show Less Button */}
+                                                {showAll && hasMore && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        onClick={() => {
+                                                            const newShowAll = new Set(showAllPerClass);
+                                                            newShowAll.delete(className);
+                                                            setShowAllPerClass(newShowAll);
+                                                        }}
+                                                    >
+                                                        Show less
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
                 )}
 
@@ -225,37 +357,52 @@ export default function CCEWorksPage() {
                         </TabsContent>
                     ))}
                 </Tabs>
-            </div>
-        </AppLayout>
+            </div >
+        </AppLayout >
     );
 }
 
 function WorkCard({ work, onClick }: { work: CCEWork; onClick: () => void }) {
     return (
-        <Card variant="interactive" onClick={onClick}>
+        <Card variant="interactive" onClick={onClick} className="hover:border-primary/40 transition-all shadow-sm hover:shadow-md">
             <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Badge className={levelColors[work.level as keyof typeof levelColors]}>
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0 space-y-2">
+                        {/* Line 1: Badges */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <Badge className={`${levelColors[work.level as keyof typeof levelColors]} font-semibold px-2.5 py-0.5`}>
                                 L{work.level}
                             </Badge>
-                            <Badge variant="outline">{work.subjectName}</Badge>
+                            <Badge className="bg-success/10 text-success border-success/20 font-medium px-2.5 py-0.5">
+                                {work.subjectName}
+                            </Badge>
                         </div>
-                        <p className="font-semibold text-foreground truncate">{work.title}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{work.className}</p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+
+                        {/* Line 2: Title */}
+                        <h3 className="font-bold text-base text-foreground leading-tight">
+                            {work.title}
+                        </h3>
+
+                        {/* Line 3: Class + Metadata combined */}
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                            <span className="font-semibold text-foreground">Class {work.className}</span>
+                            <span className="text-muted-foreground">•</span>
                             <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                Due: {format(new Date(work.dueDate), 'MMM d')}
+                                <Calendar className="w-3.5 h-3.5 text-teal-600" />
+                                <span className="font-medium">Due: {format(new Date(work.dueDate), 'MMM d')}</span>
                             </span>
+                            <span className="text-muted-foreground">•</span>
                             <span className="flex items-center gap-1">
-                                <Award className="w-3 h-3" />
-                                {work.maxMarks} marks
+                                <Award className="w-3.5 h-3.5 text-teal-600" />
+                                <span className="font-medium">{work.maxMarks} marks</span>
                             </span>
                         </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+
+                    {/* Chevron */}
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
                 </div>
             </CardContent>
         </Card>

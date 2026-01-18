@@ -1,9 +1,10 @@
-import { Bell, Menu, ArrowLeft } from 'lucide-react';
+import { Bell, ArrowLeft, User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface HeaderProps {
   title?: string;
@@ -12,9 +13,11 @@ interface HeaderProps {
 }
 
 export function Header({ title, showBack = false, onBack }: HeaderProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [hasUnread, setHasUnread] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     // Check for unread notifications
@@ -22,7 +25,9 @@ export function Header({ title, showBack = false, onBack }: HeaderProps) {
       try {
         const { data } = await api.get('/notifications');
         if (Array.isArray(data)) {
-          setHasUnread(data.some((n: any) => !n.read_at));
+          const unread = data.filter((n: any) => !n.read_at);
+          setHasUnread(unread.length > 0);
+          setUnreadCount(unread.length);
         }
       } catch (e) {
         console.error(e);
@@ -37,12 +42,32 @@ export function Header({ title, showBack = false, onBack }: HeaderProps) {
     }
   }, [user]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showProfileMenu]);
+
   const handleBack = () => {
     if (onBack) {
       onBack();
     } else {
       navigate(-1);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -71,6 +96,7 @@ export function Header({ title, showBack = false, onBack }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Notifications */}
           <Button
             variant="ghost"
             size="icon-sm"
@@ -78,13 +104,63 @@ export function Header({ title, showBack = false, onBack }: HeaderProps) {
             onClick={() => navigate('/notifications')}
           >
             <Bell className="w-5 h-5" />
-            {hasUnread && (
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
             )}
           </Button>
-          <Button variant="ghost" size="icon-sm">
-            <Menu className="w-5 h-5" />
-          </Button>
+
+          {/* Profile Dropdown */}
+          <div className="relative profile-dropdown">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 h-9"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+            >
+              <User className="w-4 h-4" />
+              <ChevronDown className="w-3 h-3" />
+            </Button>
+
+            {showProfileMenu && (
+              <Card className="absolute right-0 top-12 w-48 shadow-lg animate-scale-in">
+                <CardContent className="p-1">
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      navigate('/profile');
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary rounded-lg transition-colors text-left"
+                  >
+                    <User className="w-4 h-4" />
+                    View Profile
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary rounded-lg transition-colors text-left"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </button>
+
+                  <div className="h-px bg-border my-1" />
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-destructive/10 text-destructive rounded-lg transition-colors text-left"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </header>

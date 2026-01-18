@@ -20,6 +20,7 @@ interface ApiIssue {
   updated_at: string;
   category?: { id: number; name: string };
   responsible_user?: { id: number; name: string };
+  responsibleUser?: { id: number; name: string };
 }
 
 const filterTabs: { id: IssueFilter; label: string }[] = [
@@ -50,16 +51,21 @@ export default function IssuesPage() {
     loadIssues();
   }, [activeFilter]);
 
-  const getPriorityColor = (priority: ApiIssue['priority']) => {
-    return priority; // matches badge variant names e.g. 'low', 'medium', 'high'
+  const getPriorityBadgeStyle = (priority: ApiIssue['priority']) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-700 border-red-200';
+      case 'medium': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'low': return 'bg-blue-100 text-blue-700 border-blue-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
   };
 
-  const getStatusBadge = (status: ApiIssue['status']) => {
+  const getStatusBadgeStyle = (status: ApiIssue['status']) => {
     switch (status) {
-      case 'open': return 'open';
-      case 'resolved': return 'resolved';
-      case 'forwarded': return 'warning';
-      default: return 'secondary';
+      case 'open': return 'bg-green-100 text-green-700 border-green-200';
+      case 'resolved': return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'forwarded': return 'bg-purple-100 text-purple-700 border-purple-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
@@ -70,11 +76,19 @@ export default function IssuesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Issues</h2>
-            <p className="text-sm text-muted-foreground">{issues.length} total</p>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              Issues
+              <Badge variant="secondary" className="text-xs font-normal">
+                {issues.length} total
+              </Badge>
+            </h2>
           </div>
-          <Button size="sm" onClick={() => navigate('/issues/new')}>
-            <Plus className="w-4 h-4" />
+          <Button
+            size="sm"
+            onClick={() => navigate('/issues/new')}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4 mr-1" />
             Raise
           </Button>
         </div>
@@ -85,11 +99,10 @@ export default function IssuesPage() {
             <button
               key={tab.id}
               onClick={() => setActiveFilter(tab.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium ${
-                activeFilter === tab.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground'
-              }`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeFilter === tab.id
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                }`}
             >
               {tab.label}
             </button>
@@ -98,57 +111,79 @@ export default function IssuesPage() {
 
         {/* Issues List */}
         {loading ? (
-          <p className="text-sm text-center text-muted-foreground">Loading...</p>
+          <p className="text-sm text-center text-muted-foreground py-8">Loading...</p>
+        ) : issues.length === 0 ? (
+          <Card className="border-dashed border-2">
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">No issues found</p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-3">
-            {issues.map((issue) => (
-              <Card
-                key={issue.id}
-                variant="interactive"
-                onClick={() => navigate(`/issues/${issue.id}`)}
-              >
-                <CardContent className="p-4 space-y-2">
-                  
-                  <div className="flex justify-between">
-                    <h3 className="font-semibold line-clamp-1">{issue.title}</h3>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
+            {issues.map((issue) => {
+              const assignee = issue.responsibleUser?.name || issue.responsible_user?.name || "Unassigned";
+              const truncatedAssignee = assignee.length > 25 ? assignee.substring(0, 25) + '...' : assignee;
 
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {issue.description}
-                  </p>
+              return (
+                <Card
+                  key={issue.id}
+                  variant="interactive"
+                  onClick={() => navigate(`/issues/${issue.id}`)}
+                  className="hover:border-primary/40 transition-all shadow-sm hover:shadow-md"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0 space-y-2">
+                        {/* Line 1: Title + Date */}
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-bold text-base text-foreground leading-tight flex-1">
+                            {issue.title}
+                          </h3>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                            <Clock className="w-3.5 h-3.5 text-teal-600" />
+                            {new Date(issue.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
 
-                  <div className="flex gap-2 flex-wrap text-xs">
-                    <Badge variant={getStatusBadge(issue.status)}>
-                      {issue.status}
-                    </Badge>
-                    <Badge variant={getPriorityColor(issue.priority)}>
-                      {issue.priority}
-                    </Badge>
+                        {/* Line 2: Description + Badges */}
+                        <div className="flex items-center gap-2 flex-wrap text-sm">
+                          <span className="text-muted-foreground line-clamp-1 flex-shrink">
+                            {issue.description}
+                          </span>
+                          <span className="text-muted-foreground flex-shrink-0">•</span>
+                          <Badge className={`${getStatusBadgeStyle(issue.status)} font-medium px-2 py-0.5 border flex-shrink-0`}>
+                            {issue.status}
+                          </Badge>
+                          <Badge className={`${getPriorityBadgeStyle(issue.priority)} font-medium px-2 py-0.5 border flex-shrink-0`}>
+                            {issue.priority}
+                          </Badge>
+                          {issue.category && (
+                            <>
+                              <span className="text-muted-foreground flex-shrink-0">•</span>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                                <Tag className="w-3 h-3 text-teal-600" />
+                                {issue.category.name}
+                              </span>
+                            </>
+                          )}
+                        </div>
 
-                    {issue.category && (
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Tag className="w-3 h-3" />
-                        {issue.category.name}
-                      </span>
-                    )}
-                  </div>
+                        {/* Line 3: Assignee */}
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <User className="w-3.5 h-3.5 text-teal-600" />
+                          <span className="font-medium">{truncatedAssignee}</span>
+                        </div>
+                      </div>
 
-                  <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3" />
-                      {issue.responsible_user?.name ?? "Unassigned"}
-                    </span>
-
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {new Date(issue.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                </CardContent>
-              </Card>
-            ))}
+                      {/* Chevron */}
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 

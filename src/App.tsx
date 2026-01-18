@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { StudentAuthProvider, useStudentAuth } from "@/contexts/StudentAuthContext";
 
+// Landing Page
+import LandingPage from "./pages/LandingPage";
+
 // Staff Pages
 import LoginPage from "./pages/LoginPage";
 import SelectRolePage from "./pages/SelectRolePage";
@@ -18,6 +21,7 @@ import TaskDetailPage from "./pages/TaskDetailPage";
 import CreateTaskPage from "./pages/CreateTaskPage";
 import IssuesPage from "./pages/IssuesPage";
 import IssueDetailPage from "./pages/IssueDetailPage";
+import ForwardIssuePage from "./pages/ForwardIssuePage";
 import SubmitReportPage from "./pages/SubmitReportPage";
 import RaiseIssuePage from "./pages/RaiseIssuePage";
 import ProfilePage from "./pages/ProfilePage";
@@ -25,7 +29,13 @@ import TeachersPage from "./pages/TeachersPage";
 import TeacherDetailPage from "./pages/TeacherDetailPage";
 import ReportsPage from "./pages/ReportsPage";
 import ReportDetailPage from "./pages/ReportDetailPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import StudentAchievementReviewPage from "./pages/StudentAchievementReviewPage";
+import StudentsPage from "./pages/StudentsPage";
+import StudentDetailPage from "./pages/StudentDetailPage";
+import StudentAttendanceOverviewPage from "./pages/StudentAttendanceOverviewPage";
+import ClassesPage from "./pages/ClassesPage";
+import ClassPerformanceReportPage from "./pages/ClassPerformanceReportPage";
 import NotFound from "./pages/NotFound";
 
 // Academic Pages
@@ -36,7 +46,9 @@ import CreateCCEWorkPage from "./pages/CreateCCEWorkPage";
 import CCEWorkDetailPage from "./pages/CCEWorkDetailPage";
 import CCEMarksPage from "./pages/CCEMarksPage";
 import SubjectsPage from "./pages/SubjectsPage";
+import SubjectDetailPage from "./pages/SubjectDetailPage";
 import StudentMarksPage from "./pages/StudentMarksPage";
+import ClassReportPage from "./pages/ClassReportPage";
 
 // Fee Management Pages
 import FeeManagementPage from "./pages/FeeManagementPage";
@@ -97,8 +109,9 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route
-        path="/"
+        path="/staff/login"
         element={
           isAuthenticated && user?.role
             ? <Navigate to="/dashboard" replace />
@@ -187,6 +200,54 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/students"
+        element={
+          <ProtectedRoute>
+            <StudentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/students/:id"
+        element={
+          <ProtectedRoute>
+            <StudentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/students/:id/attendance"
+        element={
+          <ProtectedRoute>
+            <StudentAttendanceOverviewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/classes"
+        element={
+          <ProtectedRoute>
+            <ClassesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/classes/:id/performance"
+        element={
+          <ProtectedRoute>
+            <ClassPerformanceReportPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/issues/:id/forward"
+        element={
+          <ProtectedRoute>
+            <ForwardIssuePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/issues/:id"
         element={
           <ProtectedRoute>
@@ -243,6 +304,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/student-achievements"
         element={
           <ProtectedRoute>
@@ -285,6 +354,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/cce/subjects/:subjectId"
+        element={
+          <ProtectedRoute>
+            <SubjectDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/cce/works/:id"
         element={
           <ProtectedRoute>
@@ -313,6 +390,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <StudentMarksPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cce/class-report"
+        element={
+          <ProtectedRoute>
+            <ClassReportPage />
           </ProtectedRoute>
         }
       />

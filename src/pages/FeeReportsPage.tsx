@@ -24,8 +24,10 @@ import {
     CheckCircle,
     Download,
     FileSpreadsheet,
+    Clock,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
+import { cn } from '@/lib/utils';
 
 interface OverallFinancialSummary {
     total_expected: number;
@@ -53,7 +55,17 @@ interface DailyCollectionSummary {
     total_amount: number;
     totalStudents: number;
     totalAmount: number;
-    payments: any[];
+    payments: {
+        paymentId: number;
+        studentName: string;
+        className: string;
+        amount: number;
+        receiptIssued: boolean;
+        remarks: string | null;
+        enteredBy: string;
+        time: string;
+        allocations: string;
+    }[];
 }
 
 // ==================== Export Utilities ====================
@@ -80,7 +92,7 @@ const exportClassWiseToPDF = (report: ClassWiseSummary) => {
 
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text('FEE COLLECTION REPORT', pageWidth / 2, 25, { align: 'center' });
+    doc.text('DONATION COLLECTION REPORT', pageWidth / 2, 25, { align: 'center' });
 
     doc.setFontSize(10);
     doc.text(`Class: ${report.className}`, pageWidth / 2, 31, { align: 'center' });
@@ -197,7 +209,7 @@ const exportClassWiseToPDF = (report: ClassWiseSummary) => {
         );
     }
 
-    doc.save(`${report.className}_Fee_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`${report.className}_Donation_Report_${new Date().toISOString().split('T')[0]}.pdf`);
     toast.success('PDF downloaded successfully');
 };
 
@@ -218,7 +230,7 @@ const exportClassWiseToExcel = (report: ClassWiseSummary) => {
 
     // Students Sheet
     const studentsData = [
-        ['Student Name', 'Monthly Fee', 'Total Expected', 'Total Paid', 'Pending', 'Status'],
+        ['Student Name', 'Monthly Donation', 'Total Expected', 'Total Paid', 'Pending', 'Status'],
         ...report.students.map((s) => [
             s.studentName,
             s.monthlyPayable,
@@ -231,7 +243,7 @@ const exportClassWiseToExcel = (report: ClassWiseSummary) => {
     const studentsWs = XLSX.utils.aoa_to_sheet(studentsData);
     XLSX.utils.book_append_sheet(wb, studentsWs, 'Students');
 
-    XLSX.writeFile(wb, `${report.className}_Fee_Report.xlsx`);
+    XLSX.writeFile(wb, `${report.className}_Donation_Report.xlsx`);
     toast.success('Excel downloaded successfully');
 };
 
@@ -275,16 +287,27 @@ const exportDailyToPDF = (report: DailyCollectionSummary) => {
 
         autoTable(doc, {
             startY: (doc as any).lastAutoTable.finalY + 20,
-            head: [['Student Name', 'Class', 'Amount', 'Receipt', 'Remarks']],
+            head: [['Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt', 'Remarks']],
             body: report.payments.map((p) => [
+                p.time,
                 p.studentName,
                 p.className,
+                p.allocations,
                 formatCurrencyPlain(p.amount),
                 p.receiptIssued ? 'Yes' : 'No',
                 p.remarks || '-',
             ]),
             theme: 'striped',
             headStyles: { fillColor: [34, 197, 94] },
+            columnStyles: {
+                0: { cellWidth: 20 }, // Time
+                1: { cellWidth: 40 }, // Name
+                2: { cellWidth: 15 }, // Class
+                3: { cellWidth: 50 }, // Allocations
+                4: { halign: 'right', cellWidth: 20 }, // Amount
+                5: { halign: 'center', cellWidth: 15 }, // Receipt
+                6: { cellWidth: 'auto' }, // Remarks
+            },
         });
     }
 
@@ -316,10 +339,12 @@ const exportDailyToExcel = (report: DailyCollectionSummary) => {
     // Payments Sheet
     if (report.payments.length > 0) {
         const paymentsData = [
-            ['Student Name', 'Class', 'Amount', 'Receipt Issued', 'Remarks'],
+            ['Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt Issued', 'Remarks'],
             ...report.payments.map((p) => [
+                p.time,
                 p.studentName,
                 p.className,
+                p.allocations,
                 p.amount,
                 p.receiptIssued ? 'Yes' : 'No',
                 p.remarks || '',
@@ -338,7 +363,7 @@ const FeeReportsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('summary');
 
     return (
-        <AppLayout title="Fee Reports" showBack>
+        <AppLayout title="Donation Reports" showBack>
             <div className="space-y-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
@@ -695,6 +720,27 @@ const DailyCollectionReportSection: React.FC = () => {
         }
     };
 
+    const handleToggleReceipt = async (paymentId: number) => {
+        try {
+            await feeApi.toggleReceipt(paymentId);
+            toast.success('Receipt status updated');
+            
+            // Update the local state instead of reloading entire report
+            if (report) {
+                setReport({
+                    ...report,
+                    payments: report.payments.map(p => 
+                        p.paymentId === paymentId 
+                            ? { ...p, receiptIssued: !p.receiptIssued }
+                            : p
+                    )
+                });
+            }
+        } catch (error) {
+            toast.error('Failed to update receipt status');
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -703,31 +749,66 @@ const DailyCollectionReportSection: React.FC = () => {
         }).format(amount);
     };
 
+    const toTitleCase = (str: string) => {
+        return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
     const formatDisplayDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-IN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
             day: 'numeric',
+            month: 'short',
+            year: 'numeric',
         });
+    };
+
+    const truncateAllocations = (allocations: string, maxLength: number = 3) => {
+        if (!allocations) return '-';
+        const parts = allocations.split(', ');
+        if (parts.length <= maxLength) return allocations;
+        return parts.slice(0, maxLength).join(', ') + '...';
+    };
+
+    const calculateTotal = () => {
+        return report?.payments.reduce((sum, p) => sum + p.amount, 0) || 0;
     };
 
     return (
         <div className="space-y-4">
-            <Card>
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">Select Date</span>
-                    </div>
+            {/* Compact Header with Date and Export */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
                     <Input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
                         max={new Date().toISOString().split('T')[0]}
+                        className="w-auto"
                     />
-                </CardContent>
-            </Card>
+                </div>
+                {!loading && report && report.payments.length > 0 && (
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportDailyToPDF(report)}
+                            className="flex-1 sm:flex-none"
+                        >
+                            <Download className="w-4 h-4 mr-1.5" />
+                            PDF
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportDailyToExcel(report)}
+                            className="flex-1 sm:flex-none"
+                        >
+                            <FileSpreadsheet className="w-4 h-4 mr-1.5" />
+                            Excel
+                        </Button>
+                    </div>
+                )}
+            </div>
 
             {loading && (
                 <div className="space-y-3 animate-pulse">
@@ -739,49 +820,30 @@ const DailyCollectionReportSection: React.FC = () => {
 
             {!loading && report && (
                 <>
-                    {/* Export Buttons */}
-                    {report.payments.length > 0 && (
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                                onClick={() => exportDailyToPDF(report)}
-                            >
-                                <Download className="w-4 h-4 mr-2" />
-                                PDF
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                                onClick={() => exportDailyToExcel(report)}
-                            >
-                                <FileSpreadsheet className="w-4 h-4 mr-2" />
-                                Excel
-                            </Button>
-                        </div>
-                    )}
 
-                    {/* Daily Summary */}
-                    <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                        <CardContent className="p-4">
-                            <p className="text-sm text-muted-foreground mb-1">
-                                {formatDisplayDate(selectedDate)}
-                            </p>
-                            <div className="grid grid-cols-2 gap-4 mt-3">
-                                <div className="text-center p-3 bg-background/80 rounded-lg">
-                                    <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
-                                    <p className="text-2xl font-bold">{report.totalStudents}</p>
-                                    <p className="text-xs text-muted-foreground">Students Paid</p>
+
+                    {/* Subtle Stats Card */}
+                    <Card className="bg-muted/30">
+                        <CardContent className="p-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                    <div className="flex items-center gap-1.5">
+                                        <Users className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">Students:</span>
+                                        <span className="font-semibold">{report.totalStudents}</span>
+                                    </div>
+                                    <div className="hidden sm:block h-4 w-px bg-border" />
+                                    <div className="flex items-center gap-1.5">
+                                        <IndianRupee className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">Collected:</span>
+                                        <span className="font-semibold text-green-700 dark:text-green-400">
+                                            {formatCurrency(report.totalAmount)}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="text-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                                    <IndianRupee className="w-5 h-5 mx-auto mb-1 text-emerald-600 dark:text-emerald-400" />
-                                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                                        {formatCurrency(report.totalAmount)}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">Total Collected</p>
-                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                    {formatDisplayDate(selectedDate)}
+                                </span>
                             </div>
                         </CardContent>
                     </Card>
@@ -795,48 +857,186 @@ const DailyCollectionReportSection: React.FC = () => {
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground px-1">
-                                {report.payments.length} payment(s)
-                            </p>
-                            {report.payments.map((payment) => (
-                                <Card key={payment.paymentId}>
-                                    <CardContent className="p-3">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <p className="font-medium">{payment.studentName}</p>
-                                                <p className="text-xs text-muted-foreground">{payment.className}</p>
-                                                {payment.remarks && (
-                                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                                        <FileText className="w-3 h-3" />
-                                                        {payment.remarks}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold text-emerald-600 dark:text-emerald-400">
-                                                    {formatCurrency(payment.amount)}
+                        <>
+                            {/* Desktop Table View - Hidden on Mobile */}
+                            <div className="hidden md:block border rounded-lg overflow-x-auto">
+                                {/* Table Header */}
+                                <div className="grid grid-cols-[80px_1fr_80px_2fr_100px_80px] gap-4 p-3 bg-muted/30 border-b font-medium text-sm">
+                                    <div>Time</div>
+                                    <div>Student</div>
+                                    <div>Class</div>
+                                    <div>Allocations</div>
+                                    <div className="text-right">Amount</div>
+                                    <div className="text-center">Receipt</div>
+                                </div>
+
+                                {/* Table Body */}
+                                {report.payments.map((payment) => (
+                                    <div 
+                                        key={payment.paymentId}
+                                        className="grid grid-cols-[80px_1fr_80px_2fr_100px_80px] gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 items-center transition-colors bg-background"
+                                    >
+                                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            {payment.time}
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-sm truncate text-foreground" title={payment.studentName}>
+                                                {toTitleCase(payment.studentName)}
+                                            </p>
+                                            {payment.remarks && (
+                                                <p className="text-xs text-muted-foreground truncate" title={payment.remarks}>
+                                                    {payment.remarks}
                                                 </p>
+                                            )}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {payment.className}
+                                        </div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {payment.allocations ? (
+                                                payment.allocations.split(', ').map((alloc, idx) => (
+                                                    <Badge key={idx} variant="outline" className="text-xs font-normal">
+                                                        {alloc}
+                                                    </Badge>
+                                                ))
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">-</span>
+                                            )}
+                                        </div>
+                                        <div className="text-right font-bold text-green-700 dark:text-green-400">
+                                            {formatCurrency(payment.amount)}
+                                        </div>
+                                        <div className="flex justify-center">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleToggleReceipt(payment.paymentId)}
+                                                className={cn(
+                                                    "h-8 px-2",
+                                                    payment.receiptIssued 
+                                                        ? 'text-green-700 hover:text-green-800 hover:bg-green-50' 
+                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                                                )}
+                                            >
                                                 {payment.receiptIssued ? (
-                                                    <Badge variant="outline" className="text-xs text-emerald-600 mt-1">
-                                                        <Receipt className="w-3 h-3 mr-1" />
-                                                        Receipt
-                                                    </Badge>
+                                                    <CheckCircle className="w-4 h-4" />
                                                 ) : (
-                                                    <Badge variant="outline" className="text-xs text-muted-foreground mt-1">
-                                                        No Receipt
-                                                    </Badge>
+                                                    <Receipt className="w-4 h-4" />
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {/* Total Row */}
+                                <div className="grid grid-cols-[80px_1fr_80px_2fr_100px_80px] gap-4 p-3 border-t-2 bg-muted/20 font-semibold">
+                                    <div className="col-span-4 text-right">Total:</div>
+                                    <div className="text-right text-green-700 dark:text-green-400">
+                                        {formatCurrency(calculateTotal())}
+                                    </div>
+                                    <div></div>
+                                </div>
+                            </div>
+
+                            {/* Mobile Card View - Visible Only on Mobile */}
+                            <div className="md:hidden space-y-3">
+                                {report.payments.map((payment) => (
+                                    <Card key={payment.paymentId} className="overflow-hidden">
+                                        <CardContent className="p-0">
+                                            {/* Header with Amount and Time */}
+                                            <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border-b">
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <Clock className="w-4 h-4" />
+                                                    <span>{payment.time}</span>
+                                                </div>
+                                                <div className="text-lg font-bold text-green-700 dark:text-green-400">
+                                                    {formatCurrency(payment.amount)}
+                                                </div>
+                                            </div>
+
+                                            {/* Student Info */}
+                                            <div className="p-3 space-y-2">
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">Student</p>
+                                                    <p className="font-medium text-foreground">{toTitleCase(payment.studentName)}</p>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Class</p>
+                                                        <p className="text-sm">{payment.className}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Receipt</p>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleToggleReceipt(payment.paymentId)}
+                                                            className={cn(
+                                                                "mt-1 h-8 text-xs",
+                                                                payment.receiptIssued 
+                                                                    ? 'text-green-700 border-green-200 hover:bg-green-50' 
+                                                                    : 'text-gray-600 hover:bg-gray-50'
+                                                            )}
+                                                        >
+                                                            {payment.receiptIssued ? (
+                                                                <>
+                                                                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                                                                    Issued
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Receipt className="w-3.5 h-3.5 mr-1.5" />
+                                                                    Issue
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                {payment.allocations && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Allocations</p>
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            {payment.allocations.split(', ').map((alloc, idx) => (
+                                                                <Badge key={idx} variant="outline" className="text-xs font-normal">
+                                                                    {alloc}
+                                                                </Badge>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {payment.remarks && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Remarks</p>
+                                                        <p className="text-sm mt-0.5">{payment.remarks}</p>
+                                                    </div>
                                                 )}
                                             </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+
+                                {/* Mobile Total */}
+                                <Card className="bg-muted/30">
+                                    <CardContent className="p-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-semibold">Total Collected:</span>
+                                            <span className="text-lg font-bold text-green-700 dark:text-green-400">
+                                                {formatCurrency(calculateTotal())}
+                                            </span>
                                         </div>
                                     </CardContent>
                                 </Card>
-                            ))}
-                        </div>
+                            </div>
+                        </>
                     )}
                 </>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 

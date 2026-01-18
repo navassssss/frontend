@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.118:8000/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use(
@@ -14,6 +14,23 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor to handle authentication errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 Unauthorized or 403 Forbidden
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Clear tokens
+      localStorage.removeItem("token");
+      localStorage.removeItem("student_token");
+
+      // Redirect to login page (root path)
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default api;

@@ -10,7 +10,7 @@ import {
   Forward,
   CheckCircle2
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,13 @@ interface ApiIssue {
   created_by: number;
   responsible_user_id?: number;
 }
+
+// Helper to convert name to title case
+const toTitleCase = (str: string) => {
+  return str.toLowerCase().split(' ').map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
 
 export default function IssueDetailPage() {
   const { id } = useParams();
@@ -101,12 +108,30 @@ export default function IssueDetailPage() {
     navigate(`/issues/${id}/forward`);
   };
 
+  const getPriorityBadgeStyle = (priority: ApiIssue['priority']) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-700 border-red-200';
+      case 'medium': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'low': return 'bg-blue-100 text-blue-700 border-blue-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusBadgeStyle = (status: ApiIssue['status']) => {
+    switch (status) {
+      case 'open': return 'bg-green-100 text-green-700 border-green-200';
+      case 'resolved': return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'forwarded': return 'bg-purple-100 text-purple-700 border-purple-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
   if (!issue) return <p className="text-center mt-6">Loading...</p>;
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 border-b bg-background/95 backdrop-blur">
-        <div className="flex items-center h-14 px-4 max-w-lg mx-auto">
+      <header className="sticky top-0 border-b bg-background/95 backdrop-blur z-10">
+        <div className="flex items-center h-14 px-4 max-w-2xl lg:max-w-4xl mx-auto">
           <Button variant="ghost" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -114,71 +139,104 @@ export default function IssueDetailPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-lg mx-auto space-y-4 pb-32">
+      <main className="p-4 max-w-2xl lg:max-w-4xl mx-auto space-y-4 pb-32">
 
-        {/* Info */}
+        {/* Main Info Card - Reduced padding */}
         <Card>
           <CardContent className="p-4 space-y-3">
-            <div className="flex gap-2">
-              <Badge variant={issue.status as any}>{issue.status}</Badge>
-              <Badge variant={issue.priority as any}>{issue.priority} priority</Badge>
+            {/* Badges */}
+            <div className="flex gap-2 flex-wrap">
+              <Badge className={`${getStatusBadgeStyle(issue.status)} font-medium px-2.5 py-0.5 border`}>
+                {issue.status}
+              </Badge>
+              <Badge className={`${getPriorityBadgeStyle(issue.priority)} font-medium px-2.5 py-0.5 border`}>
+                {issue.priority} priority
+              </Badge>
             </div>
 
-            <h2 className="text-lg font-bold">{issue.title}</h2>
-            <p className="text-muted-foreground">{issue.description}</p>
+            {/* Title - Bolder */}
+            <h2 className="text-lg font-bold leading-tight">{issue.title}</h2>
 
-            <div className="flex gap-3 text-sm border-t pt-3 text-muted-foreground">
-              <Tag className="w-4 h-4" />
-              {issue.category.name}
-            </div>
+            {/* Description */}
+            <p className="text-sm text-muted-foreground leading-relaxed">{issue.description}</p>
 
-            {issue.responsible_user && (
-              <div className="flex gap-3 text-sm text-muted-foreground">
-                <User className="w-4 h-4" />
-                {issue.responsible_user.name}
+            {/* Category & Assignee - No separator, tighter spacing */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Tag className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                <span className="font-medium">{issue.category.name}</span>
               </div>
-            )}
+
+              {issue.responsible_user && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                  <span className="font-medium">{toTitleCase(issue.responsible_user.name)}</span>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Timeline */}
+        {/* Activity Card - Matching header style */}
         <Card>
-          <CardContent className="p-4 space-y-4">
-            <h3 className="font-semibold">Activity</h3>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Activity</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-3">
             {issue.timeline.map((item) => (
-              <div key={item.id} className="border-l pl-3">
-                <p className="font-medium capitalize">
+              <div key={item.id} className="border-l-2 border-primary/30 pl-3 py-1">
+                <p className="font-semibold text-sm capitalize">
                   {item.action_type.replace('_', ' ')}
                   {item.action_type === 'forwarded' && item.to_user && (
-                    <span className="text-muted-foreground ml-1">
-                      to {item.to_user.name}
+                    <span className="text-muted-foreground font-normal ml-1">
+                      to {toTitleCase(item.to_user.name)}
                     </span>
                   )}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {item.performer?.name || 'Unknown'} • {new Date(item.created_at).toLocaleString()}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {toTitleCase(item.performer?.name || 'Unknown')} • {new Date(item.created_at).toLocaleString()}
                 </p>
                 {item.note && (
-                  <p className="mt-1 text-sm bg-muted p-2 rounded-md">{item.note}</p>
+                  <p className="mt-2 text-sm bg-muted/50 p-2 rounded-lg">{item.note}</p>
                 )}
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* Comment box */}
+        {/* Comment Section - Inside a card like Activity */}
         {canComment ? (
-          <div className="space-y-2">
-            <h3 className="font-semibold">Add Comment</h3>
-            <div className="flex gap-2">
-              <Input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Write comment..." />
-              <Button size="icon" onClick={handleAddComment} disabled={isSubmitting}>
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">Add Comment</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex gap-2">
+                <Input
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="rounded-xl"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleAddComment();
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  onClick={handleAddComment}
+                  disabled={isSubmitting}
+                  className="rounded-full flex-shrink-0"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="text-center p-4 text-muted-foreground text-sm border rounded-lg bg-muted/20">
+          <div className="text-center p-4 text-muted-foreground text-sm border rounded-xl bg-muted/20">
             You are not authorized to comment on this issue.
           </div>
         )}
@@ -187,11 +245,11 @@ export default function IssueDetailPage() {
         {(user?.role === "principal" || user?.role === "manager") && (
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={handleForward}>
-              <Forward className="w-5 h-5" />
+              <Forward className="w-4 h-4 mr-2" />
               Forward
             </Button>
-            <Button className="flex-1 bg-success" onClick={handleResolve}>
-              <CheckCircle2 className="w-5 h-5" />
+            <Button className="flex-1 bg-success hover:bg-success/90" onClick={handleResolve}>
+              <CheckCircle2 className="w-4 h-4 mr-2" />
               Resolve
             </Button>
           </div>

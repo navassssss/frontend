@@ -7,7 +7,7 @@ import {
     X,
     Check,
     Users,
-    AlertCircle
+    ChevronRight
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,17 +27,7 @@ import {
 import { format } from 'date-fns';
 import api from '@/lib/api';
 
-interface ClassData {
-    id: number;
-    name: string;
-    studentCount: number;
-}
-
-interface StudentData {
-    id: number;
-    name: string;
-    roll_number: string;
-}
+// ... interfaces
 
 export default function TakeAttendancePage() {
     const navigate = useNavigate();
@@ -69,7 +59,7 @@ export default function TakeAttendancePage() {
 
     const loadClasses = async () => {
         try {
-            const { data } = await api.get('/classes');
+            const { data } = await api.get('/attendance/classes');
             setClasses(data);
         } catch (error) {
             toast.error('Failed to load classes');
@@ -151,8 +141,22 @@ export default function TakeAttendancePage() {
     const presentCount = selectedClassInfo ? selectedClassInfo.studentCount - absentStudents.length : 0;
 
     return (
-        <AppLayout title="Take Attendance" showBack>
-            <div className="p-4 space-y-6 pb-24">
+        <AppLayout title="Take Attendance" showBack={false}>
+            <div className="p-4 space-y-6 pb-24 max-w-2xl mx-auto">
+                {/* Header with Back Button */}
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/attendance')}
+                        className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
+                    >
+                        <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
+                    </button>
+                    <div>
+                        <h2 className="text-lg font-bold text-foreground">Attendance Entry</h2>
+                        <p className="text-sm text-muted-foreground">Mark student attendance</p>
+                    </div>
+                </div>
+
                 {/* Class Selection */}
                 <div className="space-y-2">
                     <Label>Select Class</Label>

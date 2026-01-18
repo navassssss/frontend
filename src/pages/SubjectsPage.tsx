@@ -76,7 +76,7 @@ export default function SubjectsPage() {
         try {
             const [subjectsRes, classesRes, teachersRes] = await Promise.all([
                 api.get('/subjects'),
-                api.get('/classes'),
+                api.get('/attendance/classes'),
                 api.get('/teachers')
             ]);
             setSubjects(subjectsRes.data);

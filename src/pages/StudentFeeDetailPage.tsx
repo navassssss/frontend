@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
     Plus,
@@ -22,6 +23,7 @@ import {
     Clock,
     AlertCircle,
     FileText,
+    ArrowLeft,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 
@@ -201,6 +203,12 @@ const StudentFeeDetailPage: React.FC = () => {
         return monthStr > current;
     };
 
+    // Check if month is current month
+    const isCurrentMonth = (monthStr: string) => {
+        const current = getCurrentMonth();
+        return monthStr === current;
+    };
+
     // Get next month in YYYY-MM format
     const getNextMonth = () => {
         const now = new Date();
@@ -231,25 +239,29 @@ const StudentFeeDetailPage: React.FC = () => {
         }).format(amount);
     };
 
+    const toTitleCase = (str: string) => {
+        return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
     const getStatusBadge = (status: 'paid' | 'partial' | 'unpaid') => {
         switch (status) {
             case 'paid':
                 return (
-                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Paid
                     </Badge>
                 );
             case 'partial':
                 return (
-                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <Badge className="bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400">
                         <Clock className="w-3 h-3 mr-1" />
                         Partial
                     </Badge>
                 );
             case 'unpaid':
                 return (
-                    <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         Unpaid
                     </Badge>
@@ -269,6 +281,7 @@ const StudentFeeDetailPage: React.FC = () => {
                 amount: parseFloat(paymentAmount),
                 payment_date: paymentDate,
                 remarks: paymentRemarks || undefined,
+                receipt_issued: paymentReceiptIssued,
             });
             toast.success('Payment added successfully');
             setPaymentDialogOpen(false);
@@ -295,15 +308,26 @@ const StudentFeeDetailPage: React.FC = () => {
         // Check if any selected months are fully paid or partially paid
         const getMonthsInRange = (from: string, to: string) => {
             if (to === 'ongoing') {
-                // For ongoing, check from current month to end of academic year
-                const currentDate = new Date();
-                const currentYear = currentDate.getFullYear();
-                const currentMonth = currentDate.getMonth() + 1;
-                const endYear = currentMonth > 3 ? currentYear + 1 : currentYear;
-                const endMonth = 3;
-
+                // For ongoing, create 12 months from the start date
                 const months: string[] = [];
                 const [startYear, startMonth] = from.split('-').map(Number);
+                
+                let tempYear = startYear;
+                let tempMonth = startMonth + 11; // 11 months ahead (total 12 months)
+                
+                let endYear, endMonth;
+                if (tempMonth > 12) {
+                    endYear = tempYear + Math.floor(tempMonth / 12);
+                    endMonth = tempMonth % 12;
+                    if (endMonth === 0) {
+                        endMonth = 12;
+                        endYear--;
+                    }
+                } else {
+                    endYear = tempYear;
+                    endMonth = tempMonth;
+                }
+                
                 for (let y = startYear; y <= endYear; y++) {
                     const mStart = (y === startYear) ? startMonth : 1;
                     const mEnd = (y === endYear) ? endMonth : 12;
@@ -356,18 +380,21 @@ const StudentFeeDetailPage: React.FC = () => {
 
             let endYear, endMonth;
             if (adjustToMonth === 'ongoing') {
-                // Set to end of current academic year (March of next year)
-                const currentDate = new Date();
-                const currentYear = currentDate.getFullYear();
-                const currentMonth = currentDate.getMonth() + 1; // 1-12
-
-                // If we're past March, set to next year's March, otherwise this year's March
-                if (currentMonth > 3) {
-                    endYear = currentYear + 1;
-                    endMonth = 3;
+                // Set to 12 months from the start date
+                let tempYear = startYear;
+                let tempMonth = startMonth + 11; // 11 months ahead (total 12 months including start)
+                
+                // Handle month overflow
+                if (tempMonth > 12) {
+                    endYear = tempYear + Math.floor(tempMonth / 12);
+                    endMonth = tempMonth % 12;
+                    if (endMonth === 0) {
+                        endMonth = 12;
+                        endYear--;
+                    }
                 } else {
-                    endYear = currentYear;
-                    endMonth = 3;
+                    endYear = tempYear;
+                    endMonth = tempMonth;
                 }
             } else {
                 [endYear, endMonth] = adjustToMonth.split('-').map(Number);
@@ -433,13 +460,24 @@ const StudentFeeDetailPage: React.FC = () => {
     return (
         <AppLayout title="Student Fee Details" showBack>
             <div className="space-y-4">
+                {/* Back Button for Desktop */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/fees')}
+                    className="hidden lg:flex items-center gap-1 -ml-2"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Fee Management
+                </Button>
+
                 {/* Overview Card */}
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h2 className="text-lg font-semibold">{studentFee.studentName}</h2>
-                                <p className="text-sm text-muted-foreground">{studentFee.className}</p>
+                                <h2 className="text-lg font-semibold">{toTitleCase(studentFee.studentName)}</h2>
+                                <p className="text-sm text-muted-foreground">Class {studentFee.className}</p>
                             </div>
                         </div>
 
@@ -449,15 +487,31 @@ const StudentFeeDetailPage: React.FC = () => {
                                     <p className="text-xs text-muted-foreground">Expected</p>
                                     <p className="text-lg font-bold">{formatCurrency(overview.totalExpected)}</p>
                                 </div>
-                                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                                <div className={`p-3 rounded-lg ${overview.totalPaid > 0
+                                    ? 'bg-green-50 dark:bg-green-900/20'
+                                    : 'bg-gray-50 dark:bg-gray-900/20'
+                                    }`}>
                                     <p className="text-xs text-muted-foreground">Paid</p>
-                                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                    <p className={`text-lg font-bold ${overview.totalPaid > 0
+                                        ? 'text-green-700 dark:text-green-400'
+                                        : 'text-muted-foreground'
+                                        }`}>
                                         {formatCurrency(overview.totalPaid)}
                                     </p>
                                 </div>
-                                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                                <div className={`p-3 rounded-lg ${overview.totalPending > 0
+                                    ? 'bg-amber-50 dark:bg-amber-900/20'
+                                    : overview.totalPending < 0
+                                        ? 'bg-blue-50 dark:bg-blue-900/20'
+                                        : 'bg-gray-50 dark:bg-gray-900/20'
+                                    }`}>
                                     <p className="text-xs text-muted-foreground">Pending</p>
-                                    <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                                    <p className={`text-lg font-bold ${overview.totalPending > 0
+                                        ? 'text-amber-700 dark:text-amber-400'
+                                        : overview.totalPending < 0
+                                            ? 'text-blue-700 dark:text-blue-400'
+                                            : 'text-muted-foreground'
+                                        }`}>
                                         {formatCurrency(overview.totalPending)}
                                     </p>
                                 </div>
@@ -470,7 +524,7 @@ const StudentFeeDetailPage: React.FC = () => {
                 <div className="flex gap-2">
                     <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="flex-1">
+                            <Button size="sm">
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Payment
                             </Button>
@@ -527,7 +581,7 @@ const StudentFeeDetailPage: React.FC = () => {
                         }
                     }}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="flex-1">
+                            <Button variant="outline" size="sm">
                                 <Edit className="w-4 h-4 mr-2" />
                                 Adjust Fee
                             </Button>
@@ -611,101 +665,142 @@ const StudentFeeDetailPage: React.FC = () => {
 
                 {/* Tabs */}
                 <Tabs defaultValue="breakdown" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="breakdown">Monthly Breakdown</TabsTrigger>
-                        <TabsTrigger value="payments">Payments</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 bg-transparent border-b rounded-none h-auto p-0">
+                        <TabsTrigger
+                            value="breakdown"
+                            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                        >
+                            Monthly Breakdown
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="payments"
+                            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                        >
+                            Payments
+                        </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="breakdown" className="mt-4 space-y-2">
-                        {monthlyStatus.map((status) => {
-                            const fee = monthlyFees.find((mf) => mf.month === status.month);
-                            return (
-                                <Card key={status.month}>
-                                    <CardContent className="p-3">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-medium">{formatMonth(status.month)}</p>
-                                                    {isFutureMonth(status.month) && (
-                                                        <span className="inline-flex items-center rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
-                                                            Future
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                {fee?.adjustmentReason && (
-                                                    <p className="text-xs text-amber-600 dark:text-amber-400">
-                                                        Adjusted: {fee.adjustmentReason}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            {getStatusBadge(status.status)}
-                                        </div>
-                                        <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
-                                            <div>
-                                                <p className="text-muted-foreground text-xs">Expected</p>
-                                                <p className="font-medium">{formatCurrency(status.expectedAmount)}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-muted-foreground text-xs">Paid</p>
-                                                <p className="font-medium text-emerald-600 dark:text-emerald-400">
-                                                    {formatCurrency(status.paidAmount)}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-muted-foreground text-xs">Balance</p>
-                                                <p className={`font-medium ${status.balance > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
-                                                    {formatCurrency(status.balance)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+                    <TabsContent value="breakdown" className="mt-4">
+                        <div className="border rounded-lg overflow-hidden">
+                            {/* Table Header */}
+                            <div className="grid grid-cols-5 gap-4 p-3 bg-muted/30 border-b font-medium text-sm">
+                                <div>Month</div>
+                                <div className="text-right">Expected</div>
+                                <div className="text-right">Paid</div>
+                                <div className="text-right">Balance</div>
+                                <div className="text-right">Status</div>
+                            </div>
+
+                            {/* Table Rows */}
+                            {monthlyStatus.map((status) => (
+                                <div
+                                    key={status.month}
+                                    className={cn(
+                                        "grid grid-cols-5 gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 transition-colors",
+                                        isCurrentMonth(status.month) && "bg-amber-50/30 dark:bg-amber-900/10"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">{formatMonth(status.month)}</span>
+                                        {isFutureMonth(status.month) && (
+                                            <Badge variant="outline" className="text-xs border-blue-200 bg-blue-50 text-blue-700">
+                                                Future
+                                            </Badge>
+                                        )}
+                                        {isCurrentMonth(status.month) && (
+                                            <Badge variant="outline" className="text-xs border-amber-200 bg-amber-50 text-amber-700">
+                                                Current
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="text-right font-medium">
+                                        {formatCurrency(status.expectedAmount)}
+                                    </div>
+                                    <div className={cn(
+                                        "text-right font-medium",
+                                        status.paidAmount > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
+                                    )}>
+                                        {formatCurrency(status.paidAmount)}
+                                    </div>
+                                    <div className={cn(
+                                        "text-right font-medium",
+                                        status.balance > 0 ? "text-amber-700 dark:text-amber-400" :
+                                            status.balance < 0 ? "text-blue-700 dark:text-blue-400" :
+                                                "text-muted-foreground"
+                                    )}>
+                                        {formatCurrency(status.balance)}
+                                    </div>
+                                    <div className="text-right">
+                                        {getStatusBadge(status.status)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </TabsContent>
 
-                    <TabsContent value="payments" className="mt-4 space-y-2">
-                        {payments.length === 0 ? (
-                            <Card>
-                                <CardContent className="p-8 text-center text-muted-foreground">
-                                    <IndianRupee className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                    <p>No payments recorded</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            payments.map((payment) => (
-                                <Card key={payment.id}>
-                                    <CardContent className="p-3">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                                    {formatCurrency(payment.amount)}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {new Date(payment.date).toLocaleDateString('en-IN')}
-                                                </p>
-                                                {payment.remarks && (
-                                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                                        <FileText className="w-3 h-3" />
-                                                        {payment.remarks}
-                                                    </p>
-                                                )}
-                                            </div>
+                    <TabsContent value="payments" className="mt-4">
+                        <div className="border rounded-lg overflow-hidden">
+                            {/* Table Header */}
+                            <div className="grid grid-cols-4 gap-4 p-3 bg-muted/30 border-b font-medium text-sm">
+                                <div>Amount</div>
+                                <div>Date</div>
+                                <div>Remarks</div>
+                                <div className="text-right">Receipt</div>
+                            </div>
+
+                            {payments.length === 0 ? (
+                                <div className="p-8 text-center text-muted-foreground bg-background">
+                                    <IndianRupee className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                                    <p className="text-sm">No payments recorded</p>
+                                </div>
+                            ) : (
+                                payments.map((payment) => (
+                                    <div
+                                        key={payment.id}
+                                        className="grid grid-cols-4 gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 items-center transition-colors bg-background"
+                                    >
+                                        <div className="font-bold text-green-700 dark:text-green-400">
+                                            {formatCurrency(payment.amount)}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {new Date(payment.date).toLocaleDateString('en-IN', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric'
+                                            })}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground truncate">
+                                            {payment.remarks || '-'}
+                                        </div>
+                                        <div className="text-right">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleToggleReceipt(payment.id)}
-                                                className={payment.receiptIssued ? 'text-emerald-600' : 'text-muted-foreground'}
+                                                className={cn(
+                                                    "h-8 px-2 text-xs",
+                                                    payment.receiptIssued
+                                                        ? 'text-green-700 hover:text-green-800 hover:bg-green-50'
+                                                        : 'text-muted-foreground hover:text-foreground'
+                                                )}
                                             >
-                                                <Receipt className="w-4 h-4 mr-1" />
-                                                {payment.receiptIssued ? 'Receipt Issued' : 'No Receipt'}
+                                                {payment.receiptIssued ? (
+                                                    <>
+                                                        <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                                                        Issued
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Receipt className="w-3.5 h-3.5 mr-1.5" />
+                                                        Issue
+                                                    </>
+                                                )}
                                             </Button>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            ))
-                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </TabsContent>
                 </Tabs>
             </div>
