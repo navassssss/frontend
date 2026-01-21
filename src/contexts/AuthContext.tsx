@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
+import api from '@/lib/api';
 
 export type UserRole = 'teacher' | 'principal' | 'manager' | 'admin';
 
@@ -21,9 +21,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
+// Local api creation removed - using imported api instance
 
 // Attach token to requests
 if (localStorage.getItem("token")) {
