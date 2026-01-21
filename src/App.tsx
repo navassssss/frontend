@@ -71,7 +71,11 @@ import StudentFeePage from "./pages/student/StudentFeePage";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -85,7 +89,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -95,7 +103,11 @@ function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function StudentProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useStudentAuth();
+  const { isAuthenticated, isLoading } = useStudentAuth();
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/student/login" replace />;
