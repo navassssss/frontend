@@ -96,9 +96,23 @@ const FeeManagementPage: React.FC = () => {
     }, [classFilter]);
 
     // Local sorting (no network request)
+    // Local sorting (no network request)
     useEffect(() => {
         filterAndSortStudents();
     }, [students, sortOption]);
+
+    // Keyboard shortcut for New Payment (Alt + N)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.altKey && e.key.toLowerCase() === 'n') {
+                e.preventDefault();
+                setPaymentModalOpen(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     const loadClasses = async () => {
         try {
@@ -316,7 +330,7 @@ const FeeManagementPage: React.FC = () => {
                                 <SelectItem value="overpaid">Overpaid</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Select value={sortOption} onValueChange={setSortOption}>
+                        <Select value={sortOption} onValueChange={(val: any) => setSortOption(val)}>
                             <SelectTrigger className="w-[140px] h-9">
                                 <SelectValue placeholder="Sort by" />
                             </SelectTrigger>

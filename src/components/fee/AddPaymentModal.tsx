@@ -325,6 +325,8 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 // Reset form for next payment but keep modal open
                 resetForm();
                 setShowSessionSummary(true);
+                // Auto-open search for the next student
+                setTimeout(() => setStudentSearchOpen(true), 100);
             } else {
                 onOpenChange(false);
             }
@@ -356,7 +358,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
                         <span className="flex items-center gap-2">
@@ -562,9 +564,23 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                     />
                                 </div>
 
-                                <div className="flex items-center justify-between">
-                                    <Label>Receipt Issued</Label>
-                                    <Switch checked={receiptIssued} onCheckedChange={setReceiptIssued} />
+                                <div className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => {
+                                    setReceiptIssued(!receiptIssued);
+                                    amountInputRef.current?.focus();
+                                }}>
+                                    <div className="space-y-0.5 pointer-events-none">
+                                        <Label className="text-base cursor-pointer">Receipt Issued</Label>
+                                        <p className="text-xs text-muted-foreground">Toggle if a physical receipt was given</p>
+                                    </div>
+                                    <Switch
+                                        checked={receiptIssued}
+                                        onCheckedChange={(c) => {
+                                            setReceiptIssued(c);
+                                            // Return focus to amount input so Enter works for submit
+                                            setTimeout(() => amountInputRef.current?.focus(), 50);
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
                                 </div>
 
                                 <Separator />
