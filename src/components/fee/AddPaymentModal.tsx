@@ -107,6 +107,8 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     const [sessionPayments, setSessionPayments] = useState<SessionPayment[]>([]);
     const [showSessionSummary, setShowSessionSummary] = useState(false);
 
+    const amountInputRef = React.useRef<HTMLInputElement>(null);
+
     // Load students on mount
     useEffect(() => {
         if (open) {
@@ -114,6 +116,10 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             resetForm();
             setSessionPayments([]);
             setShowSessionSummary(false);
+            // Auto open search if no pre-selected student
+            if (!preSelectedStudentId) {
+                setTimeout(() => setStudentSearchOpen(true), 100);
+            }
         }
     }, [open]);
 
@@ -131,6 +137,10 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     useEffect(() => {
         if (selectedStudent) {
             loadStudentFeeDetails();
+            // Focus amount input after student selection
+            setTimeout(() => {
+                amountInputRef.current?.focus();
+            }, 100);
         }
     }, [selectedStudent]);
 
@@ -519,9 +529,16 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                     <div className="space-y-2">
                                         <Label>Amount (₹)</Label>
                                         <Input
+                                            ref={amountInputRef}
                                             type="number"
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && amount && parseFloat(amount) > 0) {
+                                                    e.preventDefault();
+                                                    handleSubmit(true); // Add & Next
+                                                }
+                                            }}
                                             placeholder="Enter amount"
                                         />
                                     </div>
