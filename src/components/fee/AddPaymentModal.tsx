@@ -431,6 +431,16 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                             onValueChange={(val) => {
                                                 setSearchQuery(val);
                                             }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && filteredStudents.length > 0) {
+                                                    // Auto-select the first result if Enter is pressed
+                                                    // but no item was actively selected by the command list
+                                                    const student = filteredStudents[0];
+                                                    setSelectedStudent(student);
+                                                    setStudentSearchOpen(false);
+                                                    setSearchQuery('');
+                                                }
+                                            }}
                                         />
                                         <CommandList>
                                             <CommandEmpty>No student found.</CommandEmpty>
