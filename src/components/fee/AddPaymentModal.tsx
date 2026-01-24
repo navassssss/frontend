@@ -564,7 +564,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                     />
                                 </div>
 
-                                <div className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => {
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => {
                                     setReceiptIssued(!receiptIssued);
                                     amountInputRef.current?.focus();
                                 }}>
@@ -573,6 +573,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                         <p className="text-xs text-muted-foreground">Toggle if a physical receipt was given</p>
                                     </div>
                                     <Switch
+                                        className="border-2 border-muted data-[state=checked]:border-primary"
                                         checked={receiptIssued}
                                         onCheckedChange={(c) => {
                                             setReceiptIssued(c);
