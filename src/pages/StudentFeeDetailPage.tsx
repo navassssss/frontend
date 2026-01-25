@@ -295,7 +295,7 @@ const StudentFeeDetailPage: React.FC = () => {
     };
 
     const handleAdjustFee = async () => {
-        if (!id || !adjustFromMonth || !adjustToMonth || !adjustAmount || !adjustReason) {
+        if (!id || !adjustFromMonth || !adjustToMonth || !adjustAmount) {
             toast.error('Please fill all fields');
             return;
         }
@@ -311,10 +311,10 @@ const StudentFeeDetailPage: React.FC = () => {
                 // For ongoing, create 12 months from the start date
                 const months: string[] = [];
                 const [startYear, startMonth] = from.split('-').map(Number);
-                
+
                 let tempYear = startYear;
                 let tempMonth = startMonth + 11; // 11 months ahead (total 12 months)
-                
+
                 let endYear, endMonth;
                 if (tempMonth > 12) {
                     endYear = tempYear + Math.floor(tempMonth / 12);
@@ -327,7 +327,7 @@ const StudentFeeDetailPage: React.FC = () => {
                     endYear = tempYear;
                     endMonth = tempMonth;
                 }
-                
+
                 for (let y = startYear; y <= endYear; y++) {
                     const mStart = (y === startYear) ? startMonth : 1;
                     const mEnd = (y === endYear) ? endMonth : 12;
@@ -383,7 +383,7 @@ const StudentFeeDetailPage: React.FC = () => {
                 // Set to 12 months from the start date
                 let tempYear = startYear;
                 let tempMonth = startMonth + 11; // 11 months ahead (total 12 months including start)
-                
+
                 // Handle month overflow
                 if (tempMonth > 12) {
                     endYear = tempYear + Math.floor(tempMonth / 12);
@@ -648,7 +648,7 @@ const StudentFeeDetailPage: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Reason</Label>
+                                    <Label>Reason (Optional)</Label>
                                     <Textarea
                                         value={adjustReason}
                                         onChange={(e) => setAdjustReason(e.target.value)}

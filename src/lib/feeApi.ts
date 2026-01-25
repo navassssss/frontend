@@ -140,7 +140,7 @@ export const setStudentFeeRange = async (data: {
     end_year: number;
     end_month: number;
     amount: number;
-    reason: string;
+    reason?: string;
 }) => {
     const response = await api.post('/fees/plans/student', data);
     return response.data;
