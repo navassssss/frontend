@@ -149,6 +149,12 @@ export const setStudentFeeRange = async (data: {
 // Adjust student fee (alias for setStudentFeeRange for clarity)
 export const adjustStudentFee = setStudentFeeRange;
 
+// Update student monthly fee
+export const updateStudentMonthlyFee = async (studentId: number, monthly_fee: number) => {
+    const response = await api.post(`/fees/students/${studentId}/monthly-fee`, { monthly_fee });
+    return response.data;
+};
+
 // Get overall summary
 export const getOverallSummary = async () => {
     const response = await api.get('/fees/reports/summary');

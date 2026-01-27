@@ -38,6 +38,7 @@ interface StudentFee {
     id: string;
     studentName: string;
     className: string;
+    monthlyFee: number;
 }
 
 interface MonthlyFeeStatus {
@@ -84,6 +85,10 @@ const StudentFeeDetailPage: React.FC = () => {
     const [adjustAmount, setAdjustAmount] = useState('');
     const [adjustReason, setAdjustReason] = useState('');
 
+    // Monthly Fee dialog
+    const [monthlyFeeDialogOpen, setMonthlyFeeDialogOpen] = useState(false);
+    const [newMonthlyFee, setNewMonthlyFee] = useState('');
+
     useEffect(() => {
         if (id) {
             loadData();
@@ -105,6 +110,7 @@ const StudentFeeDetailPage: React.FC = () => {
                     id: overview.student.id.toString(),
                     studentName: overview.student.name,
                     className: overview.student.class_name,
+                    monthlyFee: overview.student.monthly_fee || 0,
                 });
             }
 
@@ -431,6 +437,23 @@ const StudentFeeDetailPage: React.FC = () => {
         }
     };
 
+    const handleUpdateMonthlyFee = async () => {
+        if (!id || !newMonthlyFee || parseFloat(newMonthlyFee) < 0) {
+            toast.error('Please enter a valid amount');
+            return;
+        }
+
+        try {
+            await feeApi.updateStudentMonthlyFee(parseInt(id), parseFloat(newMonthlyFee));
+            toast.success('Monthly fee updated successfully');
+            setMonthlyFeeDialogOpen(false);
+            setNewMonthlyFee('');
+            loadData();
+        } catch (error) {
+            toast.error('Failed to update monthly fee');
+        }
+    };
+
     if (loading) {
         return (
             <AppLayout title="Student Fee" showBack>
@@ -478,6 +501,23 @@ const StudentFeeDetailPage: React.FC = () => {
                             <div>
                                 <h2 className="text-lg font-semibold">{toTitleCase(studentFee.studentName)}</h2>
                                 <p className="text-sm text-muted-foreground">Class {studentFee.className}</p>
+                            </div>
+                            <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-md">
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Fixed Monthly Fee</p>
+                                    <p className="font-semibold">{formatCurrency(studentFee.monthlyFee)}</p>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 ml-1"
+                                    onClick={() => {
+                                        setNewMonthlyFee(studentFee.monthlyFee.toString());
+                                        setMonthlyFeeDialogOpen(true);
+                                    }}
+                                >
+                                    <Edit className="w-3 h-3" />
+                                </Button>
                             </div>
                         </div>
 
@@ -661,6 +701,31 @@ const StudentFeeDetailPage: React.FC = () => {
                             </div>
                         </DialogContent>
                     </Dialog>
+
+                    <Dialog open={monthlyFeeDialogOpen} onOpenChange={setMonthlyFeeDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Update Monthly Fee</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 pt-4">
+                                <div>
+                                    <Label>Monthly Fee Amount (₹)</Label>
+                                    <Input
+                                        type="number"
+                                        value={newMonthlyFee}
+                                        onChange={(e) => setNewMonthlyFee(e.target.value)}
+                                        placeholder="Enter monthly fee"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        This amount will be used as the default fee for future months.
+                                    </p>
+                                </div>
+                                <Button onClick={handleUpdateMonthlyFee} className="w-full">
+                                    Update Fee
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 {/* Tabs */}
@@ -803,8 +868,8 @@ const StudentFeeDetailPage: React.FC = () => {
                         </div>
                     </TabsContent>
                 </Tabs>
-            </div>
-        </AppLayout>
+            </div >
+        </AppLayout >
     );
 };
 
