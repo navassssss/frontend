@@ -1,6 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api';
 
+export interface StarProgress {
+  currentStars: number;
+  totalPoints: number;
+  currentStarPoints: number;
+  nextStarPoints: number;
+  pointsInBand: number;
+  pointsToNextStar: number;
+  progressPct: number;
+  thresholds: Record<string, number>;
+}
+
 export interface Student {
   id: string;
   username: string;
@@ -16,6 +27,7 @@ export interface Student {
   monthlyPoints: number;
   walletBalance: number;
   opening_balance?: number;
+  starProgress: StarProgress | null;
 }
 
 interface StudentAuthContextType {
@@ -62,6 +74,16 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
             monthlyPoints: studentData.monthly_points,
             walletBalance: parseFloat(studentData.wallet_balance) || 0,
             opening_balance: parseFloat(studentData.opening_balance) || 0,
+            starProgress: studentData.star_progress ? {
+              currentStars: studentData.star_progress.current_stars,
+              totalPoints: studentData.star_progress.total_points,
+              currentStarPoints: studentData.star_progress.current_star_points,
+              nextStarPoints: studentData.star_progress.next_star_points,
+              pointsInBand: studentData.star_progress.points_in_band,
+              pointsToNextStar: studentData.star_progress.points_to_next_star,
+              progressPct: studentData.star_progress.progress_pct,
+              thresholds: studentData.star_progress.thresholds || {},
+            } : null,
           });
         } catch (error) {
           // Token invalid, clear it
@@ -105,6 +127,16 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
         monthlyPoints: studentData.monthly_points,
         walletBalance: parseFloat(studentData.wallet_balance) || 0,
         opening_balance: parseFloat(studentData.opening_balance) || 0,
+        starProgress: studentData.star_progress ? {
+          currentStars: studentData.star_progress.current_stars,
+          totalPoints: studentData.star_progress.total_points,
+          currentStarPoints: studentData.star_progress.current_star_points,
+          nextStarPoints: studentData.star_progress.next_star_points,
+          pointsInBand: studentData.star_progress.points_in_band,
+          pointsToNextStar: studentData.star_progress.points_to_next_star,
+          progressPct: studentData.star_progress.progress_pct,
+          thresholds: studentData.star_progress.thresholds || {},
+        } : null,
       });
 
       return true;

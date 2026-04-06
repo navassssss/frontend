@@ -38,7 +38,7 @@ const managerNavItems: NavItem[] = [
 
 export function BottomNav() {
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal';
+  const isPrincipal = user?.role === 'principal' || user?.role === 'manager' || (user?.role === 'teacher' && user?.is_vice_principal);
   const isManager = user?.role === 'manager';
   const [openIssuesCount, setOpenIssuesCount] = useState(0);
 

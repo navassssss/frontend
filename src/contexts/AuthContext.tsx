@@ -9,7 +9,11 @@ interface User {
   email: string;
   role: UserRole;
   avatar?: string;
-  can_review_achievements?: boolean;
+  phone?: string;
+  department?: string;
+  bio?: string;
+  is_vice_principal?: boolean;
+  permissions?: { id: number, name: string, label: string }[];
 }
 
 interface AuthContextType {
@@ -18,6 +22,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -95,7 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!user,
       isLoading,
       login,
-      logout
+      logout,
+      setUser
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
     Users,
     Award,
@@ -9,6 +9,7 @@ import {
     FileText,
     FileSpreadsheet,
     BookOpen,
+    Search,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -408,42 +409,78 @@ export default function StudentMarksPage() {
 
     return (
         <AppLayout title="Student Marks" showBack>
-            <div className="p-4 space-y-6 pb-24">
-                {/* Filters */}
-                <div className="space-y-3">
-                    {/* Search */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Search</label>
-                        <Input
-                            placeholder="Search by name or roll number..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full"
-                        />
-                    </div>
-
-                    {/* Class Filter */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Filter by Class</label>
-                        <Select value={selectedClass} onValueChange={setSelectedClass}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select class" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Classes</SelectItem>
-                                {classes.length === 0 && <SelectItem value="loading" disabled>Loading classes...</SelectItem>}
-                                {classes.map((cls) => {
-                                    console.log('Rendering class:', cls);
-                                    return (
-                                        <SelectItem key={cls.id} value={cls.id.toString()}>
-                                            {cls.name}
-                                        </SelectItem>
-                                    );
-                                })}
-                            </SelectContent>
-                        </Select>
+            <div className="p-4 md:p-8 max-w-[1100px] mx-auto space-y-6 pb-24 min-h-screen">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 animate-fade-in">
+                    <div>
+                        <p className="text-[11px] font-bold uppercase tracking-widest mb-1">
+                            <span className="text-slate-400">STUDENTS / </span>
+                            <span className="text-[#00a67e]">PERFORMANCE MATRIX</span>
+                        </p>
+                        <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Academic Records</h1>
                     </div>
                 </div>
+                {/* Filters Card */}
+                <Card className="p-5 md:p-6 bg-white border border-slate-100 shadow-sm rounded-2xl">
+                    <div className="flex flex-col gap-6">
+                        {/* Search Input */}
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search by name or roll number..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-50/80 border border-slate-100 rounded-xl pl-12 pr-4 py-3.5 text-[15px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
+                            />
+                        </div>
+
+                        {/* Class Filter Pills */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-2">
+                                CLASSES:
+                            </span>
+                            
+                            <button
+                                onClick={() => setSelectedClass('all')}
+                                className={`px-4 py-2 rounded-full text-[13px] font-bold transition-all ${
+                                    selectedClass === 'all'
+                                        ? 'bg-[#00a67e] text-white shadow-sm'
+                                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                            >
+                                All Classes
+                            </button>
+
+                            {classes.length === 0 ? (
+                                <span className="text-[13px] font-medium text-slate-400">Loading classes...</span>
+                            ) : (
+                                classes.map((cls) => (
+                                    <button
+                                        key={cls.id}
+                                        onClick={() => setSelectedClass(cls.id.toString())}
+                                        className={`px-4 py-2 rounded-full text-[13px] font-bold transition-all ${
+                                            selectedClass === cls.id.toString()
+                                                ? 'bg-[#00a67e] text-white shadow-sm'
+                                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                    >
+                                        {cls.name}
+                                    </button>
+                                ))
+                            )}
+
+                            {selectedClass !== 'all' && (
+                                <button
+                                    onClick={() => setSelectedClass('all')}
+                                    className="flex items-center gap-1 text-[13px] font-bold text-[#00a67e] hover:text-[#008f6c] ml-2 transition-colors"
+                                >
+                                    <span className="text-lg leading-none">&times;</span> Clear All
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </Card>
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
@@ -494,108 +531,146 @@ export default function StudentMarksPage() {
                                 </CardContent>
                             </Card>
                         ) : (
-                            <>
-                                {students.map((student) => {
+                            <div className="space-y-4">
+                                {students.map((student, index) => {
                                     const isExpanded = expandedStudents.has(student.studentId);
+                                    
+                                    const getGradeAndStatus = (percentage: number) => {
+                                        if (percentage >= 90) return { grade: 'A', status: 'EXCELLENT', color: 'text-emerald-500', badge: 'bg-emerald-50 text-emerald-600 border border-emerald-100', bar: 'bg-emerald-500' };
+                                        if (percentage >= 80) return { grade: 'B+', status: 'CONSISTENT', color: 'text-emerald-400', badge: 'bg-emerald-50 text-emerald-600 border border-emerald-100', bar: 'bg-emerald-400' };
+                                        if (percentage >= 70) return { grade: 'B', status: 'GOOD', color: 'text-blue-500', badge: 'bg-blue-50 text-blue-600 border border-blue-100', bar: 'bg-blue-500' };
+                                        if (percentage >= 60) return { grade: 'C', status: 'AVERAGE', color: 'text-yellow-600', badge: 'bg-yellow-50 text-yellow-600 border border-yellow-100', bar: 'bg-yellow-500' };
+                                        if (percentage >= 50) return { grade: 'D', status: 'NEEDS FOCUS', color: 'text-orange-500', badge: 'bg-orange-50 text-orange-600 border border-orange-100', bar: 'bg-orange-500' };
+                                        return { grade: 'F', status: 'CRITICAL', color: 'text-rose-500', badge: 'bg-rose-50 text-rose-600 border border-rose-100', bar: 'bg-rose-500' };
+                                    };
+
+                                    const uiData = getGradeAndStatus(student.overallPercentage);
+
                                     return (
-                                        <Card key={student.studentId} variant="elevated">
-                                            <CardContent className="p-4">
-                                                {/* Header - Always Visible */}
-                                                <div
-                                                    className="flex items-start justify-between cursor-pointer"
-                                                    onClick={() => toggleStudent(student.studentId)}
-                                                >
-                                                    <div className="flex-1">
-                                                        <p className="font-semibold text-foreground">{student.studentName}</p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Roll: {student.rollNumber} • {student.className}
-                                                        </p>
+                                        <Card key={student.studentId} className="overflow-hidden border-0 shadow-sm bg-white">
+                                            {/* Always Visible Header */}
+                                            <div
+                                                className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/50 transition-colors"
+                                                onClick={() => toggleStudent(student.studentId)}
+                                            >
+                                                {/* Left Section - Avatar & Details */}
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-slate-200 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm flex items-center justify-center text-lg font-bold text-slate-500">
+                                                        {student.studentName.charAt(0)}
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge
-                                                            variant={
-                                                                student.overallPercentage >= 75 ? 'success' :
-                                                                    student.overallPercentage >= 50 ? 'warning' :
-                                                                        'destructive'
-                                                            }
-                                                        >
-                                                            {student.overallPercentage.toFixed(1)}%
-                                                        </Badge>
-                                                        {isExpanded ? (
-                                                            <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                                                        ) : (
-                                                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                                                        )}
+                                                    <div>
+                                                        <h4 className="text-[15px] font-bold text-slate-900 leading-tight">
+                                                            {student.studentName}
+                                                        </h4>
+                                                        <p className="text-[12px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">
+                                                            ROLL #{student.rollNumber || 'N/A'} {student.className && `• ${student.className}`}
+                                                        </p>
                                                     </div>
                                                 </div>
 
-                                                {/* Expandable Details */}
-                                                {isExpanded && (
-                                                    <div className="mt-4 space-y-3">
-                                                        {/* Subject-wise breakdown */}
-                                                        <div className="space-y-2">
-                                                            <p className="text-xs font-semibold text-muted-foreground uppercase">Subject Details</p>
-                                                            {Object.values(student.subjectMarks).map((subject: SubjectMark, idx: number) => (
-                                                                <div key={idx} className="bg-muted/30 rounded-lg p-3">
-                                                                    <div className="flex items-center justify-between mb-2">
-                                                                        <span className="font-medium text-foreground">{subject.subjectName}</span>
-                                                                        <Badge
-                                                                            variant="outline"
-                                                                            className={
-                                                                                subject.percentage >= 75 ? 'border-success text-success' :
-                                                                                    subject.percentage >= 50 ? 'border-warning text-warning' :
-                                                                                        'border-destructive text-destructive'
-                                                                            }
-                                                                        >
-                                                                            {subject.percentage.toFixed(1)}%
-                                                                        </Badge>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                                                        <div>
-                                                                            <p className="text-xs text-muted-foreground">Obtained</p>
-                                                                            <p className="font-semibold">{subject.obtained}</p>
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="text-xs text-muted-foreground">Total</p>
-                                                                            <p className="font-semibold">{subject.total}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
+                                                {/* Middle & Right Sections */}
+                                                <div className="flex flex-wrap md:flex-nowrap items-center gap-6 md:gap-12">
+                                                    {/* Performance */}
+                                                    <div className="flex flex-col min-w-[100px]">
+                                                        <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">
+                                                            PERFORMANCE
+                                                        </span>
+                                                        <span className={`text-[14px] font-bold ${uiData.color}`}>
+                                                            {uiData.grade} ({student.overallPercentage.toFixed(1)}%)
+                                                        </span>
+                                                    </div>
 
-                                                        {/* Total */}
-                                                        <div className="pt-3 border-t border-border">
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="font-semibold text-foreground flex items-center gap-1">
-                                                                    <Award className="w-4 h-4" />
-                                                                    Overall Total
-                                                                </span>
-                                                                <span className="font-bold text-primary text-lg">
-                                                                    {student.totalObtained}/{student.totalMarks}
-                                                                </span>
-                                                            </div>
+                                                    {/* Status */}
+                                                    <div className="flex flex-col min-w-[90px]">
+                                                        <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">
+                                                            STATUS
+                                                        </span>
+                                                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-sm w-fit ${uiData.badge}`}>
+                                                            {uiData.status}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Rank & Toggle */}
+                                                    <div className="flex items-center gap-5 min-w-[100px] justify-between">
+                                                        <div className="flex flex-col items-center flex-1">
+                                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">
+                                                                RANK
+                                                            </span>
+                                                            <span className="text-[13px] font-bold text-slate-800">
+                                                                #{String(index + 1).padStart(2, '0')} <span className="text-slate-400 font-semibold">/ {totalStats.total_students}</span>
+                                                            </span>
+                                                        </div>
+                                                        <div className="w-8 h-8 flex items-center justify-center text-slate-400">
+                                                            {isExpanded ? (
+                                                                <ChevronUp className="w-5 h-5" />
+                                                            ) : (
+                                                                <ChevronDown className="w-5 h-5" />
+                                                            )}
                                                         </div>
                                                     </div>
-                                                )}
-                                            </CardContent>
+                                                </div>
+                                            </div>
+
+                                            {/* Expandable Details */}
+                                            {isExpanded && (
+                                                <div className="bg-slate-50/80 border-t border-slate-100 p-6">
+                                                    {/* Grid of Subjects */}
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                        {Object.values(student.subjectMarks).map((subject: SubjectMark, idx: number) => {
+                                                            const subjUi = getGradeAndStatus(subject.percentage);
+                                                            
+                                                            return (
+                                                                <div key={idx} className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3">
+                                                                    <div className="flex items-end justify-between">
+                                                                        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider truncate max-w-[60%]">
+                                                                            {subject.subjectName}
+                                                                        </span>
+                                                                        <div className="flex items-baseline gap-0.5">
+                                                                            <span className={`text-[16px] font-bold ${subjUi.color}`}>
+                                                                                {subject.obtained}
+                                                                            </span>
+                                                                            <span className="text-[13px] text-slate-400 font-bold">
+                                                                                /{subject.total}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    {/* Custom Progress Bar */}
+                                                                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mt-1">
+                                                                        <div 
+                                                                            className={`h-full rounded-full ${subjUi.bar}`}
+                                                                            style={{ width: `${Math.min(100, Math.max(0, subject.percentage))}%` }}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    <div className="mt-5 flex justify-end">
+                                                        <Link to={`/students/${student.studentId}`} className="text-[13px] font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1.5 transition-colors">
+                                                            View Full Analytics Report <span className="text-lg leading-none">&rarr;</span>
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </Card>
                                     );
                                 })}
 
                                 {/* Load More Button */}
                                 {hasMore && (
-                                    <div className="flex justify-center pt-4">
+                                    <div className="flex justify-center pt-2">
                                         <button
                                             onClick={loadMore}
                                             disabled={loadingMore}
-                                            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="px-6 py-2.5 bg-white border border-slate-200 text-[13px] font-bold text-slate-700 rounded-lg shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                         >
                                             {loadingMore ? 'Loading...' : 'Load More'}
                                         </button>
                                     </div>
                                 )}
-                            </>
+                            </div>
                         )}
                     </TabsContent>
 

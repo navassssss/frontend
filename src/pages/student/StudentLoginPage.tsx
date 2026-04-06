@@ -1,272 +1,196 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Eye, EyeOff, ArrowRight, Trophy, ArrowLeft, User, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
 import { toast } from 'sonner';
 
 export default function StudentLoginPage() {
-  const navigate = useNavigate();
-  const { login, isAuthenticated } = useStudentAuth();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login, isAuthenticated } = useStudentAuth();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-  React.useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/student/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
+    React.useEffect(() => {
+        if (isAuthenticated) navigate('/student/dashboard');
+    }, [isAuthenticated, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username.trim() || !password.trim()) {
-      toast.error('Please enter both username and password');
-      return;
-    }
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!username.trim() || !password.trim()) {
+            toast.error('Please enter both username and password');
+            return;
+        }
+        setIsLoading(true);
+        const success = await login(username, password);
+        setIsLoading(false);
+        if (success) {
+            toast.success('Welcome back!');
+            navigate('/student/dashboard');
+        } else {
+            toast.error('Invalid credentials');
+        }
+    };
 
-    setIsLoading(true);
-    const success = await login(username, password);
-    setIsLoading(false);
+    return (
+        <div className="min-h-screen bg-[#f6f9f8] flex items-center justify-center p-4 relative overflow-hidden">
 
-    if (success) {
-      toast.success('Welcome back!');
-      navigate('/student/dashboard');
-    } else {
-      toast.error('Invalid credentials');
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large Circle - Top Right */}
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-white/10 rounded-full"></div>
-
-        {/* Geometric Shapes - Left Side */}
-        <div className="absolute top-20 left-12 space-y-4">
-          {/* Semi Circle */}
-          <div className="w-24 h-12 bg-white/20 rounded-t-full"></div>
-          {/* Dotted Grid */}
-          <div className="grid grid-cols-5 gap-2">
-            {[...Array(15)].map((_, i) => (
-              <div key={i} className="w-1.5 h-1.5 bg-white/30 rounded-full"></div>
-            ))}
-          </div>
-          {/* Vertical Pills */}
-          <div className="flex gap-3">
-            <div className="w-6 h-32 bg-white/20 rounded-full"></div>
-            <div className="w-6 h-24 bg-white/15 rounded-full mt-4"></div>
-          </div>
-        </div>
-
-        {/* Floating Elements - Top */}
-        <div className="absolute top-16 right-1/4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-full"></div>
-            <div className="w-6 h-6 bg-white/15 rounded-full"></div>
-          </div>
-        </div>
-
-        {/* Bottom Left Decorations */}
-        <div className="absolute bottom-20 left-16 flex items-end gap-3">
-          <div className="w-3 h-3 bg-cyan-300/40 rounded-full"></div>
-          <div className="space-y-2">
-            <div className="grid grid-cols-4 gap-1.5">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="w-1.5 h-1.5 bg-white/25 rounded-full"></div>
-              ))}
+            {/* Decorative blobs */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute -top-48 -right-48 w-[500px] h-[500px] rounded-full bg-[#008f6c]/8" />
+                <div className="absolute -bottom-48 -left-48 w-[400px] h-[400px] rounded-full bg-emerald-100/50" />
+                <div className="absolute top-1/3 left-1/4 w-3 h-3 bg-[#008f6c]/20 rounded-full" />
+                <div className="absolute top-1/4 right-1/3 w-2 h-2 bg-emerald-300/30 rounded-full" />
             </div>
-          </div>
-        </div>
 
-        {/* Bottom Right - Large Decorative Circle */}
-        <div className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3">
-          <div className="relative w-80 h-80">
-            {/* Outer ring */}
-            <div className="absolute inset-0 border-8 border-white/20 rounded-full"></div>
-            {/* Inner gradient circle */}
-            <div className="absolute inset-12 bg-gradient-to-br from-cyan-300/30 to-blue-400/30 rounded-full"></div>
-            {/* Small circles on ring */}
-            <div className="absolute top-8 right-1/2 w-6 h-6 bg-cyan-300/50 rounded-full"></div>
-            <div className="absolute bottom-16 left-8 w-5 h-5 bg-white/30 rounded-full"></div>
-          </div>
-        </div>
-
-        {/* Cross/X shape */}
-        <div className="absolute bottom-32 left-1/3">
-          <div className="relative w-8 h-8">
-            <div className="absolute inset-0 flex items-center justify-center text-white/20 text-3xl font-light">×</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
-        {/* Left Side - Text Content */}
-        <div className="text-white space-y-6 hidden lg:block animate-in fade-in slide-in-from-left duration-700">
-          <div className="inline-block">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/30">
-                <GraduationCap className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">DHIC eGov</h2>
-                <p className="text-white/70 text-sm">Student Portal</p>
-              </div>
-            </div>
-          </div>
-
-          <h1 className="text-6xl font-bold leading-tight">
-            Your Success<br />
-            Journey
-          </h1>
-          <p className="text-xl text-white/80 max-w-md">
-            Track your achievements, view your marks, and compete on the leaderboard
-          </p>
-        </div>
-
-        {/* Right Side - Login Card */}
-        <div className="flex justify-center lg:justify-end animate-in fade-in slide-in-from-right duration-700">
-          <Card className="w-full max-w-md bg-white shadow-2xl border-0 relative">
-            {/* Back Button - Mobile */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="absolute -top-12 left-0 text-white hover:bg-white/10 lg:hidden"
+            {/* Back to home */}
+            <button
+                onClick={() => navigate('/')}
+                className="absolute top-5 left-5 flex items-center gap-1.5 text-[11px] font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
+                <ArrowLeft className="w-3.5 h-3.5" /> Home
+            </button>
 
-            <CardContent className="p-8 lg:p-10">
-              {/* Logo - Mobile */}
-              <div className="lg:hidden text-center mb-8">
-                <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <GraduationCap className="w-10 h-10 text-primary" />
-                </div>
-                <h2 className="text-2xl font-bold">DHIC eGov</h2>
-                <p className="text-muted-foreground">Student Portal</p>
-              </div>
+            <div className="w-full max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
 
-              {/* Welcome Text */}
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2">Hello! Welcome back</h3>
-                <p className="text-muted-foreground">Sign in to continue</p>
-              </div>
+                {/* Left – branding */}
+                <div className="hidden lg:flex flex-col gap-8 animate-in fade-in slide-in-from-left duration-700">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-[#008f6c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#008f6c]/30">
+                            <GraduationCap className="w-7 h-7 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-800">DHIC Portal</h2>
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Students Portal</p>
+                        </div>
+                    </div>
 
-              {/* Login Form */}
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Username</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Enter your username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="pl-10 h-12 bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-primary"
-                    />
-                  </div>
-                </div>
+                    <div>
+                        <h1 className="text-[44px] font-black text-slate-800 leading-[1.1] tracking-tight">
+                            Your Success<br />Journey<br />
+                            <span className="text-[#008f6c]">Starts Here.</span>
+                        </h1>
+                        <p className="mt-5 text-slate-500 font-medium leading-relaxed max-w-sm">
+                            Track your achievements, view your marks, and compete on the leaderboard with fellow scholars.
+                        </p>
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 h-12 bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-primary"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
+                    {/* Stats teasers */}
+                    <div className="flex gap-4">
+                        {[
+                            { label: 'Active Students', value: '500+' },
+                            { label: 'Achievements', value: '2.4K+' },
+                            { label: 'Merit Points', value: '∞' },
+                        ].map(s => (
+                            <div key={s.label} className="bg-white rounded-2xl px-5 py-4 border border-slate-100 shadow-sm text-center">
+                                <p className="text-xl font-black text-[#008f6c]">{s.value}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{s.label}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                    <span className="text-muted-foreground">Remember me</span>
-                  </label>
+                {/* Right – login card */}
+                <div className="animate-in fade-in slide-in-from-right duration-700">
+                    <div className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,143,108,0.08)] border border-slate-100 p-8 lg:p-10">
+
+                        {/* Mobile logo */}
+                        <div className="lg:hidden text-center mb-8">
+                            <div className="w-16 h-16 bg-[#008f6c] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#008f6c]/25">
+                                <GraduationCap className="w-8 h-8 text-white" />
+                            </div>
+                            <h2 className="text-xl font-black text-slate-800">DHIC Portal</h2>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Students Portal</p>
+                        </div>
+
+                        <div className="mb-8">
+                            <h3 className="text-2xl font-black text-slate-800">Hello! Welcome back 👋</h3>
+                            <p className="text-sm text-slate-400 font-medium mt-1">Sign in to continue your journey</p>
+                        </div>
+
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            {/* Username */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Username</label>
+                                <div className="relative">
+                                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter your username"
+                                        value={username}
+                                        onChange={e => setUsername(e.target.value)}
+                                        className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#008f6c]/30 focus:border-[#008f6c] transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Password */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                        className="w-full h-12 pl-10 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#008f6c]/30 focus:border-[#008f6c] transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <label className="flex items-center gap-2 cursor-pointer pt-1">
+                                <input type="checkbox" className="rounded border-slate-300 accent-[#008f6c]" />
+                                <span className="text-sm text-slate-500 font-medium">Remember me</span>
+                            </label>
+
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full h-12 rounded-xl bg-[#008f6c] hover:bg-[#007a5c] text-white font-black text-sm flex items-center justify-center gap-2 transition-colors shadow-sm shadow-[#008f6c]/30 disabled:opacity-60 mt-2"
+                            >
+                                {isLoading
+                                    ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    : <><span>Sign In</span><ArrowRight className="w-4 h-4" /></>
+                                }
+                            </button>
+                        </form>
+
+                        {/* Divider */}
+                        <div className="flex items-center gap-3 my-6">
+                            <div className="h-px flex-1 bg-slate-100" />
+                            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">or</span>
+                            <div className="h-px flex-1 bg-slate-100" />
+                        </div>
+
+                        {/* Leaderboard */}
+                        <button
+                            onClick={() => navigate('/leaderboard')}
+                            className="w-full h-11 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors mb-5"
+                        >
+                            <Trophy className="w-4 h-4 text-[#008f6c]" /> View Leaderboard
+                        </button>
+
+                        <p className="text-center text-sm text-slate-400">
+                            Are you staff?{' '}
+                            <button
+                                onClick={() => navigate('/staff/login')}
+                                className="text-[#008f6c] font-black hover:underline"
+                            >
+                                Staff Portal →
+                            </button>
+                        </p>
+                    </div>
                 </div>
-
-                <Button
-                  type="submit"
-                  className="w-full h-12 text-base font-semibold"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      Login
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-muted-foreground">or</span>
-                </div>
-              </div>
-
-              {/* Leaderboard Link */}
-              <Button
-                variant="outline"
-                className="w-full h-11 mb-4"
-                onClick={() => navigate('/leaderboard')}
-              >
-                <Trophy className="w-5 h-5 mr-2" />
-                View Leaderboard
-              </Button>
-
-              {/* Staff Portal Link */}
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  Are you a staff?{' '}
-                  <button
-                    onClick={() => navigate('/staff/login')}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Staff Portal
-                  </button>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
         </div>
-      </div>
-
-      {/* Back Button - Desktop */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate('/')}
-        className="absolute top-6 left-6 text-white hover:bg-white/10 hidden lg:flex"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Home
-      </Button>
-    </div>
-  );
+    );
 }

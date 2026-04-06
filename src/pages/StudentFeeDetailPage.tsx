@@ -481,7 +481,7 @@ const StudentFeeDetailPage: React.FC = () => {
     }
 
     return (
-        <AppLayout title="Student Fee Details" showBack>
+        <AppLayout title="Student Donation Details" showBack>
             <div className="space-y-4">
                 {/* Back Button for Desktop */}
                 <Button
@@ -491,7 +491,7 @@ const StudentFeeDetailPage: React.FC = () => {
                     className="hidden lg:flex items-center gap-1 -ml-2"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back to Fee Management
+                    Back to Monthly Donations
                 </Button>
 
                 {/* Overview Card */}
@@ -623,7 +623,7 @@ const StudentFeeDetailPage: React.FC = () => {
                         <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <Edit className="w-4 h-4 mr-2" />
-                                Adjust Fee
+                                Adjust Donation
                             </Button>
                         </DialogTrigger>
                         <DialogContent>

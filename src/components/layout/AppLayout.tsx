@@ -2,6 +2,9 @@ import { ReactNode } from 'react';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
+import { usePWA } from '@/hooks/usePWA';
+import { PWAPrompt } from '../pwa/PWAPrompt';
+
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -13,6 +16,8 @@ interface AppLayoutProps {
 export function AppLayout({ children, title, hideNav = false, showBack = false }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
+      <PWAPrompt />
+
       {/* Mobile Header - Hidden on Desktop */}
       <div className="lg:hidden">
         <Header title={title} showBack={showBack} />

@@ -110,16 +110,16 @@ export default function LoginPage() {
                 <GraduationCap className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">DHIC eGov</h2>
+                <h2 className="text-2xl font-bold">DHIC Portal</h2>
                 <p className="text-white/70 text-sm">Staff Portal</p>
               </div>
             </div>
           </div>
 
-          <h1 className="text-6xl font-bold leading-tight">
+          {/* <h1 className="text-6xl font-bold leading-tight">
             Adventure<br />
             start here
-          </h1>
+          </h1> */}
           <p className="text-xl text-white/80 max-w-md">
             Manage your duties, track reports, and collaborate with your team efficiently
           </p>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, Briefcase, CheckSquare, RotateCcw, Plus, X, Calendar, User as UserIcon, Edit2 } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Briefcase, CheckSquare, RotateCcw, Plus, X, Calendar, User as UserIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,22 +22,6 @@ export default function TeacherDetailPage() {
   const [showDutyModal, setShowDutyModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [newTask, setNewTask] = useState({ title: "", dueDate: "", dutyId: "" });
-  
-  const [showSubjectModal, setShowSubjectModal] = useState(false);
-  const [allClasses, setAllClasses] = useState<any[]>([]);
-  const [newSubject, setNewSubject] = useState({ name: '', code: '', class_id: '', final_max_marks: '50' });
-  
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editData, setEditData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    department: '',
-  });
-
-  const [permissionsList, setPermissionsList] = useState<any[]>([]);
-  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 
   const loadTeacher = () => {
     Promise.all([
@@ -55,17 +39,8 @@ export default function TeacherDetailPage() {
           totalTasks: tasksRes.data.length
         });
         setDuties(dutiesRes.data);
-        setEditData({
-          name: teacherRes.data.name || '',
-          email: teacherRes.data.email || '',
-          phone: teacherRes.data.phone || '',
-          department: teacherRes.data.department || ''
-        });
       })
-      .catch(() => toast.error("Failed to load teacher"));
-      
-    api.get('/attendance/classes').then(res => setAllClasses(res.data)).catch(console.error);
-    api.get('/permissions').then(res => setPermissionsList(res.data)).catch(console.error);
+      .catch(() => toast.error("Failed to load teacher"))
   };
 
   useEffect(loadTeacher, [id]);
@@ -104,36 +79,6 @@ export default function TeacherDetailPage() {
       .finally(() => setShowDeactivateModal(false));
   };
 
-  const handleEditTeacher = () => {
-    if (!editData.name || !editData.email || !editData.department) return toast.error("Please fill in required fields");
-    
-    api.put(`/teachers/${teacher.id}`, editData)
-      .then(() => {
-        toast.success("Profile updated");
-        loadTeacher();
-        setShowEditModal(false);
-      })
-      .catch(err => {
-        console.error(err);
-        toast.error("Failed to update profile");
-      });
-  };
-
-  const handleOpenPermissions = () => {
-    setSelectedPermissions(teacher.permissions?.map((p: any) => p.name) || []);
-    setShowPermissionsModal(true);
-  };
-
-  const handleSavePermissions = () => {
-    api.post(`/teachers/${teacher.id}/sync-permissions`, { permissions: selectedPermissions })
-      .then(res => {
-         toast.success("Permissions updated successfully!");
-         setTeacher({ ...teacher, permissions: res.data.permissions });
-         setShowPermissionsModal(false);
-      })
-      .catch(err => toast.error(err.response?.data?.message || "Failed to update permissions"));
-  };
-
 
   const handleAssignTask = () => {
     if (!newTask.title || !newTask.dueDate) return toast.error("Enter title & date");
@@ -153,24 +98,6 @@ export default function TeacherDetailPage() {
         loadTeacher();
       })
       .catch(() => toast.error("Error creating task"));
-  };
-
-  const handleAssignSubject = () => {
-    if (!newSubject.name || !newSubject.code || !newSubject.class_id) {
-        return toast.error("Please fill all subject details");
-    }
-
-    api.post('/subjects', {
-        ...newSubject,
-        teacher_id: teacher.id
-    })
-    .then(() => {
-        toast.success("Subject created & assigned successfully!");
-        setShowSubjectModal(false);
-        setNewSubject({ name: '', code: '', class_id: '', final_max_marks: '50' });
-        loadTeacher();
-    })
-    .catch((err) => toast.error(err.response?.data?.message || "Failed to create subject"));
   };
 
   const [showAllReports, setShowAllReports] = useState(false);
@@ -235,18 +162,11 @@ export default function TeacherDetailPage() {
                 </div>
               </div>
 
-              {/* Desktop deactivate/edit */}
-              {isPrincipal && (
-                <div className="hidden md:flex flex-col gap-2 shrink-0">
-                  <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
-                    <Edit2 className="w-4 h-4 mr-1.5" /> Edit Profile
-                  </Button>
-                  {teacher.role === 'teacher' && (
-                    <Button variant="destructive" size="sm" onClick={() => setShowDeactivateModal(true)}>
-                      Deactivate
-                    </Button>
-                  )}
-                </div>
+              {/* Desktop deactivate */}
+              {teacher.role === 'teacher' && (
+                <Button variant="destructive" size="sm" onClick={() => setShowDeactivateModal(true)} className="hidden md:flex shrink-0">
+                  Deactivate
+                </Button>
               )}
             </div>
 
@@ -254,26 +174,26 @@ export default function TeacherDetailPage() {
             <div className="flex items-center gap-2 mt-4">
               {isPrincipal && (
                 <Button
-                  variant="outline"
-                  className="flex-1 h-9 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border-border hover:bg-muted bg-background"
-                  onClick={handleOpenPermissions}
+                  variant={teacher.can_review_achievements ? "default" : "outline"}
+                  className={`flex-1 h-9 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${teacher.can_review_achievements ? 'bg-success hover:bg-success/90 text-success-foreground border-transparent' : 'border-border hover:bg-muted bg-background'}`}
+                  onClick={() => {
+                    api.post(`/teachers/${teacher.id}/toggle-review-permission`)
+                      .then(res => {
+                        setTeacher({ ...teacher, can_review_achievements: res.data.can_review_achievements });
+                        toast.success(`Review permission ${res.data.can_review_achievements ? 'granted' : 'revoked'}`);
+                      })
+                      .catch(() => toast.error('Failed to update permission'));
+                  }}
                 >
                   <Briefcase className="w-3.5 h-3.5" />
-                  Manage Permissions
+                  {teacher.can_review_achievements ? 'Review Access Granted' : 'Grant Achievement Access'}
                 </Button>
               )}
-              {/* Mobile actions */}
-              {isPrincipal && (
-                <div className="md:hidden flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)} className="h-9 px-3 text-xs w-full">
-                    Edit Profile
-                  </Button>
-                  {teacher.role === 'teacher' && (
-                    <Button variant="destructive" size="sm" onClick={() => setShowDeactivateModal(true)} className="h-9 px-3 text-xs w-full">
-                      Deactivate
-                    </Button>
-                  )}
-                </div>
+              {/* Mobile deactivate */}
+              {teacher.role === 'teacher' && (
+                <Button variant="destructive" size="sm" onClick={() => setShowDeactivateModal(true)} className="md:hidden h-9 px-3 text-xs">
+                  Deactivate
+                </Button>
               )}
             </div>
           </div>
@@ -310,14 +230,9 @@ export default function TeacherDetailPage() {
         <div className="space-y-8">
 
           {/* Class & Subject Operations */}
-          <div className="animate-slide-up">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-foreground text-lg">Subjects & CCE Progress</h3>
-              <button onClick={() => setShowSubjectModal(true)} className="w-6 h-6 rounded-full bg-success text-white flex items-center justify-center hover:bg-success/90 transition-colors shadow-sm">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            {teacher.subjects && teacher.subjects.length > 0 ? (
+          {teacher.subjects && teacher.subjects.length > 0 && (
+            <div className="animate-slide-up">
+              <h3 className="font-bold text-foreground mb-4 text-lg">Subjects & CCE Progress</h3>
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
                 {teacher.subjects.map((sub: any) => (
                    <div key={sub.id} className="p-4 bg-card rounded-2xl shadow-sm border border-border">
@@ -346,12 +261,8 @@ export default function TeacherDetailPage() {
                    </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-xs font-medium text-muted-foreground py-4 border border-border/50 bg-card rounded-xl px-4">
-                No subjects assigned to this teacher yet.
-              </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Assigned Duties */}
           <div className="animate-slide-up" style={{ animationDelay: '0.15s' }}>
@@ -669,127 +580,6 @@ export default function TeacherDetailPage() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Edit Profile Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm animate-fade-in p-4">
-          <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scale-in rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-foreground">Edit Profile</h3>
-                <Button variant="ghost" size="icon-sm" onClick={() => setShowEditModal(false)}>
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Name <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="Enter teacher name"
-                    value={editData.name}
-                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Email <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="Enter email address"
-                    value={editData.email}
-                    onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Department <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="e.g. Science, Arabic..."
-                    value={editData.department}
-                    onChange={(e) => setEditData({ ...editData, department: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Phone
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="Enter phone number"
-                    value={editData.phone}
-                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 mt-6">
-                    <Button variant="ghost" onClick={() => setShowEditModal(false)}>
-                      Cancel
-                    </Button>
-                    <Button variant="touch" onClick={handleEditTeacher}>
-                      Save Changes
-                    </Button>
-                </div>
-              </div>
-
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Permissions Modal */}
-      {showPermissionsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm animate-fade-in p-4">
-          <Card className="w-full max-w-md max-h-[90vh] overflow-hidden animate-scale-in rounded-2xl flex flex-col">
-            <div className="p-6 pb-4 border-b border-border/50 flex items-center justify-between shrink-0">
-              <div>
-                 <h3 className="text-lg font-bold text-foreground">Manage Permissions</h3>
-                 <p className="text-xs text-muted-foreground mt-0.5">Assign access roles for {teacher.name}</p>
-              </div>
-              <Button variant="ghost" size="icon-sm" onClick={() => setShowPermissionsModal(false)}>
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto min-h-0 flex-1 space-y-3">
-               {permissionsList.length === 0 && <p className="text-center text-muted-foreground text-sm py-4">No permissions available.</p>}
-               {permissionsList.map((perm) => (
-                 <label key={perm.id} className="flex items-start gap-3 p-4 bg-muted/30 border border-border/50 rounded-xl cursor-pointer hover:bg-muted/50 transition-colors">
-                    <input 
-                       type="checkbox" 
-                       className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                       checked={selectedPermissions.includes(perm.name)}
-                       onChange={(e) => {
-                          if (e.target.checked) setSelectedPermissions([...selectedPermissions, perm.name]);
-                          else setSelectedPermissions(selectedPermissions.filter(p => p !== perm.name));
-                       }}
-                    />
-                    <div>
-                       <p className="text-sm font-bold text-foreground leading-none">{perm.label}</p>
-                       <p className="text-xs text-muted-foreground mt-1.5">{perm.module} Module Access</p>
-                    </div>
-                 </label>
-               ))}
-            </div>
-
-            <div className="p-6 pt-4 border-t border-border/50 flex justify-end gap-3 shrink-0">
-               <Button variant="ghost" onClick={() => setShowPermissionsModal(false)}>
-                 Cancel
-               </Button>
-               <Button variant="touch" onClick={handleSavePermissions}>
-                 Save Permissions
-               </Button>
-            </div>
           </Card>
         </div>
       )}

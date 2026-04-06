@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { StudentAuthProvider, useStudentAuth } from "@/contexts/StudentAuthContext";
+import { PWAPrompt } from "@/components/pwa/PWAPrompt";
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
@@ -31,7 +32,12 @@ import ReportsPage from "./pages/ReportsPage";
 import ReportDetailPage from "./pages/ReportDetailPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import StudentAchievementReviewPage from "./pages/StudentAchievementReviewPage";
+import AchievementSettingsPage from "./pages/AchievementSettingsPage";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
+import CreateAnnouncementPage from "./pages/CreateAnnouncementPage";
+import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
 import StudentsPage from "./pages/StudentsPage";
+import AddStudentsPage from "./pages/AddStudentsPage";
 import StudentDetailPage from "./pages/StudentDetailPage";
 import StudentAttendanceOverviewPage from "./pages/StudentAttendanceOverviewPage";
 import ClassesPage from "./pages/ClassesPage";
@@ -67,6 +73,7 @@ import PublicLeaderboardPage from "./pages/student/PublicLeaderboardPage";
 import StudentCCEPage from "./pages/student/StudentCCEPage";
 import StudentAttendancePage from "./pages/student/StudentAttendancePage";
 import StudentFeePage from "./pages/student/StudentFeePage";
+import StudentAnnouncementsPage from "./pages/student/StudentAnnouncementsPage";
 
 const queryClient = new QueryClient();
 
@@ -220,6 +227,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/students/new"
+        element={
+          <ProtectedRoute>
+            <AddStudentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/students/:id"
         element={
           <ProtectedRoute>
@@ -328,6 +343,38 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <StudentAchievementReviewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student-achievements/settings"
+        element={
+          <ProtectedRoute>
+            <AchievementSettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/announcements"
+        element={
+          <ProtectedRoute>
+            <AnnouncementsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/announcements/new"
+        element={
+          <ProtectedRoute>
+            <CreateAnnouncementPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/announcements/:id"
+        element={
+          <ProtectedRoute>
+            <AnnouncementDetailPage />
           </ProtectedRoute>
         }
       />
@@ -517,24 +564,40 @@ function AppRoutes() {
           </StudentProtectedRoute>
         }
       />
+      <Route
+        path="/student/announcements"
+        element={
+          <StudentProtectedRoute>
+            <StudentAnnouncementsPage />
+          </StudentProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
 
+const router = createBrowserRouter([
+  {
+    path: "*",
+    element: (
+      <AuthProvider>
+        <StudentAuthProvider>
+          <AppRoutes />
+        </StudentAuthProvider>
+      </AuthProvider>
+    ),
+  },
+]);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <StudentAuthProvider>
-            <AppRoutes />
-          </StudentAuthProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      <PWAPrompt />
+      <RouterProvider router={router} />
     </TooltipProvider>
   </QueryClientProvider>
 );

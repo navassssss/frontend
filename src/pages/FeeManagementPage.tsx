@@ -246,7 +246,7 @@ const FeeManagementPage: React.FC = () => {
     };
 
     return (
-        <AppLayout title="Fee Management" showBack={true}>
+        <AppLayout title="Monthly Donations" showBack={true}>
             <div className="space-y-4 p-4 pb-20 max-w-5xl mx-auto">
                 {/* Header Stats - Clean Minimal Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

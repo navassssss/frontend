@@ -6,7 +6,8 @@ import {
     Lock,
     Unlock,
     Edit,
-    Trash2
+    Trash2,
+    ChevronDown
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ interface Subject {
     teacherId: number;
     finalMaxMarks: number;
     isLocked: boolean;
+    completion_percent?: number;
 }
 
 interface ClassRoom {
@@ -59,6 +61,7 @@ export default function SubjectsPage() {
     const [classes, setClasses] = useState<ClassRoom[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [loading, setLoading] = useState(true);
+    const [collapsedClasses, setCollapsedClasses] = useState<string[]>([]);
     const [showDialog, setShowDialog] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -109,6 +112,16 @@ export default function SubjectsPage() {
         }
     };
 
+    const handleAssignTeacher = async (subjectId: string, teacherId: string) => {
+        try {
+            await api.put(`/subjects/${subjectId}`, { teacher_id: teacherId });
+            toast.success('Faculty updated successfully');
+            loadData();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to update faculty');
+        }
+    };
+
     const toggleLock = async (id: string) => {
         try {
             await api.post(`/subjects/${id}/toggle-lock`);
@@ -119,67 +132,158 @@ export default function SubjectsPage() {
         }
     };
 
+    const toggleClassCollapse = (className: string) => {
+        setCollapsedClasses(prev => 
+            prev.includes(className) ? prev.filter(c => c !== className) : [...prev, className]
+        );
+    };
+
+    const groupedSubjects = subjects.reduce((acc, subject) => {
+        const className = subject.className || 'Unassigned';
+        if (!acc[className]) acc[className] = [];
+        acc[className].push(subject);
+        return acc;
+    }, {} as Record<string, Subject[]>);
+
     return (
         <AppLayout title="Subjects" showBack>
-            <div className="p-4 space-y-6 pb-24">
-                {/* Create Button */}
-                <Button
-                    variant="touch"
-                    className="w-full"
-                    onClick={() => setShowDialog(true)}
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Create Subject
-                </Button>
+            <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-8 pb-24">
+                {/* Header & Create Button */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+                    <div>
+                        <h2 className="text-xl font-bold text-foreground">Subjects Directory</h2>
+                        <p className="text-sm text-muted-foreground">Manage institutional syllabus structures</p>
+                    </div>
+                    <Button
+                        className="w-full sm:w-auto hover:scale-105 transition-transform rounded-xl bg-[#008f6c] hover:bg-[#007a5c]"
+                        onClick={() => setShowDialog(true)}
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Subject
+                    </Button>
+                </div>
 
-                {/* Subjects List */}
-                <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                        All Subjects
-                    </h3>
+                {/* Grouped Subjects List */}
+                <div className="space-y-10">
                     {loading ? (
-                        <p className="text-center text-muted-foreground">Loading...</p>
+                        <div className="text-center py-12"><p className="text-muted-foreground animate-pulse">Loading directory...</p></div>
                     ) : subjects.length === 0 ? (
-                        <Card variant="elevated">
-                            <CardContent className="p-6 text-center">
-                                <BookOpen className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
-                                <p className="text-muted-foreground">No subjects yet</p>
-                            </CardContent>
-                        </Card>
+                        <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <BookOpen className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                            <p className="text-slate-500 font-medium">No subjects found.</p>
+                        </div>
                     ) : (
-                        subjects.map((subject) => (
-                            <Card key={subject.id} variant="elevated">
-                                <CardContent className="p-4">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-semibold text-foreground">{subject.name}</h4>
-                                                <Badge variant="outline">{subject.code}</Badge>
-                                                {subject.isLocked && (
-                                                    <Lock className="w-4 h-4 text-warning" />
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">{subject.className}</p>
-                                            <p className="text-sm text-muted-foreground">Teacher: {subject.teacherName}</p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <Badge variant="outline">Max: {subject.finalMaxMarks}</Badge>
-                                            </div>
+                        Object.entries(groupedSubjects).map(([className, classSubjects], sectionIndex) => {
+                            const isCollapsed = collapsedClasses.includes(className);
+                            return (
+                            <div key={className} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 animate-slide-up" style={{ animationDelay: `${sectionIndex * 0.1}s` }}>
+                                {/* Class Header */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-[#008f6c]/20 text-[#008f6c] flex items-center justify-center font-black text-lg shrink-0">
+                                            {className.slice(0,2).toUpperCase()}
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => toggleLock(subject.id)}
-                                        >
-                                            {subject.isLocked ? (
-                                                <Lock className="w-4 h-4" />
-                                            ) : (
-                                                <Unlock className="w-4 h-4" />
-                                            )}
-                                        </Button>
+                                        <div>
+                                           <h3 className="text-xl font-black text-slate-800 leading-tight">Class {className}</h3>
+                                           <p className="text-[11px] font-black tracking-widest text-[#94a3b8] uppercase mt-0.5">
+                                              {classSubjects.length} SUBJECT{classSubjects.length !== 1 ? 'S' : ''}
+                                           </p>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))
+                                    <div className="flex items-center gap-3">
+                                        <div className="hidden md:flex -space-x-2 mr-2">
+                                            {classSubjects.slice(0, 3).map((sub, i) => (
+                                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-600 shadow-sm relative z-10" style={{ zIndex: 10 - i}}>
+                                                   {sub.teacherName ? sub.teacherName.charAt(0).toUpperCase() : '?'}
+                                                </div>
+                                            ))}
+                                            {classSubjects.length > 3 && (
+                                                <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500 shadow-sm relative z-0">
+                                                   +{classSubjects.length - 3}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button onClick={() => toggleClassCollapse(className)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 transition-colors">
+                                            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Class Subjects Table */}
+                                {!isCollapsed && (
+                                    <div className="mt-8">
+                                        <table className="w-full text-left border-collapse min-w-[600px]">
+                                            <thead>
+                                                <tr>
+                                                    <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">SUBJECT NAME & CODE</th>
+                                                    <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">ASSIGNED FACULTY</th>
+                                                    <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-center">MAX MARKS</th>
+                                                    <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 min-w-[200px]">SYLLABUS PROGRESS</th>
+                                                    <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">ACTIONS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-50">
+                                                {classSubjects.map((subject) => (
+                                                    <tr key={subject.id} className="group hover:bg-slate-50/50 transition-colors">
+                                                        <td className="py-4 px-4">
+                                                            <p className="font-extrabold text-slate-800 text-[14px]">{subject.name}</p>
+                                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{subject.code}</p>
+                                                        </td>
+                                                        <td className="py-4 px-4">
+                                                            <div className="flex items-center gap-2.5">
+                                                                <div className="w-7 h-7 rounded-full bg-[#008f6c] text-white flex items-center justify-center text-[10px] font-bold shadow-sm shrink-0">
+                                                                    {subject.teacherName ? subject.teacherName.charAt(0).toUpperCase() : '?'}
+                                                                </div>
+                                                                <Select 
+                                                                    value={subject.teacherId?.toString() || ""} 
+                                                                    onValueChange={(val) => handleAssignTeacher(subject.id, val)}
+                                                                >
+                                                                    <SelectTrigger className="h-8 border-transparent hover:border-slate-200 bg-transparent hover:bg-slate-50 focus:ring-0 shadow-none px-2 -ml-2 text-[13px] font-bold text-slate-700 w-[160px] cursor-pointer">
+                                                                        <SelectValue placeholder="Assign Faculty" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {teachers.map(t => (
+                                                                            <SelectItem key={t.id} value={t.id.toString()}>
+                                                                                {t.name}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 px-4 text-center">
+                                                            <span className="text-[14px] font-black text-slate-800">{subject.finalMaxMarks}</span>
+                                                        </td>
+                                                        <td className="py-4 px-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                                    <div className="h-full bg-[#008f6c] rounded-full" style={{ width: `${subject.completion_percent || 0}%` }}></div>
+                                                                </div>
+                                                                <span className="text-[11px] font-black text-[#008f6c] w-8">{subject.completion_percent || 0}%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 px-4 text-right">
+                                                            <button 
+                                                                onClick={() => toggleLock(subject.id)} 
+                                                                className="w-8 h-8 rounded-full hover:bg-slate-100 inline-flex items-center justify-center transition-colors shadow-sm bg-white"
+                                                            >
+                                                                {subject.isLocked ? <Lock className="w-3.5 h-3.5 text-rose-500" /> : <Unlock className="w-3.5 h-3.5 text-slate-400" />}
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        
+                                        <div className="text-center pt-5 mt-2 border-t border-slate-50">
+                                            <button className="text-[10px] font-black text-[#008f6c] uppercase tracking-widest hover:text-[#007a5c] transition-colors">
+                                                VIEW ALL {classSubjects.length} SUBJECTS
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )})
                     )}
                 </div>
 

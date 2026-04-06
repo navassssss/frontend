@@ -27,7 +27,8 @@ import {
     ChevronRight,
     Search,
     ArrowUpDown,
-    Download
+    Download,
+    Settings
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
@@ -197,25 +198,34 @@ export default function StudentAchievementReviewPage() {
         <AppLayout title={studentId ? `Achievements` : "Review Achievements"} showBack={!!studentId}>
             <div className="p-4 space-y-6 pb-24 max-w-5xl mx-auto">
                 {/* Back Button & Header */}
-                <div className="flex items-center gap-4">
-                    {studentId && (
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
-                        >
-                            <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
-                        </button>
-                    )}
-                    <div>
-                        <h2 className="text-xl font-bold text-foreground">
-                            {studentId ? toTitleCase(studentName) : 'Achievement Reviews'}
-                        </h2>
-                        {studentId ? (
-                            <p className="text-sm text-muted-foreground">Student Profile & History</p>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">Manage and review student submissions</p>
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        {studentId && (
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
+                            >
+                                <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
+                            </button>
                         )}
+                        <div>
+                            <h2 className="text-xl font-bold text-foreground">
+                                {studentId ? toTitleCase(studentName) : 'Achievement Reviews'}
+                            </h2>
+                            {studentId ? (
+                                <p className="text-sm text-muted-foreground">Student Profile & History</p>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">Manage and review student submissions</p>
+                            )}
+                        </div>
                     </div>
+                    
+                    {!studentId && (
+                        <Button variant="outline" size="sm" onClick={() => navigate('/student-achievements/settings')}>
+                            <Settings className="w-4 h-4 mr-2" />
+                            Settings
+                        </Button>
+                    )}
                 </div>
 
                 {/* Stats Card */}

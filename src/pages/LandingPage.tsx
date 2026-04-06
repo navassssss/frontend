@@ -23,7 +23,7 @@ export default function LandingPage() {
                         <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
                             <GraduationCap className="h-6 w-6 text-primary-foreground" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">DHIC eGov</span>
+                        <span className="text-xl font-bold tracking-tight">DHIC Portal</span>
                     </div>
                 </nav>
 
@@ -143,7 +143,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="py-6 text-center text-sm text-muted-foreground border-t border-border/40 mt-auto">
-                    <p>© 2025 Darul Huda Islamic College. Powered by eGov.</p>
+                    <p>© 2025 Darul Hasanath Islamic College.</p>
                 </div>
             </div>
         </div>

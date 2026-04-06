@@ -1,48 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    BookOpen,
     Plus,
-    Filter,
-    ChevronRight,
-    Calendar,
-    Award,
-    FileText,
-    Lock,
-    Unlock
+    ChevronDown,
+    MoreVertical,
+    BookOpen
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import api from '@/lib/api';
-
-const levelColors = {
-    1: 'bg-primary/10 text-primary',
-    2: 'bg-accent/10 text-accent',
-    3: 'bg-warning/10 text-warning',
-    4: 'bg-success/10 text-success'
-};
-
-interface Subject {
-    id: string;
-    name: string;
-    code: string;
-    className: string;
-    teacherName: string;
-    finalMaxMarks: number;
-    isLocked: boolean;
-}
 
 interface SubjectSummary {
     subject_id: string;
@@ -72,18 +39,44 @@ interface CCEWork {
     evaluatedCount: number;
 }
 
+const getStage = (classStr: string) => {
+    const num = parseInt(classStr.replace(/\D/g, ''));
+    if (isNaN(num)) return "General Segment";
+    if (num <= 6) return "Secondary";
+    if (num <= 8) return "Middle School";
+    return "Degree";
+};
+
+const getSubjectTagStyle = (index: number) => {
+    const styles = [
+        "bg-emerald-100 text-emerald-800",
+        "bg-blue-100 text-blue-800",
+        "bg-amber-100 text-amber-800",
+        "bg-rose-100 text-rose-800",
+        "bg-violet-100 text-violet-800"
+    ];
+    return styles[index % styles.length];
+};
+
+const getTypeStyle = (type: string) => {
+    const t = type.toUpperCase();
+    if (t.includes('QUIZ') || t.includes('TEST')) return "bg-emerald-100 text-emerald-800";
+    if (t.includes('PROJECT')) return "bg-rose-100 text-rose-800";
+    if (t.includes('ASSIGN')) return "bg-blue-100 text-blue-800";
+    return "bg-slate-100 text-slate-800";
+};
+
 export default function CCEWorksPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
 
-    const [subjects, setSubjects] = useState<Subject[]>([]);
     const [subjectsSummary, setSubjectsSummary] = useState<SubjectSummary[]>([]);
     const [works, setWorks] = useState<CCEWork[]>([]);
-    const [selectedSubject, setSelectedSubject] = useState<string>(isPrincipal ? 'my' : 'all');
     const [loading, setLoading] = useState(true);
+
     const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set());
-    const [showAllPerClass, setShowAllPerClass] = useState<Set<string>>(new Set());
+    const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         loadData();
@@ -91,13 +84,23 @@ export default function CCEWorksPage() {
 
     const loadData = async () => {
         try {
-            const [subjectsRes, worksRes] = await Promise.all([
-                api.get('/subjects'),
+            const [worksRes] = await Promise.all([
                 api.get('/cce/works')
             ]);
-            setSubjects(subjectsRes.data);
             setWorks(worksRes.data.works || worksRes.data);
             setSubjectsSummary(worksRes.data.subjects_summary || []);
+
+            // Auto expand visually first valid class
+            if (worksRes.data.subjects_summary?.length > 0) {
+                const grouped = groupByClass(worksRes.data.subjects_summary);
+                const keys = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+                if (keys.length > 0) {
+                    setExpandedClasses(new Set([keys[0]]));
+                    if (grouped[keys[0]].length > 0) {
+                        setExpandedSubjects(new Set([grouped[keys[0]][0].subject_id]));
+                    }
+                }
+            }
         } catch (error) {
             console.error('Failed to load data', error);
         } finally {
@@ -105,306 +108,217 @@ export default function CCEWorksPage() {
         }
     };
 
-    const filteredWorks = works.filter(w => {
-        // Determine which subjects to include based on tab selection
-        let allowedSubjects = subjects;
-        if (selectedSubject === 'my') {
-            allowedSubjects = subjects.filter(s => s.teacherName === user?.name);
-        }
+    const groupByClass = (summaries: SubjectSummary[]) => {
+        return summaries.reduce((acc, summary) => {
+            const className = summary.class_name;
+            if (!acc[className]) acc[className] = [];
+            acc[className].push(summary);
+            return acc;
+        }, {} as Record<string, SubjectSummary[]>);
+    };
 
-        // Handle specific subject filter
-        if (selectedSubject !== 'all' && selectedSubject !== 'my' && selectedSubject !== 'none') {
-            if (w.subjectId !== selectedSubject) return false;
-        }
-        // Handle 'my' tab - only show works from my subjects
-        else if (selectedSubject === 'my') {
-            if (!allowedSubjects.some(s => s.id === w.subjectId)) return false;
-        }
-
-        return true;
+    const groupedByClass = groupByClass(subjectsSummary);
+    const sortedClasses = Object.keys(groupedByClass).sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, '')) || 0;
+        const numB = parseInt(b.replace(/\D/g, '')) || 0;
+        return numB - numA; // Descending like 10, 09, 08 in image
     });
 
-    const groupedByLevel = [1, 2, 3, 4].map(level => ({
-        level,
-        works: filteredWorks.filter(w => w.level === level)
-    }));
+    const toggleClass = (className: string) => {
+        const newSet = new Set(expandedClasses);
+        if (newSet.has(className)) newSet.delete(className);
+        else newSet.add(className);
+        setExpandedClasses(newSet);
+    };
+
+    const toggleSubject = (e: React.MouseEvent, subjectId: string) => {
+        e.stopPropagation();
+        const newSet = new Set(expandedSubjects);
+        if (newSet.has(subjectId)) newSet.delete(subjectId);
+        else newSet.add(subjectId);
+        setExpandedSubjects(newSet);
+    };
 
     return (
-        <AppLayout title="CCE Works" showBack>
-            <div className="p-4 space-y-6">
-                {/* Subject Tabs (for principals) */}
-                {isPrincipal && (
-                    <div className="flex gap-2">
-                        <Button
-                            variant={selectedSubject === 'all' ? 'default' : 'outline'}
-                            className="flex-1"
-                            onClick={() => setSelectedSubject('all')}
-                        >
-                            <BookOpen className="w-4 h-4 mr-2" />
-                            All Subjects
-                        </Button>
-                        <Button
-                            variant={selectedSubject === 'my' ? 'default' : 'outline'}
-                            className="flex-1"
-                            onClick={() => setSelectedSubject('my')}
-                        >
-                            <Award className="w-4 h-4 mr-2" />
-                            My Subjects
-                        </Button>
+        <AppLayout title="CCE Works">
+            <div className="p-4 md:p-8 max-w-[1100px] mx-auto space-y-6 pb-24 min-h-screen">
+
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 animate-fade-in">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Curriculum Hierarchy</h1>
+                        <p className="text-sm font-medium text-slate-500 mt-1">Expand classes to manage subject-specific evaluation rubrics.</p>
                     </div>
-                )}
-
-
-
-                {/* Create Work Button */}
-                <div className="flex justify-end">
-                    <Button
+                    <button
                         onClick={() => navigate('/cce/works/new')}
-                        className="w-full lg:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all px-6"
+                        className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-bold text-sm px-6 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
                     >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create CCE Work
-                    </Button>
+                        <Plus className="w-4 h-4" strokeWidth={3} /> New Assessment
+                    </button>
                 </div>
 
-                {/* Subjects with Statistics - Grouped by Class */}
-                {isPrincipal && (
-                    <div className="space-y-3">
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                            Subjects Status {selectedSubject !== 'all' && selectedSubject !== 'my' && '(Filtered)'}
-                        </h3>
+                {/* Accordion list */}
+                <div className="space-y-4">
+                    {loading ? (
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-3xl animate-pulse border border-slate-100" />)}
+                        </div>
+                    ) : sortedClasses.map(className => {
+                        const classSubjects = groupedByClass[className];
+                        const isExpanded = expandedClasses.has(className);
+                        const classNum = className.replace(/\D/g, '').padStart(2, '0');
+                        const totalClassWorks = classSubjects.reduce((sum, s) => sum + s.total_works, 0);
+                        const completedClassWorks = classSubjects.reduce((sum, s) => sum + s.completed_works, 0);
+                        const classPercent = totalClassWorks > 0 ? Math.round((completedClassWorks / totalClassWorks) * 100) : 0;
 
-                        {/* Group subjects by class */}
-                        {(() => {
-                            const ITEMS_PER_CLASS = 4;
+                        return (
+                            <div key={className} className={`bg-white rounded-3xl transition-all duration-300 shadow-[0_2px_12px_rgb(0,0,0,0.03)] border border-slate-100 cursor-pointer overflow-hidden ${isExpanded ? 'p-2 md:p-3' : 'hover:-translate-y-0.5'}`}>
 
-                            // Filter subjects based on tab
-                            const filteredSummary = subjectsSummary.filter(summary => {
-                                if (selectedSubject === 'my') {
-                                    const subject = subjects.find(s => s.id === summary.subject_id);
-                                    return subject?.teacherName === user?.name;
-                                }
-                                return true;
-                            });
-
-                            // Group by class
-                            const groupedByClass = filteredSummary.reduce((acc, summary) => {
-                                const className = summary.class_name;
-                                if (!acc[className]) acc[className] = [];
-                                acc[className].push(summary);
-                                return acc;
-                            }, {} as Record<string, SubjectSummary[]>);
-
-                            const classNames = Object.keys(groupedByClass).sort();
-
-                            return classNames.map(className => {
-                                const classSubjects = groupedByClass[className];
-                                const isExpanded = expandedClasses.has(className);
-                                const showAll = showAllPerClass.has(className);
-                                const displaySubjects = showAll ? classSubjects : classSubjects.slice(0, ITEMS_PER_CLASS);
-                                const hasMore = classSubjects.length > ITEMS_PER_CLASS;
-
-                                return (
-                                    <div key={className} className="space-y-2">
-                                        {/* Class Header */}
-                                        <div
-                                            className="flex items-center justify-between cursor-pointer p-2 bg-muted/30 rounded-lg"
-                                            onClick={() => {
-                                                const newExpanded = new Set(expandedClasses);
-                                                if (isExpanded) {
-                                                    newExpanded.delete(className);
-                                                } else {
-                                                    newExpanded.add(className);
-                                                }
-                                                setExpandedClasses(newExpanded);
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                                                <span className="font-semibold text-sm">{className}</span>
-                                                <Badge variant="secondary" className="text-xs">
-                                                    {classSubjects.length} {classSubjects.length === 1 ? 'subject' : 'subjects'}
-                                                </Badge>
-                                            </div>
+                                {/* Outer Class Header */}
+                                <div className={`p-4 md:p-5 flex items-center justify-between transition-colors ${!isExpanded && 'hover:bg-slate-50/50'}`} onClick={() => toggleClass(className)}>
+                                    <div className="flex items-center gap-4 md:gap-5">
+                                        <div className="w-[52px] h-[52px] rounded-2xl bg-emerald-100/60 flex items-center justify-center font-black text-emerald-800 text-[18px] shrink-0">
+                                            {classNum}
                                         </div>
-
-                                        {/* Subject Cards */}
-                                        {isExpanded && (
-                                            <div className="space-y-2">
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {displaySubjects.map((summary) => {
-                                                        const subject = subjects.find(s => s.id === summary.subject_id);
-                                                        const isSelected = selectedSubject === summary.subject_id;
-                                                        return (
-                                                            <Card
-                                                                key={summary.subject_id}
-                                                                variant="interactive"
-                                                                onClick={() => setSelectedSubject(isSelected ? (selectedSubject === 'my' ? 'my' : 'all') : summary.subject_id)}
-                                                                className={`cursor-pointer hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
-                                                            >
-                                                                <CardContent className="p-3">
-                                                                    <div className="flex items-center justify-between mb-1">
-                                                                        <span className="font-medium text-foreground text-sm truncate">
-                                                                            {summary.subject_name}
-                                                                        </span>
-                                                                        {subject?.isLocked ? (
-                                                                            <Lock className="w-4 h-4 text-warning" />
-                                                                        ) : (
-                                                                            <Unlock className="w-4 h-4 text-success" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="flex items-center justify-between mb-2">
-                                                                        <Badge variant="outline" className="text-xs">
-                                                                            Max: {summary.max_marks}
-                                                                        </Badge>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2 gap-2">
-                                                                        <div className="text-center">
-                                                                            <p className="text-xs text-muted-foreground">Total</p>
-                                                                            <p className="text-sm font-bold">{summary.total_works}</p>
-                                                                        </div>
-                                                                        <div className="text-center">
-                                                                            <p className="text-xs text-muted-foreground">Done</p>
-                                                                            <p className="text-sm font-bold text-green-600">{summary.completed_works}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </CardContent>
-                                                            </Card>
-                                                        );
-                                                    })}
-                                                </div>
-
-                                                {/* Show More Button */}
-                                                {hasMore && !showAll && (
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="w-full"
-                                                        onClick={() => {
-                                                            const newShowAll = new Set(showAllPerClass);
-                                                            newShowAll.add(className);
-                                                            setShowAllPerClass(newShowAll);
-                                                        }}
-                                                    >
-                                                        Show {classSubjects.length - ITEMS_PER_CLASS} more
-                                                    </Button>
-                                                )}
-
-                                                {/* Show Less Button */}
-                                                {showAll && hasMore && (
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="w-full"
-                                                        onClick={() => {
-                                                            const newShowAll = new Set(showAllPerClass);
-                                                            newShowAll.delete(className);
-                                                            setShowAllPerClass(newShowAll);
-                                                        }}
-                                                    >
-                                                        Show less
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        )}
+                                        <div>
+                                            <h2 className="text-base md:text-lg font-bold text-slate-800 tracking-tight">
+                                                Class {className} - {getStage(className)}
+                                            </h2>
+                                            <p className="text-[12px] font-medium text-slate-500 mt-1 tracking-wide">
+                                                {classSubjects.length} Subjects • {totalClassWorks} Total Works • {classPercent}% Complete
+                                            </p>
+                                        </div>
                                     </div>
-                                );
-                            });
-                        })()}
-                    </div>
-                )}
 
-                {/* Works by Level */}
-                <Tabs defaultValue="all" className="w-full">
-                    <TabsList className="grid grid-cols-5 w-full">
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        <TabsTrigger value="1">L1</TabsTrigger>
-                        <TabsTrigger value="2">L2</TabsTrigger>
-                        <TabsTrigger value="3">L3</TabsTrigger>
-                        <TabsTrigger value="4">L4</TabsTrigger>
-                    </TabsList>
+                                    <div className="flex items-center gap-4 md:gap-6">
+                                        {/* Mini Tags */}
+                                        <div className="hidden sm:flex items-center space-x-1.5 mr-2">
+                                            {classSubjects.slice(0, 3).map((s, idx) => (
+                                                <span key={s.subject_id} className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${getSubjectTagStyle(idx)}`}>
+                                                    {s.subject_name.substring(0, 3)}
+                                                </span>
+                                            ))}
+                                            {classSubjects.length > 3 && (
+                                                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                                                    +{classSubjects.length - 3}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400">
+                                            <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <TabsContent value="all" className="mt-4 space-y-3">
-                        {filteredWorks.length === 0 ? (
-                            <Card variant="elevated">
-                                <CardContent className="p-6 text-center">
-                                    <BookOpen className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
-                                    <p className="text-muted-foreground">No CCE works found</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            filteredWorks.map((work) => (
-                                <WorkCard key={work.id} work={work} onClick={() => navigate(`/cce/works/${work.id}`)} />
-                            ))
-                        )}
-                    </TabsContent>
+                                {/* Subjects List */}
+                                <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2 pb-2' : 'grid-rows-[0fr] opacity-0'}`}>
+                                    <div className="overflow-hidden">
+                                        <div className="px-3 md:px-4 space-y-3">
+                                            {classSubjects.map((subject, sIdx) => {
+                                                const isSubjectExpanded = expandedSubjects.has(subject.subject_id);
+                                                const worksForSubject = works.filter(w => w.subjectId === subject.subject_id);
 
-                    {[1, 2, 3, 4].map((level) => (
-                        <TabsContent key={level} value={level.toString()} className="mt-4 space-y-3">
-                            {filteredWorks.filter(w => w.level === level).length === 0 ? (
-                                <Card variant="elevated">
-                                    <CardContent className="p-6 text-center">
-                                        <p className="text-muted-foreground">No Level {level} works</p>
-                                    </CardContent>
-                                </Card>
-                            ) : (
-                                filteredWorks
-                                    .filter(w => w.level === level)
-                                    .map((work) => (
-                                        <WorkCard key={work.id} work={work} onClick={() => navigate(`/cce/works/${work.id}`)} />
-                                    ))
-                            )}
-                        </TabsContent>
-                    ))}
-                </Tabs>
-            </div >
-        </AppLayout >
-    );
-}
+                                                return (
+                                                    <div key={subject.subject_id} className={`bg-[#f8fafc] rounded-3xl border transition-all duration-300 ${isSubjectExpanded ? 'border-slate-200 shadow-sm' : 'border-slate-100 hover:border-slate-200'}`}>
 
-function WorkCard({ work, onClick }: { work: CCEWork; onClick: () => void }) {
-    return (
-        <Card variant="interactive" onClick={onClick} className="hover:border-primary/40 transition-all shadow-sm hover:shadow-md">
-            <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0 space-y-2">
-                        {/* Line 1: Badges */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <Badge className={`${levelColors[work.level as keyof typeof levelColors]} font-semibold px-2.5 py-0.5`}>
-                                L{work.level}
-                            </Badge>
-                            <Badge className="bg-success/10 text-success border-success/20 font-medium px-2.5 py-0.5">
-                                {work.subjectName}
-                            </Badge>
-                        </div>
+                                                        <div className="p-4 md:p-5 flex items-center justify-between cursor-pointer rounded-3xl transition-colors hover:bg-slate-50/80" onClick={(e) => toggleSubject(e, subject.subject_id)}>
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-11 h-11 rounded-[14px] bg-white border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
+                                                                    <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2.5} />
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="text-[15px] font-bold text-slate-800 tracking-tight">{subject.subject_name}</h3>
+                                                                    <p className="text-[11px] font-bold tracking-wide text-slate-400 mt-0.5">{subject.total_works} CCE Works Configured</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-5">
+                                                                <div className="text-right hidden sm:block">
+                                                                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest leading-tight">Weightage</p>
+                                                                    <p className="text-[13px] font-black text-slate-700">{totalClassWorks > 0 ? Math.round((subject.total_works / totalClassWorks) * 100) : 0}% of Class</p>
+                                                                </div>
+                                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-emerald-700">
+                                                                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isSubjectExpanded ? 'rotate-180' : ''}`} />
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
-                        {/* Line 2: Title */}
-                        <h3 className="font-bold text-base text-foreground leading-tight">
-                            {work.title}
-                        </h3>
+                                                        {/* Assessments Table */}
+                                                        {isSubjectExpanded && (
+                                                            <div className="px-2 pb-2 mt-1">
+                                                                <div className="bg-white rounded-[1.25rem] shadow-sm border border-slate-100 overflow-hidden">
+                                                                    <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
+                                                                        <div className="col-span-5 md:col-span-4">Assessment Title</div>
+                                                                        <div className="col-span-2 hidden md:block">Type</div>
+                                                                        <div className="col-span-3 md:col-span-2">Status</div>
+                                                                        <div className="col-span-3 md:col-span-2">Due Date</div>
+                                                                        <div className="col-span-2 hidden lg:block">Distribution</div>
+                                                                        <div className="col-span-1 text-center ml-auto">Actions</div>
+                                                                    </div>
 
-                        {/* Line 3: Class + Metadata combined */}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                            <span className="font-semibold text-foreground">Class {work.className}</span>
-                            <span className="text-muted-foreground">•</span>
-                            <span className="flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                                <span className="font-medium">Due: {format(new Date(work.dueDate), 'MMM d')}</span>
-                            </span>
-                            <span className="text-muted-foreground">•</span>
-                            <span className="flex items-center gap-1">
-                                <Award className="w-3.5 h-3.5 text-teal-600" />
-                                <span className="font-medium">{work.maxMarks} marks</span>
-                            </span>
-                        </div>
-                    </div>
+                                                                    {worksForSubject.length === 0 ? (
+                                                                        <div className="p-8 text-center text-sm font-semibold text-slate-400">
+                                                                            No assessments created yet.
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="divide-y divide-slate-50">
+                                                                            {worksForSubject.map(work => {
+                                                                                const isDraft = !work.issuedDate || new Date(work.issuedDate) > new Date();
+                                                                                const statusColor = isDraft ? 'bg-orange-500' : 'bg-emerald-500';
+                                                                                const statusText = isDraft ? 'Drafting' : 'Published';
+                                                                                const distWidth = subject.max_marks > 0 ? Math.min(100, Math.round((work.maxMarks / subject.max_marks) * 100)) : 10;
 
-                    {/* Chevron */}
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
+                                                                                return (
+                                                                                    <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 p-4 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
+
+                                                                                        <div className="col-span-5 md:col-span-4 w-full">
+                                                                                            <p className="text-[14px] font-bold text-slate-800 leading-tight truncate">{work.title}</p>
+                                                                                            <p className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-1">{work.description || work.submissionType || 'Internal Assessment'}</p>
+                                                                                        </div>
+
+                                                                                        <div className="col-span-2 hidden md:block">
+                                                                                            <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
+                                                                                                {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
+                                                                                            </span>
+                                                                                        </div>
+
+                                                                                        <div className="col-span-3 md:col-span-2 flex items-center gap-2">
+                                                                                            <div className={`w-1.5 h-1.5 rounded-full ${statusColor}`}></div>
+                                                                                            <span className="text-[12px] font-bold text-slate-700">{statusText}</span>
+                                                                                        </div>
+
+                                                                                        <div className="col-span-3 md:col-span-2 text-[12px] font-bold text-slate-600">
+                                                                                            {work.dueDate ? format(new Date(work.dueDate), 'MMM dd, yyyy') : 'No Date'}
+                                                                                        </div>
+
+                                                                                        <div className="col-span-2 hidden lg:block w-full max-w-[120px]">
+                                                                                            <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1.5 overflow-hidden">
+                                                                                                <div className="bg-emerald-700 h-full rounded-full transition-all" style={{ width: `${distWidth}%` }}></div>
+                                                                                            </div>
+                                                                                            <p className="text-[10px] font-bold text-slate-400">{distWidth}% of Subj.</p>
+                                                                                        </div>
+
+                                                                                        <div className="col-span-1 hidden sm:flex justify-end text-slate-300 hover:text-slate-600 cursor-pointer ml-auto transition-colors">
+                                                                                            <MoreVertical className="w-5 h-5" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </AppLayout>
     );
 }

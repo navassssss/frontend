@@ -1,277 +1,384 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Wallet,
-  TrendingUp,
-  TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  Filter,
-  Calendar
+    Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
+    Calendar, ChevronLeft, ChevronRight as ChevronRightIcon, Activity
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import StudentLayout from '@/components/student/StudentLayout';
 import { format } from 'date-fns';
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
 import api from '@/lib/api';
 
 interface Transaction {
-  id: number;
-  type: 'deposit' | 'expense';
-  amount: number;
-  purpose: string;
-  description: string;
-  balance_after: number;
-  transaction_date: string;
+    id: number;
+    type: 'deposit' | 'expense';
+    amount: number;
+    purpose: string;
+    description: string;
+    balance_after: number;
+    transaction_date: string;
 }
 
 type FilterType = 'all' | 'credit' | 'debit';
 
 export default function StudentAccountPage() {
-  const { student, isLoading: isAuthLoading } = useStudentAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [stats, setStats] = useState({ totalCredits: 0, totalDebits: 0 });
+    const { student, isLoading: isAuthLoading } = useStudentAuth();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [filter, setFilter] = useState<FilterType>('all');
+    const [stats, setStats] = useState({ totalCredits: 0, totalDebits: 0 });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
+    const [prevPageUrl, setPrevPageUrl] = useState<string | null>(null);
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
-  const [prevPageUrl, setPrevPageUrl] = useState<string | null>(null);
+    useEffect(() => {
+        if (student) fetchTransactions(1);
+    }, [student]);
 
-  useEffect(() => {
-    if (student) {
-      fetchTransactions(1);
-    }
-  }, [student]);
-
-  const fetchTransactions = async (page = 1) => {
-    try {
-      setLoading(true);
-      const { data } = await api.get(`/student/transactions?page=${page}`);
-
-      // Update data and pagination info
-      setTransactions(data.data || []);
-      setCurrentPage(data.current_page || 1);
-      setLastPage(data.last_page || 1);
-      setNextPageUrl(data.next_page_url);
-      setPrevPageUrl(data.prev_page_url);
-
-      // Use backend stats if available (for total credits/debits)
-      if (data.stats) {
-        setStats({
-          totalCredits: Number(data.stats.total_credits),
-          totalDebits: Number(data.stats.total_debits)
-        });
-      }
-
-    } catch (error) {
-      console.error('Failed to fetch transactions');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredTransactions = transactions.filter(t => {
-    if (filter === 'all') return true;
-    if (filter === 'credit') return t.type === 'deposit';
-    if (filter === 'debit') return t.type === 'expense';
-    return true;
-  });
-
-  // Add opening balance as virtual last transaction (oldest chronologically) if on last page and showing all/credits
-  const transactionsWithOpening = React.useMemo(() => {
-    if (currentPage === lastPage && student?.opening_balance && (filter === 'all' || filter === 'credit')) {
-      const openingTransaction: Transaction = {
-        id: -1, // Negative ID to indicate virtual transaction
-        type: 'deposit',
-        amount: student.opening_balance,
-        purpose: 'Opening Balance',
-        description: 'Opening Balance (Last Year Total)',
-        balance_after: student.opening_balance,
-        transaction_date: '2024-01-01T00:00:00.000000Z',
-      };
-      return [...filteredTransactions, openingTransaction];
-    }
-    return filteredTransactions;
-  }, [currentPage, lastPage, student, filter, filteredTransactions]);
-
-  // Adjust stats to include opening balance in credits
-  const adjustedStats = React.useMemo(() => {
-    const openingBalanceAmount = student?.opening_balance || 0;
-    return {
-      totalCredits: stats.totalCredits + openingBalanceAmount,
-      totalDebits: stats.totalDebits,
+    const fetchTransactions = async (page = 1) => {
+        try {
+            setLoading(true);
+            const { data } = await api.get(`/student/transactions?page=${page}`);
+            setTransactions(data.data || []);
+            setCurrentPage(data.current_page || 1);
+            setLastPage(data.last_page || 1);
+            setNextPageUrl(data.next_page_url);
+            setPrevPageUrl(data.prev_page_url);
+            if (data.stats) {
+                setStats({
+                    totalCredits: Number(data.stats.total_credits),
+                    totalDebits: Number(data.stats.total_debits),
+                });
+            }
+        } catch { /* silent */ }
+        finally { setLoading(false); }
     };
-  }, [stats, student]);
 
-  const filters: { value: FilterType; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'credit', label: 'Credits' },
-    { value: 'debit', label: 'Debits' },
-  ];
+    const filteredTransactions = transactions.filter(t => {
+        if (filter === 'credit') return t.type === 'deposit';
+        if (filter === 'debit') return t.type === 'expense';
+        return true;
+    });
 
-  if (isAuthLoading || !student) return null;
+    const transactionsWithOpening = React.useMemo(() => {
+        if (currentPage === lastPage && student?.opening_balance && (filter === 'all' || filter === 'credit')) {
+            return [...filteredTransactions, {
+                id: -1, type: 'deposit' as const,
+                amount: student.opening_balance,
+                purpose: 'Opening Balance',
+                description: 'Opening Balance (Last Year Total)',
+                balance_after: student.opening_balance,
+                transaction_date: '2024-01-01T00:00:00.000000Z',
+            }];
+        }
+        return filteredTransactions;
+    }, [currentPage, lastPage, student, filter, filteredTransactions]);
 
-  return (
-    <StudentLayout title="Account" showBack>
-      <div className="space-y-6 pb-24">
-        {/* Balance Card */}
-        <Card variant="elevated" className="animate-slide-up overflow-hidden">
-          <div className="bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
-                <Wallet className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm text-primary-foreground/80">Current Balance</p>
-                <p className={`text-3xl font-bold`}>
-                  ₹{(Number(student.walletBalance) || 0).toLocaleString('en-IN', { maximumFractionDigits: 4 })}
+    const adjustedStats = React.useMemo(() => ({
+        totalCredits: stats.totalCredits + (student?.opening_balance || 0),
+        totalDebits: stats.totalDebits,
+    }), [stats, student]);
+
+    const balance = Number(student?.walletBalance) || 0;
+    const fmt = (n: number) => n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+
+    if (isAuthLoading || !student) return null;
+
+    return (
+        <StudentLayout title="My Account">
+            {/* ══════════════════════════════
+                DESKTOP LAYOUT (lg+)
+            ══════════════════════════════ */}
+            <div className="hidden lg:flex gap-7 pb-8 items-start">
+
+                {/* ── Left: Sticky stats sidebar ── */}
+                <div className="w-72 shrink-0 space-y-4 sticky top-24">
+
+                    {/* Balance card */}
+                    <div className="bg-[#008f6c] rounded-2xl p-6 text-white shadow-lg shadow-[#008f6c]/20">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
+                                <Wallet className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200">Current Balance</p>
+                                <p className={`text-2xl font-black leading-tight ${balance < 0 ? 'text-red-300' : 'text-white'}`}>
+                                    ₹{fmt(Math.abs(balance))}
+                                </p>
+                            </div>
+                        </div>
+                        <p className="text-[11px] text-emerald-100/70">Updated: {format(new Date(), 'MMM d, yyyy')}</p>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-50">
+                        <div className="p-4 flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-[#008f6c]/10 flex items-center justify-center shrink-0">
+                                <TrendingUp className="w-4 h-4 text-[#008f6c]" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Credits</p>
+                                <p className="text-lg font-black text-[#008f6c]">₹{fmt(adjustedStats.totalCredits)}</p>
+                            </div>
+                        </div>
+                        <div className="p-4 flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                                <TrendingDown className="w-4 h-4 text-red-500" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Debits</p>
+                                <p className="text-lg font-black text-red-500">₹{fmt(adjustedStats.totalDebits)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Info note */}
+                    <div className="bg-slate-50 rounded-2xl p-4 text-[11px] text-slate-400 leading-relaxed border border-slate-100">
+                        💡 Account data is synced from the school finance system. For discrepancies, contact the accounts office.
+                    </div>
+                </div>
+
+                {/* ── Right: Transaction table ── */}
+                <div className="flex-1 min-w-0 space-y-4">
+
+                    {/* Header row */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-slate-400" />
+                            <h2 className="font-black text-slate-800">Transaction History</h2>
+                        </div>
+                        {/* Filter pills */}
+                        <div className="flex gap-2">
+                            {(['all', 'credit', 'debit'] as FilterType[]).map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border ${
+                                        filter === f
+                                            ? 'bg-[#008f6c] text-white border-[#008f6c] shadow-sm'
+                                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    {f === 'all' ? 'All' : f === 'credit' ? 'Credits' : 'Debits'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        {/* Table header */}
+                        <div className="grid grid-cols-[2fr,1fr,1fr,1fr] px-5 py-3 border-b border-slate-50 bg-slate-50/60">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Amount</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Balance</span>
+                        </div>
+
+                        {loading ? (
+                            <div className="divide-y divide-slate-50">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <div key={i} className="grid grid-cols-[2fr,1fr,1fr,1fr] px-5 py-4 animate-pulse">
+                                        <div className="h-3 bg-slate-100 rounded w-2/3" />
+                                        <div className="h-3 bg-slate-100 rounded w-1/2" />
+                                        <div className="h-3 bg-slate-100 rounded w-1/2 ml-auto" />
+                                        <div className="h-3 bg-slate-100 rounded w-1/2 ml-auto" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : transactionsWithOpening.length === 0 ? (
+                            <div className="py-16 text-center">
+                                <Wallet className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                                <p className="font-bold text-slate-400 text-sm">No transactions found</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-slate-50">
+                                {transactionsWithOpening.map(t => {
+                                    const isCredit = t.type === 'deposit';
+                                    return (
+                                        <div key={t.id} className="grid grid-cols-[2fr,1fr,1fr,1fr] px-5 py-4 hover:bg-slate-50/60 transition-colors">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isCredit ? 'bg-[#008f6c]/10' : 'bg-red-50'}`}>
+                                                    {isCredit
+                                                        ? <ArrowDownRight className="w-4 h-4 text-[#008f6c]" />
+                                                        : <ArrowUpRight className="w-4 h-4 text-red-500" />
+                                                    }
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[13px] font-bold text-slate-700 truncate">{t.description || t.purpose}</p>
+                                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                                                        {t.purpose}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <span className="text-[12px] text-slate-400 font-medium">
+                                                    {format(new Date(t.transaction_date), 'MMM d, yyyy')}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center justify-end">
+                                                <span className={`text-[13px] font-black ${isCredit ? 'text-[#008f6c]' : 'text-red-500'}`}>
+                                                    {isCredit ? '+' : '-'}₹{fmt(Number(t.amount))}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center justify-end">
+                                                <span className="text-[12px] font-bold text-slate-500">
+                                                    ₹{fmt(Number(t.balance_after))}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {!loading && lastPage > 1 && (
+                            <div className="flex items-center justify-between px-5 py-3 border-t border-slate-50 bg-slate-50/40">
+                                <button
+                                    disabled={!prevPageUrl}
+                                    onClick={() => fetchTransactions(currentPage - 1)}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[12px] font-black text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                                </button>
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                                    Page {currentPage} of {lastPage}
+                                </span>
+                                <button
+                                    disabled={!nextPageUrl}
+                                    onClick={() => fetchTransactions(currentPage + 1)}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[12px] font-black text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Next <ChevronRightIcon className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ══════════════════════════════
+                MOBILE LAYOUT (unchanged)
+            ══════════════════════════════ */}
+            <div className="lg:hidden space-y-5 pb-24">
+
+                {/* Balance banner */}
+                <div className="bg-[#008f6c] rounded-2xl p-5 text-white shadow-lg shadow-[#008f6c]/20">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
+                            <Wallet className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200">Current Balance</p>
+                            <p className={`text-3xl font-black leading-tight ${balance < 0 ? 'text-red-300' : 'text-white'}`}>
+                                ₹{fmt(Math.abs(balance))}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/10 rounded-xl p-3 text-center">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-0.5">Credits</p>
+                            <p className="font-black text-white">₹{fmt(adjustedStats.totalCredits)}</p>
+                        </div>
+                        <div className="bg-white/10 rounded-xl p-3 text-center">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-0.5">Debits</p>
+                            <p className="font-black text-white">₹{fmt(adjustedStats.totalDebits)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Filter pills */}
+                <div className="flex gap-2">
+                    {(['all', 'credit', 'debit'] as FilterType[]).map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border ${
+                                filter === f
+                                    ? 'bg-[#008f6c] text-white border-[#008f6c] shadow-sm'
+                                    : 'bg-white text-slate-500 border-slate-200'
+                            }`}
+                        >
+                            {f === 'all' ? 'All' : f === 'credit' ? 'Credits' : 'Debits'}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Transaction list */}
+                <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Recent Transactions</p>
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
+                        {loading ? (
+                            [1, 2, 3].map(i => (
+                                <div key={i} className="flex items-center gap-3 p-4 animate-pulse">
+                                    <div className="w-9 h-9 rounded-xl bg-slate-100 shrink-0" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-3 bg-slate-100 rounded w-2/3" />
+                                        <div className="h-2.5 bg-slate-50 rounded w-1/3" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : transactionsWithOpening.length === 0 ? (
+                            <div className="py-12 text-center">
+                                <Wallet className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                                <p className="font-bold text-slate-400 text-sm">No transactions found</p>
+                            </div>
+                        ) : transactionsWithOpening.map(t => {
+                            const isCredit = t.type === 'deposit';
+                            return (
+                                <div key={t.id} className="flex items-center gap-3 p-4 hover:bg-slate-50/60 transition-colors">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isCredit ? 'bg-[#008f6c]/10' : 'bg-red-50'}`}>
+                                        {isCredit
+                                            ? <ArrowDownRight className="w-5 h-5 text-[#008f6c]" />
+                                            : <ArrowUpRight className="w-5 h-5 text-red-500" />
+                                        }
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[13px] font-bold text-slate-700 truncate">{t.description || t.purpose}</p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">{t.purpose}</span>
+                                            <span className="text-[10px] text-slate-300">{format(new Date(t.transaction_date), 'MMM d, yyyy')}</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <p className={`text-[13px] font-black ${isCredit ? 'text-[#008f6c]' : 'text-red-500'}`}>
+                                            {isCredit ? '+' : '-'}₹{fmt(Number(t.amount))}
+                                        </p>
+                                        <p className="text-[10px] text-slate-300 mt-0.5">Bal: ₹{fmt(Number(t.balance_after))}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Mobile Pagination */}
+                {!loading && lastPage > 1 && (
+                    <div className="flex items-center justify-between pt-1">
+                        <button
+                            disabled={!prevPageUrl}
+                            onClick={() => fetchTransactions(currentPage - 1)}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-black text-slate-600 border border-slate-200 bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                        </button>
+                        <span className="text-[11px] font-black text-slate-400">{currentPage} / {lastPage}</span>
+                        <button
+                            disabled={!nextPageUrl}
+                            onClick={() => fetchTransactions(currentPage + 1)}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-black text-slate-600 border border-slate-200 bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next <ChevronRightIcon className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
+                )}
+
+                {/* Info note */}
+                <p className="text-[11px] text-slate-400 text-center px-4 leading-relaxed">
+                    💡 Account data is synced from the school finance system. For discrepancies, contact the accounts office.
                 </p>
-              </div>
             </div>
-            <p className="text-sm text-primary-foreground/70">
-              Last updated: {format(new Date(), 'MMM d, yyyy')}
-            </p>
-          </div>
-
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-success">₹{adjustedStats.totalCredits.toLocaleString('en-IN')}</p>
-                <p className="text-sm text-muted-foreground">Total Credits</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-destructive">₹{adjustedStats.totalDebits.toLocaleString('en-IN')}</p>
-                <p className="text-sm text-muted-foreground">Total Debits</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Transaction Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          {filters.map((f) => (
-            <Button
-              key={f.value}
-              variant={filter === f.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter(f.value)}
-              className="flex-shrink-0"
-            >
-              {f.label}
-            </Button>
-          ))}
-        </div>
-
-        {/* Transactions List */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground px-1 flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Recent Transactions
-          </h2>
-
-          <div className="space-y-3">
-            {loading ? (
-              <div className="text-center p-8 text-muted-foreground">Loading transactions...</div>
-            ) : transactionsWithOpening.map((transaction, index) => (
-              <TransactionCard
-                key={transaction.id}
-                transaction={transaction}
-                index={index}
-              />
-            ))}
-          </div>
-
-          {!loading && transactionsWithOpening.length === 0 && (
-            <Card variant="flat">
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">No transactions found</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Pagination Controls */}
-        {!loading && (
-          <div className="flex items-center justify-between pt-4">
-            <Button
-              variant="outline"
-              disabled={!prevPageUrl}
-              onClick={() => fetchTransactions(currentPage - 1)}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {currentPage} of {lastPage}
-            </span>
-            <Button
-              variant="outline"
-              disabled={!nextPageUrl}
-              onClick={() => fetchTransactions(currentPage + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        )}
-
-        {/* Info Note */}
-        <Card variant="flat" className="animate-fade-in">
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground text-center">
-              💡 Account data is synced from the school finance system.
-              For any discrepancies, please contact the accounts office.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </StudentLayout>
-  );
-}
-
-function TransactionCard({ transaction, index }: { transaction: Transaction; index: number }) {
-  const isCredit = transaction.type === 'deposit';
-
-  return (
-    <Card
-      variant="interactive"
-      className={`animate-slide-up stagger-${Math.min(index + 1, 5)}`}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCredit ? 'bg-success/10' : 'bg-destructive/10'
-              }`}>
-              {isCredit ? (
-                <ArrowDownRight className="w-5 h-5 text-success" />
-              ) : (
-                <ArrowUpRight className="w-5 h-5 text-destructive" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-foreground truncate">{transaction.description || transaction.purpose}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline">{transaction.purpose}</Badge>
-                <span className="text-xs text-muted-foreground">
-                  {format(new Date(transaction.transaction_date), 'MMM d, yyyy')}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Bal: ₹{Number(transaction.balance_after).toLocaleString('en-IN', { maximumFractionDigits: 4 })}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className={`font-semibold ${isCredit ? 'text-success' : 'text-destructive'
-              }`}>
-              {isCredit ? '+' : '-'}₹{Number(transaction.amount).toLocaleString('en-IN', { maximumFractionDigits: 4 })}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </StudentLayout>
+    );
 }

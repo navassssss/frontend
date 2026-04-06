@@ -9,13 +9,13 @@ import {
   Clock,
   AlertTriangle,
   Users,
-  Plus,
   Trophy,
   Calendar,
   BookOpen,
   Award,
   ArrowUpRight,
-  GraduationCap
+  GraduationCap,
+  ArrowRight,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 
-// Helper to convert name to title case
 const toTitleCase = (str: string) => {
   if (!str) return str;
   return str.toLowerCase().split(' ').map(word =>
@@ -32,13 +31,11 @@ const toTitleCase = (str: string) => {
   ).join(' ');
 };
 
-// Helper to format time display
 const formatTime = (time: string | null) => {
   if (!time || time === 'No time') return 'No due time';
   return time;
 };
 
-// Helper to get dynamic greeting based on time of day
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -47,131 +44,28 @@ const getGreeting = () => {
 };
 
 const teacherQuickActions = [
-  {
-    title: 'Attendance',
-    description: 'Mark daily attendance',
-    icon: Calendar,
-    path: '/attendance',
-    color: 'bg-info'
-  },
-  {
-    title: 'CCE Works',
-    description: 'Manage assignments',
-    icon: BookOpen,
-    path: '/cce/works',
-    color: 'bg-warning'
-  },
-  {
-    title: 'My Duties',
-    description: '3 active duties',
-    icon: ClipboardList,
-    path: '/duties',
-    color: 'bg-primary'
-  },
-  {
-    title: 'My Tasks',
-    description: '5 pending today',
-    icon: CheckSquare,
-    path: '/tasks',
-    color: 'bg-accent'
-  },
-  {
-    title: 'Raise Issue',
-    description: 'Report a problem',
-    icon: AlertCircle,
-    path: '/issues/new',
-    color: 'bg-destructive'
-  },
-  {
-    title: 'Submit Report',
-    description: 'Complete a duty',
-    icon: FileText,
-    path: '/reports/new',
-    color: 'bg-success'
-  },
+  { title: 'Attendance', description: 'Mark daily attendance', icon: Calendar, path: '/attendance', color: 'text-blue-500', bg: 'bg-blue-50' },
+  { title: 'CCE Works', description: 'Manage assignments', icon: BookOpen, path: '/cce/works', color: 'text-amber-500', bg: 'bg-amber-50' },
+  { title: 'My Duties', description: '3 active duties', icon: ClipboardList, path: '/duties', color: 'text-primary', bg: 'bg-primary/10' },
+  { title: 'My Tasks', description: '5 pending today', icon: CheckSquare, path: '/tasks', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { title: 'Raise Issue', description: 'Report a problem', icon: AlertCircle, path: '/issues/new', color: 'text-red-500', bg: 'bg-red-50' },
+  { title: 'Submit Report', description: 'Complete a duty', icon: FileText, path: '/reports/new', color: 'text-violet-500', bg: 'bg-violet-50' },
 ];
 
 const principalQuickActions = [
-  {
-    title: 'Attendance',
-    description: 'View daily records',
-    icon: Calendar,
-    path: '/attendance',
-    color: 'bg-info'
-  },
-  {
-    title: 'Subjects',
-    description: 'Manage subjects',
-    icon: BookOpen,
-    path: '/subjects',
-    color: 'bg-success'
-  },
-  {
-    title: 'CCE Works',
-    description: 'Manage assignments',
-    icon: BookOpen,
-    path: '/cce/works',
-    color: 'bg-warning'
-  },
-  {
-    title: 'Student Marks',
-    description: 'View CCE marks',
-    icon: Award,
-    path: '/cce/student-marks',
-    color: 'bg-primary'
-  },
-  {
-    title: 'Teachers',
-    description: 'Manage staff',
-    icon: Users,
-    path: '/teachers',
-    color: 'bg-primary'
-  },
-  {
-    title: 'Create Duty',
-    description: 'Add new duty',
-    icon: ClipboardList,
-    path: '/duties/new',
-    color: 'bg-accent'
-  },
-  {
-    title: 'Achievements',
-    description: 'Review students',
-    icon: Trophy,
-    path: '/student-achievements',
-    color: 'bg-warning'
-  },
-  {
-    title: 'All Issues',
-    description: '5 open issues',
-    icon: AlertCircle,
-    path: '/issues',
-    color: 'bg-destructive'
-  },
-  {
-    title: 'Review Reports',
-    description: 'Pending reviews',
-    icon: FileText,
-    path: '/reports',
-    color: 'bg-primary'
-  },
+  { title: 'Attendance', description: 'View daily records', icon: Calendar, path: '/attendance', color: 'text-blue-500', bg: 'bg-blue-50' },
+  { title: 'Subjects', description: 'Manage subjects', icon: BookOpen, path: '/subjects', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { title: 'CCE Works', description: 'Manage assignments', icon: BookOpen, path: '/cce/works', color: 'text-amber-500', bg: 'bg-amber-50' },
+  { title: 'Student Marks', description: 'View CCE marks', icon: Award, path: '/cce/student-marks', color: 'text-primary', bg: 'bg-primary/10' },
+  { title: 'Teachers', description: 'Manage staff', icon: Users, path: '/teachers', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+  { title: 'Create Duty', description: 'Add new duty', icon: ClipboardList, path: '/duties/new', color: 'text-orange-500', bg: 'bg-orange-50' },
+  { title: 'Achievements', description: 'Review students', icon: Trophy, path: '/student-achievements', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+  { title: 'All Issues', description: '5 open issues', icon: AlertCircle, path: '/issues', color: 'text-red-500', bg: 'bg-red-50' },
+  { title: 'Review Reports', description: 'Pending reviews', icon: FileText, path: '/reports', color: 'text-violet-500', bg: 'bg-violet-50' },
 ];
 
-// Helper to map icon name string to component
 const getIcon = (iconName: string) => {
-  const icons: any = {
-    Users,
-    CheckSquare,
-    AlertTriangle,
-    Clock,
-    ClipboardList,
-    TrendingUp,
-    Calendar,
-    GraduationCap,
-    FileText,
-    Trophy,
-    BookOpen
-  };
+  const icons: any = { Users, CheckSquare, AlertTriangle, Clock, ClipboardList, TrendingUp, Calendar, GraduationCap, FileText, Trophy, BookOpen };
   return icons[iconName] || TrendingUp;
 };
 
@@ -193,301 +87,275 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Combine logic: Teachers with permission get the link too
   let quickActions = isPrincipal ? principalQuickActions : teacherQuickActions;
 
-  // Add review link for teachers with permission if not already present (Principal has it in default list)
-  if (!isPrincipal && user?.can_review_achievements) {
+  if (!isPrincipal && user?.permissions?.some(p => p.name === 'review_achievements')) {
     quickActions = [
-      {
-        title: 'Achievements',
-        description: 'Review students',
-        icon: Trophy,
-        path: '/student-achievements',
-        color: 'bg-warning'
-      },
+      { title: 'Achievements', description: 'Review students', icon: Trophy, path: '/student-achievements', color: 'text-yellow-500', bg: 'bg-yellow-50' },
       ...quickActions
     ];
   }
 
-  // Get primary stat for featured banner
-  const primaryStat = stats[0] || { label: 'Loading...', value: '0', icon: 'Users' };
+  // Identify attention items from stats
+  const attentionStats = stats.filter(s =>
+    ['Open Issues', 'Pending Reports', 'Pending Reviews'].includes(s.label) && parseInt(s.value) > 0
+  );
+
+  const attentionPaths: Record<string, string> = {
+    'Open Issues': '/issues',
+    'Pending Reports': '/reports',
+    'Pending Reviews': '/student-achievements',
+  };
+
+  const attentionColors: Record<string, string> = {
+    'Open Issues': 'text-red-600 bg-red-50 border-red-200',
+    'Pending Reports': 'text-amber-600 bg-amber-50 border-amber-200',
+    'Pending Reviews': 'text-violet-600 bg-violet-50 border-violet-200',
+  };
 
   return (
     <AppLayout title="Dashboard">
-      {/* Mobile View */}
+
+      {/* ── MOBILE VIEW ── */}
       <div className="lg:hidden p-4 space-y-6">
-        {/* Greeting */}
-        <div className="animate-fade-in">
+        <div>
           <h2 className="text-xl font-bold text-foreground">
-            {getGreeting()}, {toTitleCase(user?.name?.split(' ')[0] || 'User')}
+            {/* {getGreeting()}, {toTitleCase(user?.name?.split(' ')[0] || 'User')} */}
+            Dashboard
           </h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Here's your overview for today
-          </p>
+          <p className="text-muted-foreground text-sm mt-0.5">Here's your overview for today</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3 animate-slide-up">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
           {loading ? (
-            <p className="col-span-2 text-center text-sm text-muted-foreground">Loading stats...</p>
+            <p className="col-span-2 text-center text-sm text-muted-foreground py-4">Loading...</p>
           ) : stats.map((stat) => {
             const Icon = getIcon(stat.icon);
             return (
-              <Card key={stat.label} variant="stat" className="text-center">
-                <CardContent className="p-3">
-                  <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mx-auto mb-2`}>
-                    <Icon className="w-5 h-5" />
+              <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-9 h-9 rounded-xl ${stat.color || 'bg-primary/10'} flex items-center justify-center`}>
+                    <Icon className="w-4 h-4 text-foreground" />
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{stat.label}</p>
-                </CardContent>
-              </Card>
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground/40" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+              </div>
             );
           })}
         </div>
 
         {/* Quick Actions */}
-        <div className="animate-slide-up stagger-2" style={{ animationFillMode: 'backwards' }}>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map((action) => {
-              // Dynamic description update based on stats
-              let description = action.description;
-              if (action.title === 'All Issues') {
-                const openIssuesStat = stats.find(s => s.label === 'Open Issues');
-                if (openIssuesStat) {
-                  description = `${openIssuesStat.value} open issues`;
-                }
-              }
-              if (action.title === 'Review Reports') {
-                const pendingReportsStat = stats.find(s => s.label === 'Pending Reports');
-                if (pendingReportsStat) {
-                  description = `${pendingReportsStat.value} pending reviews`;
-                }
-              }
-              if (action.title === 'My Tasks') {
-                const pendingTasksStat = stats.find(s => s.label === 'Pending Tasks');
-                if (pendingTasksStat) {
-                  description = `${pendingTasksStat.value} pending today`;
-                }
-              }
-              if (action.title === 'My Duties') {
-                const activeDutiesStat = stats.find(s => s.label === 'Active Duties');
-                if (activeDutiesStat) {
-                  description = `${activeDutiesStat.value} active duties`;
-                }
-              }
-
-              return (
-                <Card
-                  key={action.title}
-                  variant="interactive"
-                  onClick={() => navigate(action.path)}
-                >
-                  <CardContent className="p-4">
-                    <div className={`w-11 h-11 rounded-xl ${action.color} flex items-center justify-center mb-3`}>
-                      <action.icon className="w-5 h-5 text-primary-foreground" />
-                    </div>
-                    <h4 className="font-semibold text-foreground text-sm">{action.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {quickActions.slice(0, 6).map((action) => (
+              <button
+                key={action.title}
+                onClick={() => navigate(action.path)}
+                className="flex flex-col items-center gap-2 p-3 bg-card border border-border rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95"
+              >
+                <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center`}>
+                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                </div>
+                <span className="text-[10px] font-semibold text-foreground text-center leading-tight">{action.title}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Upcoming Tasks */}
-        <div className="animate-slide-up stagger-3" style={{ animationFillMode: 'backwards' }}>
+        {/* Tasks */}
+        <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {isPrincipal ? 'Recent Active Tasks' : "Today's Tasks"}
-            </h3>
-            <button
-              onClick={() => navigate('/tasks')}
-              className="text-sm text-primary font-medium flex items-center gap-1"
-            >
-              View all <ChevronRight className="w-4 h-4" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Recent Tasks</h3>
+            <button onClick={() => navigate('/tasks')} className="text-xs text-primary font-medium flex items-center gap-1">
+              View all <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
           <div className="space-y-2">
-            {loading ? <p className="text-center text-sm py-4">Loading tasks...</p> :
-              upcomingTasks.length === 0 ? <p className="text-center text-sm py-4 text-muted-foreground">No pending tasks</p> :
-                upcomingTasks.map((task) => (
-                  <Card
-                    key={task.id}
-                    variant="interactive"
-                    onClick={() => navigate(`/tasks/${task.id}`)}
-                  >
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${task.status === 'completed' ? 'bg-success' : 'bg-warning'
-                          }`} />
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground text-sm truncate">{toTitleCase(task.title)}</p>
-                          <p className="text-xs text-muted-foreground">{formatTime(task.time)}</p>
-                        </div>
-                      </div>
-                      <Badge variant={task.status === 'completed' ? 'completed' : 'pending'}>
-                        {toTitleCase(task.status)}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                ))
-            }
+            {upcomingTasks.slice(0, 4).map((task) => (
+              <div
+                key={task.id}
+                onClick={() => navigate(`/tasks/${task.id}`)}
+                className="flex items-center justify-between p-3 bg-card border border-border rounded-xl shadow-sm cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${task.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{toTitleCase(task.title)}</p>
+                    <p className="text-xs text-muted-foreground">{formatTime(task.time)}</p>
+                  </div>
+                </div>
+                <Badge variant={task.status === 'completed' ? 'completed' : 'pending'} className="shrink-0 ml-2 text-[10px]">
+                  {toTitleCase(task.status)}
+                </Badge>
+              </div>
+            ))}
+            {!loading && upcomingTasks.length === 0 && (
+              <p className="text-center text-sm py-4 text-muted-foreground">No pending tasks</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Desktop View - Completely Different Layout */}
-      <div className="hidden lg:block p-6 space-y-6">
-        {/* Header with Greeting */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              {getGreeting()}, {toTitleCase(user?.name?.split(' ')[0] || 'User')}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Here's your overview for today
-            </p>
-          </div>
+      {/* ── DESKTOP VIEW ── */}
+      <div className="hidden lg:flex flex-col h-full p-8 space-y-8">
+
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            {/* {getGreeting()}, {toTitleCase(user?.name?.split(' ')[0] || 'User')} */}
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {isPrincipal ? 'Reviewing metrics for your institution today' : "Here's your personal overview for today"}
+          </p>
         </div>
 
-        {/* Stats Grid - All stats in one row */}
+        {/* Top Stat Row — clean flat cards like img2 */}
         <div className="grid grid-cols-4 gap-4">
           {loading ? (
-            <p className="col-span-4 text-center text-sm text-muted-foreground py-8">Loading stats...</p>
-          ) : stats.map((stat, index) => {
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl p-6 animate-pulse h-28" />
+            ))
+          ) : stats.map((stat) => {
             const Icon = getIcon(stat.icon);
-            const isFirst = index === 0;
-
-            if (isFirst) {
-              // Featured stat - larger card
-              return (
-                <Card key={stat.label} className="col-span-2 bg-gradient-to-br from-primary to-primary/90 border-0 shadow-xl text-white">
-                  <CardContent className="p-8">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-3">
-                        <p className="text-white/80 text-sm font-medium uppercase tracking-wide">
-                          {stat.label}
-                        </p>
-                        <p className="text-6xl font-bold">{stat.value}</p>
-                        <p className="text-white/70 text-sm">Updated just now</p>
-                      </div>
-                      <div className="text-white/20">
-                        <Icon className="w-32 h-32" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            // Regular stats
             return (
-              <Card key={stat.label} className="hover:shadow-lg transition-all duration-300 border-2">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center shadow-md`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <ArrowUpRight className="w-5 h-5 text-muted-foreground" />
+              <div
+                key={stat.label}
+                className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-default"
+              >
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">{stat.label}</p>
+                <div className="flex items-end justify-between">
+                  <p className="text-4xl font-black text-foreground tracking-tight leading-none">{stat.value}</p>
+                  <div className={`w-9 h-9 rounded-xl ${stat.color || 'bg-primary/10'} flex items-center justify-center`}>
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <p className="text-3xl font-bold text-foreground mb-1">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Quick Actions - Takes 2 columns */}
-          <div className="col-span-2 space-y-4">
+        {/* Main 2-Column Layout */}
+        <div className="grid grid-cols-3 gap-6 flex-1">
+
+          {/* LEFT: Quick Actions */}
+          <div className="col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">Quick Actions</h2>
+              <h2 className="text-lg font-bold text-foreground">Quick Actions</h2>
             </div>
+
             <div className="grid grid-cols-3 gap-4">
-              {quickActions.slice(0, 6).map((action) => {
+              {quickActions.slice(0, 9).map((action) => {
                 let description = action.description;
-                if (action.title === 'All Issues') {
-                  const openIssuesStat = stats.find(s => s.label === 'Open Issues');
-                  if (openIssuesStat) description = `${openIssuesStat.value} open issues`;
-                }
-                if (action.title === 'Review Reports') {
-                  const pendingReportsStat = stats.find(s => s.label === 'Pending Reports');
-                  if (pendingReportsStat) description = `${pendingReportsStat.value} pending reviews`;
-                }
-                if (action.title === 'My Tasks') {
-                  const pendingTasksStat = stats.find(s => s.label === 'Pending Tasks');
-                  if (pendingTasksStat) description = `${pendingTasksStat.value} pending today`;
-                }
-                if (action.title === 'My Duties') {
-                  const activeDutiesStat = stats.find(s => s.label === 'Active Duties');
-                  if (activeDutiesStat) description = `${activeDutiesStat.value} active duties`;
-                }
+                const openIssuesStat = stats.find(s => s.label === 'Open Issues');
+                const pendingReportsStat = stats.find(s => s.label === 'Pending Reports');
+                const pendingTasksStat = stats.find(s => s.label === 'Pending Tasks');
+                const activeDutiesStat = stats.find(s => s.label === 'Active Duties');
+                if (action.title === 'All Issues' && openIssuesStat) description = `${openIssuesStat.value} open`;
+                if (action.title === 'Review Reports' && pendingReportsStat) description = `${pendingReportsStat.value} pending`;
+                if (action.title === 'My Tasks' && pendingTasksStat) description = `${pendingTasksStat.value} pending`;
+                if (action.title === 'My Duties' && activeDutiesStat) description = `${activeDutiesStat.value} active`;
 
                 return (
-                  <Card
+                  <button
                     key={action.title}
-                    className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border-2"
                     onClick={() => navigate(action.path)}
+                    className="group flex items-center gap-3 p-4 bg-card border border-border rounded-2xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all text-left"
                   >
-                    <CardContent className="p-6">
-                      <div className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center mb-4 shadow-lg`}>
-                        <action.icon className="w-7 h-7 text-primary-foreground" />
-                      </div>
-                      <h3 className="font-bold text-base mb-1">{action.title}</h3>
-                      <p className="text-sm text-muted-foreground">{description}</p>
-                    </CardContent>
-                  </Card>
+                    <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 ${action.color}`} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-foreground">{action.title}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{description}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-primary transition-colors" />
+                  </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Recent Tasks - Takes 1 column */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">
-                {isPrincipal ? 'Recent Tasks' : "Today's Tasks"}
-              </h2>
-              <button
-                onClick={() => navigate('/tasks')}
-                className="text-sm text-primary font-medium flex items-center gap-1 hover:gap-2 transition-all"
-              >
-                View all <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              {loading ? <p className="text-center text-sm py-8">Loading tasks...</p> :
-                upcomingTasks.length === 0 ? <p className="text-center text-sm py-8 text-muted-foreground">No pending tasks</p> :
-                  upcomingTasks.slice(0, 5).map((task) => (
-                    <Card
-                      key={task.id}
-                      className="hover:shadow-lg transition-all cursor-pointer border-2"
-                      onClick={() => navigate(`/tasks/${task.id}`)}
+          {/* RIGHT: Attention + Tasks */}
+          <div className="space-y-6">
+
+            {/* Attention Required */}
+            {attentionStats.length > 0 && (
+              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-4 border-b border-border bg-red-50/50">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  <h3 className="text-sm font-bold text-foreground">Attention Required</h3>
+                </div>
+                <div className="divide-y divide-border">
+                  {attentionStats.map((stat) => (
+                    <div
+                      key={stat.label}
+                      onClick={() => navigate(attentionPaths[stat.label] || '#')}
+                      className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 cursor-pointer transition-colors"
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <p className="font-semibold text-sm flex-1">{toTitleCase(task.title)}</p>
-                          <Badge variant={task.status === 'completed' ? 'completed' : 'pending'} className="flex-shrink-0">
-                            {toTitleCase(task.status)}
-                          </Badge>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{stat.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Requires your attention</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-3">
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-full border ${attentionColors[stat.label] || 'text-foreground bg-muted border-border'}`}>
+                          {stat.value}
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Tasks */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 className="text-sm font-bold text-foreground">
+                  {isPrincipal ? 'Recent Tasks' : "Today's Tasks"}
+                </h3>
+                <button
+                  onClick={() => navigate('/tasks')}
+                  className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-1.5 transition-all"
+                >
+                  View all <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="divide-y divide-border">
+                {loading ? (
+                  <p className="text-center text-sm py-8 text-muted-foreground">Loading tasks...</p>
+                ) : upcomingTasks.length === 0 ? (
+                  <p className="text-center text-sm py-8 text-muted-foreground">No pending tasks 🎉</p>
+                ) : upcomingTasks.slice(0, 6).map((task) => (
+                  <div
+                    key={task.id}
+                    onClick={() => navigate(`/tasks/${task.id}`)}
+                    className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${task.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{toTitleCase(task.title)}</p>
                         <p className="text-xs text-muted-foreground">{formatTime(task.time)}</p>
-                      </CardContent>
-                    </Card>
-                  ))
-              }
+                      </div>
+                    </div>
+                    <Badge variant={task.status === 'completed' ? 'completed' : 'pending'} className="text-[10px] shrink-0 ml-2">
+                      {toTitleCase(task.status)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
         </div>
       </div>
+
     </AppLayout>
   );
 }

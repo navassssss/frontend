@@ -20,14 +20,21 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Skip the hard redirect if the failed request was a login attempt
+    const isLoginEndpoint = 
+      error.config && 
+      (error.config.url?.endsWith('/login') || error.config.url?.endsWith('/student/login'));
+
     // Handle 401 Unauthorized or 403 Forbidden
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    if (!isLoginEndpoint && error.response && (error.response.status === 401 || error.response.status === 403)) {
       // Clear tokens
       localStorage.removeItem("token");
       localStorage.removeItem("student_token");
 
       // Redirect to login page (root path)
-      window.location.href = "/";
+      if (window.location.pathname !== '/' && window.location.pathname !== '/student/login') {
+        window.location.href = "/";
+      }
     }
     return Promise.reject(error);
   }

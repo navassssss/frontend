@@ -140,7 +140,7 @@ const StudentFeePage: React.FC = () => {
 
     if (loading) {
         return (
-            <StudentLayout title="Fee Status">
+            <StudentLayout title="Monthly Donations">
                 <div className="space-y-4 animate-pulse">
                     <Card>
                         <CardContent className="p-4">
@@ -154,11 +154,11 @@ const StudentFeePage: React.FC = () => {
 
     if (!student) {
         return (
-            <StudentLayout title="Fee Status">
+            <StudentLayout title="Monthly Donations">
                 <Card>
                     <CardContent className="p-8 text-center text-muted-foreground">
                         <IndianRupee className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p>No fee records found</p>
+                        <p>No donation records found</p>
                     </CardContent>
                 </Card>
             </StudentLayout>
@@ -166,14 +166,14 @@ const StudentFeePage: React.FC = () => {
     }
 
     return (
-        <StudentLayout title="Fee Status">
+        <StudentLayout title="Monthly Donations">
             <div className="space-y-4">
                 {/* Overview Card */}
                 <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                     <CardContent className="p-4">
                         <div className="flex items-center gap-2 mb-3">
                             <TrendingUp className="w-5 h-5 text-primary" />
-                            <h2 className="font-semibold">Fee Overview</h2>
+                            <h2 className="font-semibold">Donation Overview</h2>
                         </div>
 
                         {overview && (

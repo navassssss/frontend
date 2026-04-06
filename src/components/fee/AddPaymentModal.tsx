@@ -598,7 +598,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                                 className="h-7 text-xs"
                                             >
                                                 <Edit2 className="w-3 h-3 mr-1" />
-                                                {showAdjustment ? 'Hide' : 'Adjust Fees'}
+                                                {showAdjustment ? 'Hide' : 'Adjust Donations'}
                                             </Button>
                                         </div>
 
@@ -647,7 +647,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                 {/* Fee Adjustment Section */}
                                 {showAdjustment && monthlyStatus.length > 0 && (
                                     <div className="space-y-2 p-3 border rounded-lg bg-background">
-                                        <Label className="text-sm">Adjust Monthly Fees</Label>
+                                        <Label className="text-sm">Adjust Monthly Donations</Label>
                                         <div className="space-y-2 max-h-40 overflow-y-auto">
                                             {monthlyStatus
                                                 .filter(s => s.status !== 'paid')

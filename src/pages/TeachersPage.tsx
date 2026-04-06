@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, ChevronRight, Phone, Mail, ClipboardList, CheckSquare, BookOpen, FileText, GraduationCap } from 'lucide-react';
+import { Plus, Search, ChevronRight, Phone, Mail, ClipboardList, CheckSquare, BookOpen, FileText, GraduationCap, Briefcase } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ interface Teacher {
   initials: string;
   dutiesCount: number;
   tasksCount: number;
-  can_review_achievements: boolean;
+  permissions?: { id: number, name: string, label: string }[];
 }
 
 const initialTeachers: Teacher[] = [
@@ -34,7 +34,7 @@ const initialTeachers: Teacher[] = [
     initials: 'JS',
     dutiesCount: 3,
     tasksCount: 5,
-    can_review_achievements: false
+    permissions: []
   },
   {
     id: '2',
@@ -46,7 +46,7 @@ const initialTeachers: Teacher[] = [
     initials: 'JD',
     dutiesCount: 2,
     tasksCount: 3,
-    can_review_achievements: false
+    permissions: []
   },
   {
     id: '3',
@@ -57,7 +57,7 @@ const initialTeachers: Teacher[] = [
     initials: 'MJ',
     dutiesCount: 4,
     tasksCount: 2,
-    can_review_achievements: false
+    permissions: []
   },
   {
     id: '4',
@@ -69,7 +69,7 @@ const initialTeachers: Teacher[] = [
     initials: 'SW',
     dutiesCount: 5,
     tasksCount: 7,
-    can_review_achievements: true
+    permissions: [{ id: 1, name: 'review_achievements', label: 'Review Achievements' }]
   },
   {
     id: '5',
@@ -80,7 +80,7 @@ const initialTeachers: Teacher[] = [
     initials: 'DB',
     dutiesCount: 2,
     tasksCount: 4,
-    can_review_achievements: false
+    permissions: []
   },
   {
     id: '6',
@@ -92,7 +92,7 @@ const initialTeachers: Teacher[] = [
     initials: 'ED',
     dutiesCount: 1,
     tasksCount: 2,
-    can_review_achievements: false
+    permissions: []
   },
 ];
 
@@ -114,7 +114,7 @@ export default function TeachersPage() {
             .slice(0, 2), // Limit to first 2 letters
           dutiesCount: teacher.duties_count ?? 0,
           tasksCount: teacher.tasks_count ?? 0,
-          can_review_achievements: teacher.can_review_achievements
+          permissions: teacher.permissions || []
         }));
 
         setTeachers(teachersWithInitials);
@@ -304,51 +304,43 @@ export default function TeachersPage() {
               key={teacher.id}
               variant="interactive"
               onClick={() => navigate(`/teachers/${teacher.id}`)}
-              className="animate-slide-up"
+              className="animate-slide-up group border-border/60 hover:border-primary/50 transition-colors shadow-sm"
               style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'backwards' }}
             >
-              <CardContent className="p-5">
-                <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <span className="text-base font-bold text-primary-foreground">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                  {/* Smaller Avatar */}
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                    <span className="text-xs font-bold text-primary group-hover:text-primary-foreground">
                       {teacher.initials}
                     </span>
                   </div>
 
-                  {/* Content */}
+                  {/* Inline Content */}
                   <div className="flex-1 min-w-0">
-                    {/* Name and Role */}
-                    <div className="mb-2">
-                      <h3 className="font-bold text-base text-foreground mb-0.5">{teacher.name}</h3>
-                      <p className="text-sm text-muted-foreground capitalize">{teacher.role}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-sm text-foreground truncate">{teacher.name}</h3>
+                        {teacher.permissions && teacher.permissions.length > 0 && (
+                          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[10px]" title={`${teacher.permissions.length} Custom Permissions`}>
+                             <Briefcase className="w-2.5 h-2.5 text-primary" />
+                          </span>
+                        )}
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/50 flex-shrink-0 group-hover:text-primary transition-colors" />
                     </div>
 
-                    {/* Department and Stats */}
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs font-medium">
-                        {teacher.department}
-                      </Badge>
-                      {teacher.can_review_achievements && (
-                        <Badge variant="outline" className="text-xs border-success/30 text-success bg-success/5">
-                          ✓ Reviewer
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Stats Row */}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold text-foreground">{teacher.dutiesCount}</span> duties
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold text-foreground">{teacher.tasksCount}</span> tasks
-                      </span>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5 text-[11px] text-muted-foreground">
+                      <span className="capitalize font-medium text-foreground/80">{teacher.role}</span>
+                      <span className="opacity-40">•</span>
+                      <span className="truncate max-w-[120px] sm:max-w-none">{teacher.department || 'General'}</span>
+                      <span className="opacity-40 hidden sm:inline-block">•</span>
+                      <div className="hidden sm:flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
+                         <span className={teacher.dutiesCount > 0 ? 'text-primary' : ''}>{teacher.dutiesCount} Duties</span>
+                         <span className={teacher.tasksCount > 0 ? 'text-success' : ''}>{teacher.tasksCount} Tasks</span>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Chevron Icon */}
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
                 </div>
               </CardContent>
             </Card>

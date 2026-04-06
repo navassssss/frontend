@@ -4,33 +4,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
-  <meta name="theme-color" content="#0D9488" />
+
+  <!-- PWA Theme -->
+  <meta name="theme-color" content="#008f6c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DHIC Portal" />
+  <meta name="application-name" content="DHIC Portal" />
+  <meta name="msapplication-TileColor" content="#008f6c" />
+  <meta name="msapplication-tap-highlight" content="no" />
+
+  <!-- Icons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-  <title>EduGov - School E-Governance System</title>
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Page Meta -->
+  <title>DHIC Portal — School E-Governance</title>
   <meta name="description"
-    content="Modern school e-governance system for teachers, principals, and management. Manage duties, tasks, reports, and issues efficiently." />
-  <meta name="author" content="EduGov" />
-  <meta name="keywords" content="school management, e-governance, education, duties, tasks, teachers, principal" />
+    content="DHIC School E-Governance Portal for staff and students. Manage duties, tasks, reports, attendance, and announcements." />
+  <meta name="author" content="DHIC" />
+  <meta name="keywords" content="school management, e-governance, education, duties, tasks, teachers, principal, DHIC" />
 
-  <meta property="og:title" content="EduGov - School E-Governance System" />
-  <meta property="og:description"
-    content="Modern school e-governance system for teachers, principals, and management." />
+  <!-- Open Graph -->
+  <meta property="og:title" content="DHIC Portal — School E-Governance" />
+  <meta property="og:description" content="Staff & Student management portal for DHIC." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <meta property="og:image" content="/android-chrome-512x512.png" />
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@EduGov" />
-  <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="DHIC Portal" />
+  <meta name="twitter:image" content="/android-chrome-512x512.png" />
 
-  <link rel="canonical" href="https://edugov.app" />
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Splash screen colours -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    /* Initial loading skeleton to prevent FOUC */
+    #root:empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100svh;
+      background: #f8fafc;
+    }
+    #root:empty::after {
+      content: '';
+      width: 40px;
+      height: 40px;
+      border: 3px solid #d1fae5;
+      border-top-color: #008f6c;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 
 <body>
