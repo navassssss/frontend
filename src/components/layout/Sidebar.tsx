@@ -4,10 +4,11 @@ import {
     Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText,
     BookOpen, IndianRupee, GraduationCap, LayoutDashboard, LogOut, Settings, Calendar,
     Plus, ChevronDown, Award, Briefcase, DollarSign, Building2, HelpCircle, HeartHandshake,
-    AlertTriangle, Trophy, Megaphone
+    AlertTriangle, Trophy, Megaphone, Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import api from '@/lib/api';
 
 interface SubMenuItem {
@@ -78,6 +79,7 @@ const managerNavItems: NavItem[] = [
 
 export function Sidebar() {
     const { user, logout } = useAuth();
+    const { unreadCount } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
     const isPrincipal = user?.role === 'principal' || user?.role === 'manager' || (user?.role === 'teacher' && user?.is_vice_principal);
@@ -262,6 +264,20 @@ export function Sidebar() {
 
             {/* Footer Actions */}
             <div className="pb-8 pt-6 space-y-1">
+                <button
+                    onClick={() => navigate('/notifications')}
+                    className="w-full flex items-center gap-3 pl-6 pr-4 py-3 text-slate-600 font-bold hover:bg-slate-200/50 hover:text-slate-900 transition-colors mr-6 rounded-r-xl relative"
+                >
+                    <div className="relative">
+                        <Bell className="w-[18px] h-[18px] flex-shrink-0 text-slate-500" strokeWidth={2.5} />
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-bold rounded-full h-4 min-w-[1rem] px-1 flex items-center justify-center">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                        )}
+                    </div>
+                    <span className="text-[14px]">Notifications</span>
+                </button>
                 <button
                     className="w-full flex items-center gap-3 pl-6 pr-4 py-3 text-slate-600 font-bold hover:bg-slate-200/50 hover:text-slate-900 transition-colors mr-6 rounded-r-xl"
                 >

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
+import { useNotifications } from '@/contexts/NotificationsContext';
 
 interface HeaderProps {
   title?: string;
@@ -15,32 +16,8 @@ interface HeaderProps {
 export function Header({ title, showBack = false, onBack }: HeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [hasUnread, setHasUnread] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { unreadCount } = useNotifications();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
-  useEffect(() => {
-    // Check for unread notifications
-    const checkUnread = async () => {
-      try {
-        const { data } = await api.get('/notifications');
-        if (Array.isArray(data)) {
-          const unread = data.filter((n: any) => !n.read_at);
-          setHasUnread(unread.length > 0);
-          setUnreadCount(unread.length);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    if (user) {
-      checkUnread();
-      // Poll every minute
-      const interval = setInterval(checkUnread, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
