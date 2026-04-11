@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { StudentAuthProvider, useStudentAuth } from "@/contexts/StudentAuthContext";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { PWAPrompt } from "@/components/pwa/PWAPrompt";
 
 // Landing Page
@@ -584,7 +585,9 @@ const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <StudentAuthProvider>
-          <AppRoutes />
+          <NotificationsProvider>
+            <AppRoutes />
+          </NotificationsProvider>
         </StudentAuthProvider>
       </AuthProvider>
     ),
