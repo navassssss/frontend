@@ -194,11 +194,11 @@ export default function AnnouncementsPage() {
                                                         <Zap className="w-2.5 h-2.5" /> Pinned
                                                     </span>
                                                 )}
-                                                <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${AUDIENCE_META[featured.audience_type].color}`}>
-                                                    {AUDIENCE_META[featured.audience_type].label}
+                                                <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${AUDIENCE_META[featured.audience_type as keyof typeof AUDIENCE_META]?.color || 'bg-slate-100 text-slate-500'}`}>
+                                                    {AUDIENCE_META[featured.audience_type as keyof typeof AUDIENCE_META]?.label || featured.audience_type}
                                                 </span>
-                                                <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${TARGET_META[featured.target_type].color}`}>
-                                                    {TARGET_META[featured.target_type].label}
+                                                <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${TARGET_META[featured.target_type as keyof typeof TARGET_META]?.color || 'bg-slate-100 text-slate-500'}`}>
+                                                    {TARGET_META[featured.target_type as keyof typeof TARGET_META]?.label || featured.target_type}
                                                 </span>
                                             </div>
                                             <span className="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
@@ -376,8 +376,8 @@ export default function AnnouncementsPage() {
                                                 <div className="flex-1 min-w-0">
                                                     {/* Meta row */}
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${TARGET_META[a.target_type].color}`}>
-                                                            {TARGET_META[a.target_type].label}
+                                                        <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${TARGET_META[a.target_type as keyof typeof TARGET_META]?.color || 'bg-slate-100 text-slate-500'}`}>
+                                                            {TARGET_META[a.target_type as keyof typeof TARGET_META]?.label || a.target_type}
                                                         </span>
                                                         <span className="text-[10px] text-slate-400 font-medium">
                                                             {a.published_at

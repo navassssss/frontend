@@ -173,7 +173,7 @@ export default function AnnouncementDetailPage() {
                                     <Zap className="w-2.5 h-2.5" /> Pinned
                                 </span>
                             )}
-                            <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${AUDIENCE_COLOR[announcement.audience_type]}`}>
+                            <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${AUDIENCE_COLOR[announcement.audience_type] || 'bg-slate-100 text-slate-500'}`}>
                                 {announcement.audience_type}
                             </span>
                             <span className="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full bg-slate-100 text-slate-600">
