@@ -165,7 +165,15 @@ async function subscribeToPush(reg: ServiceWorkerRegistration | null) {
 
   try {
     const existing = await reg.pushManager.getSubscription();
-    if (existing) return; // Already subscribed
+    if (existing) {
+      // Always sync with backend on mount/check just in case the server database was reset
+      try {
+        await api.post('/push/subscribe', existing.toJSON());
+      } catch (e) {
+        console.error('[PWA] Failed to re-sync existing subscription:', e);
+      }
+      return;
+    }
 
     // Use environment variable as primary, fallback to API (for reliability)
     let vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
