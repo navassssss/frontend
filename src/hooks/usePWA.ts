@@ -163,21 +163,29 @@ export function usePWA(): PWAState {
 async function subscribeToPush(reg: ServiceWorkerRegistration | null) {
   if (!reg) return;
 
+  console.log('[PWA] Checking push subscription status...');
+
   try {
     const existing = await reg.pushManager.getSubscription();
     if (existing) {
+      console.log('[PWA] Browser already has a Push Subscription:', existing.endpoint);
       // Always sync with backend on mount/check just in case the server database was reset
       try {
+        console.log('[PWA] Re-syncing existing subscription to backend /api/push/subscribe...');
         await api.post('/push/subscribe', existing.toJSON());
-      } catch (e) {
-        console.error('[PWA] Failed to re-sync existing subscription:', e);
+        console.log('[PWA] Re-sync successful!');
+      } catch (e: any) {
+        console.error('[PWA] Failed to re-sync existing subscription:', e.response?.data || e.message);
       }
       return;
     }
 
+    console.log('[PWA] No existing subscription. Preparing to subscribe...');
+
     // Use environment variable as primary, fallback to API (for reliability)
     let vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
     if (!vapidPublicKey) {
+        console.log('[PWA] No VAPID key in .env, fetching from /api/push/vapid-key...');
         const { data } = await api.get('/push/vapid-key');
         vapidPublicKey = data?.publicKey ?? '';
     }
@@ -187,21 +195,26 @@ async function subscribeToPush(reg: ServiceWorkerRegistration | null) {
       return;
     }
 
+    console.log('[PWA] Using VAPID Public Key:', vapidPublicKey);
+
     // Base64url → Uint8Array
     const padding = '='.repeat((4 - (vapidPublicKey.length % 4)) % 4);
     const base64  = (vapidPublicKey + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawKey  = Uint8Array.from(window.atob(base64), (c) => c.charCodeAt(0));
 
-
+    console.log('[PWA] Requesting push subscription from browser...');
     const subscription = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: rawKey.buffer as ArrayBuffer,
     });
 
+    console.log('[PWA] Browser granted subscription:', subscription.endpoint);
+    console.log('[PWA] Sending new subscription to backend...');
+    
     // Register subscription with backend
     await api.post('/push/subscribe', subscription.toJSON());
-    console.log('[PWA] Push subscription registered with server');
-  } catch (err) {
-    console.error('[PWA] Push subscription failed:', err);
+    console.log('[PWA] Push subscription rigidly registered with server!');
+  } catch (err: any) {
+    console.error('[PWA] Push subscription complete failure:', err.response?.data || err.message || err);
   }
 }
