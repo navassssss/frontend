@@ -61,7 +61,7 @@ export default function AnnouncementsPage() {
         setIsLoading(true);
         try {
             const res = await api.get('/announcements');
-            setAnnouncements(res.data);
+            setAnnouncements(Array.isArray(res.data) ? res.data : []);
         } catch {
             toast.error('Failed to load announcements');
         } finally {
@@ -72,6 +72,7 @@ export default function AnnouncementsPage() {
     useEffect(() => { fetchAnnouncements(); }, []);
 
     const filtered = useMemo(() => {
+        if (!Array.isArray(announcements)) return [];
         const list = tab === 'all' ? announcements : announcements.filter(a => a.audience_type === tab);
         return list;
     }, [announcements, tab]);
@@ -300,7 +301,7 @@ export default function AnnouncementsPage() {
                                             </div>
                                             <div className="bg-white/10 rounded-xl p-3 text-center">
                                                 <p className="text-lg font-black text-white">
-                                                    {filtered.filter(a => a.is_pinned).length}
+                                                    {Array.isArray(filtered) ? filtered.filter(a => a.is_pinned).length : 0}
                                                 </p>
                                                 <p className="text-[10px] text-white/60 font-semibold mt-0.5">Pinned</p>
                                             </div>
@@ -323,8 +324,8 @@ export default function AnnouncementsPage() {
                                         </p>
                                         <div className="space-y-2.5">
                                             {[
-                                                { label: 'For Teachers', icon: Users,         color: 'text-blue-600 bg-blue-50',     count: announcements.filter(a => a.audience_type === 'teachers').length },
-                                                { label: 'For Students', icon: GraduationCap, color: 'text-emerald-600 bg-emerald-50', count: announcements.filter(a => a.audience_type === 'students').length },
+                                                { label: 'For Teachers', icon: Users,         color: 'text-blue-600 bg-blue-50',     count: Array.isArray(announcements) ? announcements.filter(a => a.audience_type === 'teachers').length : 0 },
+                                                { label: 'For Students', icon: GraduationCap, color: 'text-emerald-600 bg-emerald-50', count: Array.isArray(announcements) ? announcements.filter(a => a.audience_type === 'students').length : 0 },
                                             ].map(item => (
                                                 <div key={item.label} className="flex items-center gap-3">
                                                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${item.color}`}>
