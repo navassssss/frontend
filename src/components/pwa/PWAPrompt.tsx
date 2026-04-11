@@ -76,8 +76,8 @@ export function PWAPrompt() {
             <div className="flex-1 min-w-0">
               <p className="font-black text-sm mb-0.5">Install DHIC Portal</p>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Tap <strong className="text-white inline-flex items-center gap-1"><Share className="w-3 h-3" /> Share</strong> then{' '}
-                <strong className="text-white">"Add to Home Screen"</strong> to install and enable notifications.
+                For reliable notifications on iPhone, please tap <strong className="text-white inline-flex items-center gap-1"><Share className="w-3 h-3" /> Share</strong> then{' '}
+                <strong className="text-white">"Add to Home Screen"</strong> from the Safari Share menu.
               </p>
             </div>
             <button onClick={dismissIOSTip} className="text-slate-400 hover:text-white shrink-0">

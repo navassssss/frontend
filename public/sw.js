@@ -3,120 +3,60 @@
 // Handles: offline caching, background sync, push notifications
 // ============================================================
 
-const CACHE_VERSION = 'v1';
-const STATIC_CACHE  = `dhic-static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `dhic-dynamic-${CACHE_VERSION}`;
-const OFFLINE_PAGE  = '/offline.html';
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
 
-// Static assets to pre-cache on install
-const STATIC_ASSETS = [
-  '/',
-  '/offline.html',
-  '/manifest.json',
-  '/android-chrome-192x192.png',
-  '/android-chrome-512x512.png',
-  '/apple-touch-icon.png',
-  '/favicon.ico',
-];
+if (workbox) {
+  console.log('[SW] Workbox loaded successfully');
+  
+  const { registerRoute, setCatchHandler } = workbox.routing;
+  const { NetworkFirst, StaleWhileRevalidate, CacheFirst } = workbox.strategies;
+  const { CacheableResponsePlugin } = workbox.cacheableResponse;
+  const { ExpirationPlugin } = workbox.expiration;
 
-// API routes to cache for offline use (stale-while-revalidate)
-const CACHE_API_PATTERNS = [
-  /\/api\/tasks/,
-  /\/api\/announcements/,
-  /\/api\/duties/,
-  /\/api\/attendance/,
-  /\/api\/reports/,
-  /\/api\/user/,
-];
-
-// ── Install: pre-cache static shell ──────────────────────────
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      console.log('[SW] Pre-caching static assets');
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[SW] Some static assets failed to cache:', err);
-      });
-    }).then(() => self.skipWaiting())
+  // 1. Notifications specific cache: NetworkFirst, max 5 mins expiry
+  registerRoute(
+    ({ url }) => url.pathname.startsWith('/api/notifications'),
+    new NetworkFirst({
+      cacheName: 'dhic-notif-v3',
+      plugins: [
+        new CacheableResponsePlugin({ statuses: [0, 200] }),
+        new ExpirationPlugin({ maxAgeSeconds: 300 }) // 5 minutes
+      ]
+    })
   );
-});
 
-// ── Activate: clean up old caches ────────────────────────────
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((key) => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
-            .map((key) => {
-              console.log('[SW] Deleting old cache:', key);
-              return caches.delete(key);
-            })
-      )
-    ).then(() => self.clients.claim())
+  // 2. Other APIs: Stale-While-Revalidate
+  const CACHE_API_PATTERNS = [
+    /\/api\/tasks/, /\/api\/announcements/, /\/api\/duties/,
+    /\/api\/attendance/, /\/api\/reports/, /\/api\/user/
+  ];
+  registerRoute(
+    ({ url }) => CACHE_API_PATTERNS.some(p => p.test(url.pathname)),
+    new StaleWhileRevalidate({
+      cacheName: 'dhic-dynamic-v1'
+    })
   );
-});
 
-// ── Fetch: caching strategy ───────────────────────────────────
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  // 3. Static assets: Cache First
+  registerRoute(
+    ({ request }) => ['style', 'script', 'image', 'font'].includes(request.destination),
+    new CacheFirst({
+      cacheName: 'dhic-static-v1',
+      plugins: [
+        new ExpirationPlugin({ maxAgeSeconds: 30 * 24 * 60 * 60 }) // 30 Days
+      ]
+    })
+  );
 
-  // Skip non-GET and browser-extension requests
-  if (request.method !== 'GET') return;
-  if (!url.protocol.startsWith('http')) return;
-
-  // ① API calls → Stale-While-Revalidate
-  const isApiCall = CACHE_API_PATTERNS.some((p) => p.test(url.pathname));
-  if (isApiCall) {
-    event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE));
-    return;
-  }
-
-  // ② Navigation requests → Network first, fallback to offline page
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request).catch(() =>
-        caches.match(OFFLINE_PAGE).then((cached) => cached || new Response('Offline', { status: 503 }))
-      )
-    );
-    return;
-  }
-
-  // ③ Static assets (JS/CSS/images) → Cache first
-  event.respondWith(cacheFirst(request, STATIC_CACHE));
-});
-
-// ── Strategy: Cache First ─────────────────────────────────────
-async function cacheFirst(request, cacheName) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, response.clone());
+  // Fallback for document navigation when offline
+  setCatchHandler(async ({ request }) => {
+    if (request.mode === 'navigate') {
+      return caches.match('/offline.html') || new Response('Offline', { status: 503 });
     }
-    return response;
-  } catch {
-    return new Response('', { status: 503, statusText: 'Service Unavailable' });
-  }
-}
-
-// ── Strategy: Stale While Revalidate ─────────────────────────
-async function staleWhileRevalidate(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-
-  const fetchPromise = fetch(request).then((response) => {
-    if (response.ok) cache.put(request, response.clone());
-    return response;
-  }).catch(() => null);
-
-  return cached || fetchPromise || new Response(JSON.stringify({ offline: true, data: [] }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    return Response.error();
   });
+} else {
+  console.warn('[SW] Workbox failed to load. Caching disabled.');
 }
 
 // ── Push Notifications ────────────────────────────────────────
@@ -131,10 +71,18 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  // Register background sync for offline push sync if supported
+  if ('sync' in self.registration) {
+    self.registration.sync.register('notification-sync').catch(err => console.warn('[SW] Sync registration failed:', err));
+  }
+
+  // Show small console log for analytics/debugging
+  console.log('[SW] Push Received:', data);
+
   const options = {
     body: data.body,
     icon: '/android-chrome-192x192.png',
-    badge: '/android-chrome-192x192.png',
+    badge: '/favicon-32x32.png',
     image: data.image || undefined,
     data: { url: data.url || '/' },
     vibrate: [100, 50, 100],
@@ -146,7 +94,18 @@ self.addEventListener('push', (event) => {
     tag: data.tag || 'dhic-notification',
   };
 
-  event.waitUntil(self.registration.showNotification(data.title || 'DHIC Portal', options));
+  const showPromise = self.registration.showNotification(data.title || 'DHIC Portal', options);
+  
+  // Also send postMessage to open clients for immediate UI updates
+  const messagePromise = self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    .then(clientList => {
+      clientList.forEach(client => {
+        client.postMessage({ type: 'PUSH_RECEIVED', payload: data });
+      });
+    });
+
+  // Ensure both promises resolve before SW sleeps
+  event.waitUntil(Promise.all([showPromise, messagePromise]));
 });
 
 // ── Notification click ────────────────────────────────────────
@@ -155,15 +114,19 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'dismiss') return;
 
-  const targetUrl = event.notification.data?.url || '/';
+  // Use full absolute URL for reliable navigation (important for iOS)
+  const targetUrl = new URL(event.notification.data?.url || '/', self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Find an existing window to focus and navigate
       for (const client of clientList) {
-        if (client.url === targetUrl && 'focus' in client) {
-          return client.focus();
+        if ('focus' in client && 'navigate' in client) {
+          client.focus();
+          return client.navigate(targetUrl);
         }
       }
+      // Fallback: open a new window
       if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
