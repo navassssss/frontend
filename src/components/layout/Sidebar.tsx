@@ -136,33 +136,43 @@ export function Sidebar() {
     }
 
     useEffect(() => {
-        if (isPrincipal) {
-            fetchOpenIssuesCount();
-            const interval = setInterval(fetchOpenIssuesCount, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [isPrincipal]);
+        if (!isPrincipal) return;
 
-    useEffect(() => {
-        const currentItem = navItems.find(item =>
-            item.subItems?.some(sub => location.pathname.startsWith(sub.path))
-        );
-        if (currentItem && currentItem.subItems) {
-            const itemKey = currentItem.label;
-            if (!expandedItems.includes(itemKey)) {
-                setExpandedItems([...expandedItems, itemKey]);
-            }
-        }
-    }, [location.pathname]);
+        let lastFetch = 0;
+
+        const safeFetch = () => {
+            // Minimum 60s between open-issue refreshes
+            if (Date.now() - lastFetch < 60_000) return;
+            lastFetch = Date.now();
+            fetchOpenIssuesCount();
+        };
+
+        // Initial load
+        safeFetch();
+
+        const onVisible = () => { if (document.visibilityState === 'visible') safeFetch(); };
+        const onFocus   = () => safeFetch();
+
+        document.addEventListener('visibilitychange', onVisible);
+        window.addEventListener('focus', onFocus);
+
+        return () => {
+            document.removeEventListener('visibilitychange', onVisible);
+            window.removeEventListener('focus', onFocus);
+        };
+    }, [isPrincipal]);
 
     const fetchOpenIssuesCount = async () => {
         try {
-            const { data } = await api.get('/issues?status=open');
-            setOpenIssuesCount(data.length || 0);
-        } catch (error) {
-            console.error('Failed to fetch open issues count:', error);
+            // Use a lightweight count endpoint — returns { count: N } not full list
+            const { data } = await api.get('/issues?status=open&per_page=1');
+            // Paginated response: total gives the real count
+            setOpenIssuesCount(data.total ?? data.length ?? 0);
+        } catch {
+            // Silently fail — stale badge count is acceptable
         }
     };
+
 
     const handleLogout = () => {
         logout();

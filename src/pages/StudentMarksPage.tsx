@@ -120,9 +120,7 @@ export default function StudentMarksPage() {
 
     // Debounce search query
     useEffect(() => {
-        console.log('Search query changed:', searchQuery);
         const timer = setTimeout(() => {
-            console.log('Setting debounced search to:', searchQuery);
             setDebouncedSearch(searchQuery);
         }, 500);
 
@@ -131,7 +129,6 @@ export default function StudentMarksPage() {
 
     useEffect(() => {
         // Reset when class, student, or debounced search changes
-        console.log('Filters changed - Class:', selectedClass, 'Student:', studentId, 'Search:', debouncedSearch);
         setStudents([]);
         setCurrentPage(1);
         loadStudentMarks(1, true);
@@ -147,7 +144,6 @@ export default function StudentMarksPage() {
     const loadClasses = async () => {
         try {
             const { data } = await api.get('/attendance/classes');
-            console.log('Loaded classes:', data);
             setClasses(data);
         } catch (error) {
             console.error('Failed to load classes', error);
@@ -177,17 +173,13 @@ export default function StudentMarksPage() {
             }
 
             const { data: response } = await api.get('/cce/student-marks', { params });
-            console.log('API Response:', response);
-            console.log('Search params:', params);
 
             if (reset) {
                 setStudents(response.data);
                 // Update total stats from API
                 if (response.stats) {
-                    console.log('Stats from API:', response.stats);
                     setTotalStats(response.stats);
                 } else {
-                    console.log('No stats in response, calculating from data...');
                     // Fallback: calculate stats from all data
                     const allSubjects = new Set<string>();
                     let totalPercentage = 0;
@@ -206,7 +198,6 @@ export default function StudentMarksPage() {
                             ? Math.round(totalPercentage / response.data.length)
                             : 0
                     };
-                    console.log('Calculated stats:', calculatedStats);
                     setTotalStats(calculatedStats);
                 }
             } else {

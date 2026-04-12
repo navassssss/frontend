@@ -47,20 +47,35 @@ export function BottomNav() {
   if (isManager) navItems = managerNavItems;
 
   useEffect(() => {
-    if (isPrincipal) {
+    if (!isPrincipal) return;
+
+    let lastFetch = 0;
+
+    const safeFetch = () => {
+      if (Date.now() - lastFetch < 60_000) return;
+      lastFetch = Date.now();
       fetchOpenIssuesCount();
-      // Refresh count every 30 seconds
-      const interval = setInterval(fetchOpenIssuesCount, 30000);
-      return () => clearInterval(interval);
-    }
+    };
+
+    safeFetch();
+
+    const onVisible = () => { if (document.visibilityState === 'visible') safeFetch(); };
+    const onFocus   = () => safeFetch();
+
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [isPrincipal]);
 
   const fetchOpenIssuesCount = async () => {
     try {
-      const { data } = await api.get('/issues?status=open');
-      setOpenIssuesCount(data.length || 0);
-    } catch (error) {
-      console.error('Failed to fetch open issues count:', error);
+      const { data } = await api.get('/issues?status=open&per_page=1');
+      setOpenIssuesCount(data.total ?? data.length ?? 0);
+    } catch {
+      // silently ignore
     }
   };
 

@@ -42,7 +42,10 @@ export default function IssuesPage() {
       activeFilter === 'all' ? '' : `?status=${activeFilter}`;
 
     api.get(`/issues${statusQuery}`)
-      .then(res => setIssues(res.data))
+      .then(res => {
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+        setIssues(list);
+      })
       .catch(() => toast.error("Failed to load issues"))
       .finally(() => setLoading(false));
   };

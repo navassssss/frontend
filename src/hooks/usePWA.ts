@@ -6,6 +6,8 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 
+const DEV = import.meta.env.DEV;
+
 export interface PWAState {
   isInstallable: boolean;
   isInstalled: boolean;
@@ -47,7 +49,7 @@ export function usePWA(): PWAState {
     navigator.serviceWorker
       .register('/sw.js', { scope: '/' })
       .then((reg) => {
-        console.log('[PWA] Service Worker registered:', reg.scope);
+        DEV && console.log('[PWA] Service Worker registered:', reg.scope);
         setSWRegistration(reg);
         const interval = setInterval(() => reg.update(), 60_000);
         return () => clearInterval(interval);
@@ -55,7 +57,7 @@ export function usePWA(): PWAState {
       .catch((err) => console.error('[PWA] SW registration failed:', err));
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('[PWA] SW updated — new version active');
+      DEV && console.log('[PWA] SW updated — new version active');
     });
   }, []);
 
@@ -163,29 +165,29 @@ export function usePWA(): PWAState {
 async function subscribeToPush(reg: ServiceWorkerRegistration | null) {
   if (!reg) return;
 
-  console.log('[PWA] Checking push subscription status...');
+  DEV && console.log('[PWA] Checking push subscription status...');
 
   try {
     const existing = await reg.pushManager.getSubscription();
     if (existing) {
-      console.log('[PWA] Browser already has a Push Subscription:', existing.endpoint);
+      DEV && console.log('[PWA] Browser already has a Push Subscription:', existing.endpoint);
       // Always sync with backend on mount/check just in case the server database was reset
       try {
-        console.log('[PWA] Re-syncing existing subscription to backend /api/push/subscribe...');
+        DEV && console.log('[PWA] Re-syncing existing subscription to backend /api/push/subscribe...');
         await api.post('/push/subscribe', existing.toJSON());
-        console.log('[PWA] Re-sync successful!');
+        DEV && console.log('[PWA] Re-sync successful!');
       } catch (e: any) {
         console.error('[PWA] Failed to re-sync existing subscription:', e.response?.data || e.message);
       }
       return;
     }
 
-    console.log('[PWA] No existing subscription. Preparing to subscribe...');
+    DEV && console.log('[PWA] No existing subscription. Preparing to subscribe...');
 
     // Use environment variable as primary, fallback to API (for reliability)
     let vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
     if (!vapidPublicKey) {
-        console.log('[PWA] No VAPID key in .env, fetching from /api/push/vapid-key...');
+        DEV && console.log('[PWA] No VAPID key in .env, fetching from /api/push/vapid-key...');
         const { data } = await api.get('/push/vapid-key');
         vapidPublicKey = data?.publicKey ?? '';
     }
@@ -195,25 +197,25 @@ async function subscribeToPush(reg: ServiceWorkerRegistration | null) {
       return;
     }
 
-    console.log('[PWA] Using VAPID Public Key:', vapidPublicKey);
+    DEV && console.log('[PWA] Using VAPID Public Key:', vapidPublicKey);
 
     // Base64url → Uint8Array
     const padding = '='.repeat((4 - (vapidPublicKey.length % 4)) % 4);
     const base64  = (vapidPublicKey + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawKey  = Uint8Array.from(window.atob(base64), (c) => c.charCodeAt(0));
 
-    console.log('[PWA] Requesting push subscription from browser...');
+    DEV && console.log('[PWA] Requesting push subscription from browser...');
     const subscription = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: rawKey.buffer as ArrayBuffer,
     });
 
-    console.log('[PWA] Browser granted subscription:', subscription.endpoint);
-    console.log('[PWA] Sending new subscription to backend...');
+    DEV && console.log('[PWA] Browser granted subscription:', subscription.endpoint);
+    DEV && console.log('[PWA] Sending new subscription to backend...');
     
     // Register subscription with backend
     await api.post('/push/subscribe', subscription.toJSON());
-    console.log('[PWA] Push subscription rigidly registered with server!');
+    DEV && console.log('[PWA] Push subscription rigidly registered with server!');
   } catch (err: any) {
     console.error('[PWA] Push subscription complete failure:', err.response?.data || err.message || err);
   }

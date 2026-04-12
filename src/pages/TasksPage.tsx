@@ -54,7 +54,11 @@ export default function TasksPage() {
 
   useEffect(() => {
     api.get('/tasks')
-      .then(res => setTasks(res.data))
+      .then(res => {
+        // Handle both array (legacy) and paginated {data:[]} responses
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+        setTasks(list);
+      })
       .catch(() => toast.error('Failed to load tasks'))
       .finally(() => setIsLoading(false));
   }, []);

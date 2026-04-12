@@ -86,7 +86,6 @@ export default function ClassPerformanceReportPage() {
     useEffect(() => {
         api.get(`/classes/${id}/report`)
             .then((res) => {
-                console.log('Class report:', res.data);
                 setReport(res.data);
             })
             .catch(() => toast.error('Failed to load class report'))

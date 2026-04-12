@@ -62,7 +62,10 @@ export default function ReportsPage() {
     const query = statusMap ? `?status=${statusMap}` : "";
 
     api.get(`/reports${query}`)
-      .then((res) => setReports(res.data))
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+        setReports(list);
+      })
       .catch(() => toast.error("Failed to load reports"))
       .finally(() => setIsLoading(false));
   };

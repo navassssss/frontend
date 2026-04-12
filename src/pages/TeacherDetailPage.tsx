@@ -48,13 +48,13 @@ export default function TeacherDetailPage() {
       .then(([teacherRes, dutiesRes, tasksRes]) => {
         setTeacher({
           ...teacherRes.data,
-          tasks: tasksRes.data.filter((t: any) => t.status !== 'completed'),
-          completedTasksList: tasksRes.data.filter((t: any) => t.status === 'completed'),
-          pendingTasks: tasksRes.data.filter((t: any) => t.status !== 'completed').length,
-          completedTasks: tasksRes.data.filter((t: any) => t.status === 'completed').length,
-          totalTasks: tasksRes.data.length
+          tasks: (Array.isArray(tasksRes.data) ? tasksRes.data : tasksRes.data.data ?? []).filter((t: any) => t.status !== 'completed'),
+          completedTasksList: (Array.isArray(tasksRes.data) ? tasksRes.data : tasksRes.data.data ?? []).filter((t: any) => t.status === 'completed'),
+          pendingTasks: (Array.isArray(tasksRes.data) ? tasksRes.data : tasksRes.data.data ?? []).filter((t: any) => t.status !== 'completed').length,
+          completedTasks: (Array.isArray(tasksRes.data) ? tasksRes.data : tasksRes.data.data ?? []).filter((t: any) => t.status === 'completed').length,
+          totalTasks: (Array.isArray(tasksRes.data) ? tasksRes.data : tasksRes.data.data ?? []).length
         });
-        setDuties(dutiesRes.data);
+        setDuties(Array.isArray(dutiesRes.data) ? dutiesRes.data : dutiesRes.data.data ?? []);
         setEditData({
           name: teacherRes.data.name || '',
           email: teacherRes.data.email || '',

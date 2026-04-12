@@ -77,8 +77,6 @@ export default function ClassesPage() {
             api.get('/teachers')
         ])
             .then(([classesRes, teachersRes]) => {
-                console.log('Classes response:', classesRes.data);
-                console.log('Teachers response:', teachersRes.data);
                 setClasses(classesRes.data);
                 setTeachers(teachersRes.data);
             })

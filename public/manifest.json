@@ -1,7 +1,7 @@
 {
   "name": "DHIC Portal",
   "short_name": "DHIC",
-  "description": "DHIC School E-Governance System — Staff & Student Portal",
+  "description": "DHIC  System — Staff & Student Portal",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,7 +9,10 @@
   "theme_color": "#008f6c",
   "background_color": "#f8fafc",
   "lang": "en",
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -36,21 +39,36 @@
       "short_name": "Tasks",
       "description": "View your assigned tasks",
       "url": "/tasks",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Announcements",
       "short_name": "Notices",
       "description": "Read latest announcements",
       "url": "/announcements",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Attendance",
       "short_name": "Attendance",
       "description": "Mark or view attendance",
       "url": "/attendance",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "screenshots": [],

@@ -61,7 +61,7 @@ export default function AnnouncementsPage() {
         setIsLoading(true);
         try {
             const res = await api.get('/announcements');
-            setAnnouncements(Array.isArray(res.data) ? res.data : []);
+            setAnnouncements(Array.isArray(res.data) ? res.data : (res.data?.data ?? []));
         } catch {
             toast.error('Failed to load announcements');
         } finally {

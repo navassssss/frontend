@@ -106,9 +106,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       }
     } catch (err: any) {
       // If we failed but have cached data, don't show full error, just warn
-      if (notifications.length > 0) {
+      const cachedTimeRaw = localStorage.getItem(CACHE_TIME_KEY);
+      const cachedTime = cachedTimeRaw ? parseInt(cachedTimeRaw, 10) : null;
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      
+      if (cachedData && JSON.parse(cachedData).length > 0) {
         setIsOfflineCached(true);
-        const ageInMins = lastUpdated ? Math.floor((Date.now() - lastUpdated) / 60000) : 0;
+        const ageInMins = cachedTime ? Math.floor((Date.now() - cachedTime) / 60000) : 0;
         if (ageInMins >= 5) {
           toast.warning(`Showing cached data (last updated ${ageInMins} min ago). Connect to internet for latest.`, { id: 'offline-warning' });
         }
@@ -121,17 +125,29 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [notifications.length, lastUpdated]);
+  }, []);
 
   // ── Event-driven refresh listeners ───────────────────────
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const safeFetch = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const last = parseInt(localStorage.getItem(CACHE_TIME_KEY) || '0', 10);
+        if (!last || Date.now() - last > 10000) {
+          fetchNotifications();
+        }
+      }, 300);
+    };
+
     fetchNotifications();
 
     const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') fetchNotifications();
+      if (document.visibilityState === 'visible') safeFetch();
     };
 
-    const onWindowFocus = () => fetchNotifications();
+    const onWindowFocus = () => safeFetch();
     
     const onOnline = () => {
       // Auto-retry when coming online
