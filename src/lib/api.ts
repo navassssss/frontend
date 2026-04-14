@@ -6,8 +6,12 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // Check for student token first, then staff token
-    const token = localStorage.getItem("student_token") || localStorage.getItem("token");
+    // Isolate tokens based on route
+    const isStudentRoute = config.url?.startsWith('/student');
+    const token = isStudentRoute 
+      ? localStorage.getItem("student_token") 
+      : localStorage.getItem("token");
+      
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

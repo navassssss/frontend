@@ -49,11 +49,6 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       const token = localStorage.getItem('student_token');
 
-      // If student token exists, clear any staff session
-      if (token) {
-        localStorage.removeItem('token');
-      }
-
       if (token) {
         try {
           const response = await api.get('/student/me');
@@ -98,9 +93,6 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // Clear any existing staff session
-      localStorage.removeItem("token");
-
       const response = await api.post('/student/login', {
         login: username, // Can be email or username
         password,

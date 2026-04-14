@@ -43,12 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    // If staff token exists, clear any student session
-    if (token) {
-      localStorage.removeItem("student_token");
-      localStorage.removeItem("student");
-    }
-
     if (!token) {
       setIsLoading(false);
       return;
@@ -67,10 +61,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Clear any existing student session
-      localStorage.removeItem("student_token");
-      localStorage.removeItem("student");
-
       const res = await api.post("/login", { email, password });
 
       const token = res.data.token;
@@ -88,8 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("student_token"); // Also clear student session
-    localStorage.removeItem("student");
     delete api.defaults.headers.common["Authorization"];
     setUser(null);
   };
