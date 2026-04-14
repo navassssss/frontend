@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus, Users, User, ClipboardList } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus, Users, User, ClipboardList, Trash2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -47,6 +47,10 @@ export default function TasksPage() {
   const [activeFilter, setActiveFilter] = useState<TaskFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('mine');
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Bulk Delete State
+  const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -62,6 +66,23 @@ export default function TasksPage() {
       .catch(() => toast.error('Failed to load tasks'))
       .finally(() => setIsLoading(false));
   }, []);
+
+  const handleBulkDelete = () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedTaskIds.length} selected tasks?`)) return;
+    
+    setIsDeleting(true);
+    api.post('/tasks/bulk-delete', { task_ids: selectedTaskIds })
+      .then(() => {
+        toast.success(`Successfully deleted ${selectedTaskIds.length} tasks`);
+        setTasks(prev => prev.filter(t => !selectedTaskIds.includes(t.id)));
+        setSelectedTaskIds([]);
+      })
+      .catch(err => {
+        const msg = err.response?.data?.message || 'Failed to delete tasks';
+        toast.error(msg);
+      })
+      .finally(() => setIsDeleting(false));
+  };
 
   const today = new Date().toISOString().split('T')[0];
   const mine = (task: ApiTask) => task.assigned_to?.id === user?.id;
@@ -144,6 +165,22 @@ export default function TasksPage() {
               </button>
             ))}
           </div>
+
+          <div className="flex-1" />
+
+          {/* Bulk Delete Button */}
+          {isPrincipal && selectedTaskIds.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBulkDelete}
+              disabled={isDeleting}
+              className="h-[34px] px-3 font-semibold rounded-[10px] animate-fade-in"
+            >
+              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Trash2 className="w-4 h-4 mr-1.5" />}
+              Delete ({selectedTaskIds.length})
+            </Button>
+          )}
         </div>
 
         {/* Task List */}
@@ -173,6 +210,22 @@ export default function TasksPage() {
                   className="flex items-center gap-4 px-5 py-4 hover:bg-muted/20 cursor-pointer transition-colors group animate-slide-up"
                   style={{ animationDelay: `${index * 0.04}s`, animationFillMode: 'backwards' }}
                 >
+                  {/* Selection Checkbox */}
+                  {isPrincipal && (
+                    <div className="shrink-0 flex items-center" onClick={(e) => e.stopPropagation()}>
+                       <input 
+                         type="checkbox" 
+                         className="w-4 h-4 rounded border-border text-primary cursor-pointer"
+                         checked={selectedTaskIds.includes(task.id)}
+                         onChange={(e) => {
+                            setSelectedTaskIds(prev =>
+                              e.target.checked ? [...prev, task.id] : prev.filter(id => id !== task.id)
+                            );
+                         }}
+                       />
+                    </div>
+                  )}
+
                   {/* Status icon */}
                   <div className={`w-10 h-10 rounded-xl ${cfg.iconBg} flex items-center justify-center shrink-0`}>
                     <StatusIcon status={isMissed(task) ? 'missed' : task.status} />
