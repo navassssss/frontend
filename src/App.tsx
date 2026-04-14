@@ -126,6 +126,7 @@ function StudentProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated: isStudentAuthenticated } = useStudentAuth();
 
   return (
     <Routes>
@@ -135,6 +136,8 @@ function AppRoutes() {
         element={
           isAuthenticated && user?.role
             ? <Navigate to="/dashboard" replace />
+            : isStudentAuthenticated
+            ? <Navigate to="/student/dashboard" replace />
             : <LoginPage />
         }
       />
@@ -492,7 +495,16 @@ function AppRoutes() {
       <Route path="/leaderboard" element={<PublicLeaderboardPage />} />
 
       {/* Student Portal Routes - All Protected */}
-      <Route path="/student/login" element={<StudentLoginPage />} />
+      <Route 
+        path="/student/login" 
+        element={
+          isStudentAuthenticated
+            ? <Navigate to="/student/dashboard" replace />
+            : isAuthenticated && user?.role
+            ? <Navigate to="/dashboard" replace />
+            : <StudentLoginPage />
+        } 
+      />
       <Route
         path="/student/dashboard"
         element={
