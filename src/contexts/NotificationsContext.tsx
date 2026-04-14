@@ -79,10 +79,16 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [isOfflineCached, setIsOfflineCached] = useState(false);
 
   const isFetchingRef = useRef(false);
+  const pendingRefreshRef = useRef(false);
+  const optimisticIdsRef = useRef<Set<string>>(new Set());
+  const markAllOptimisticRef = useRef(false);
 
   // ── Core fetch ───────────────────────────────────────────
   const fetchNotifications = useCallback(async () => {
-    if (isFetchingRef.current) return;
+    if (isFetchingRef.current) {
+        pendingRefreshRef.current = true;
+        return;
+    }
     
     // Auto-skip if browser says offline
     if (!navigator.onLine) {
@@ -96,7 +102,20 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.get<AppNotification[]>('/notifications');
       if (Array.isArray(data)) {
-        setNotifications(data);
+        setNotifications((prev) => {
+          const activeOptimisticIds = optimisticIdsRef.current;
+          const isMarkAllActive = markAllOptimisticRef.current;
+          
+          return data.map((incomingNode) => {
+            if (isMarkAllActive) {
+                return { ...incomingNode, read_at: incomingNode.read_at || new Date().toISOString() };
+            }
+            if (activeOptimisticIds.has(incomingNode.id)) {
+                return { ...incomingNode, read_at: incomingNode.read_at || new Date().toISOString() };
+            }
+            return incomingNode;
+          });
+        });
         setError(null);
         setIsOfflineCached(false);
         const now = Date.now();
@@ -124,6 +143,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
       isFetchingRef.current = false;
+      if (pendingRefreshRef.current) {
+          pendingRefreshRef.current = false;
+          fetchNotifications();
+      }
     }
   }, []);
 
@@ -199,6 +222,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   // ── Mark single as read (optimistic) ──────────────────────
   const markAsRead = useCallback(async (id: string) => {
     if (!navigator.onLine) return; // don't try if offline
+    optimisticIdsRef.current.add(id);
     setNotifications((prev) =>
       prev.map((n) => n.id === id ? { ...n, read_at: new Date().toISOString() } : n)
     );
@@ -207,12 +231,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('[Notifications] markAsRead failed — rolling back', err);
       fetchNotifications();
+    } finally {
+      optimisticIdsRef.current.delete(id);
     }
   }, [fetchNotifications]);
 
   // ── Mark all as read (optimistic) ─────────────────────────
   const markAllAsRead = useCallback(async () => {
     if (!navigator.onLine) return;
+    markAllOptimisticRef.current = true;
     const now = new Date().toISOString();
     setNotifications((prev) => prev.map((n) => ({ ...n, read_at: now })));
     try {
@@ -220,6 +247,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('[Notifications] markAllAsRead failed — rolling back', err);
       fetchNotifications();
+    } finally {
+      markAllOptimisticRef.current = false;
     }
   }, [fetchNotifications]);
 
