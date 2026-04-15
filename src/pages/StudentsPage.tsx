@@ -120,11 +120,11 @@ export default function StudentsPage() {
                             Manage and monitor the academic status of the current enrollment across all disciplines.
                         </p>
                     </div>
-                    
+
                     <div className="bg-emerald-300 rounded-3xl p-5 flex items-center justify-between gap-8 min-w-[240px] shadow-sm shrink-0">
                         <div>
-                           <p className="text-[10px] font-black uppercase text-emerald-900 tracking-widest mb-1.5 opacity-80">Total Students</p>
-                           <p className="text-4xl font-black text-emerald-950 leading-none">{pagination.total}</p>
+                            <p className="text-[10px] font-black uppercase text-emerald-900 tracking-widest mb-1.5 opacity-80">Total Students</p>
+                            <p className="text-4xl font-black text-emerald-950 leading-none">{pagination.total}</p>
                         </div>
                         <Users className="w-8 h-8 text-emerald-800 opacity-60" />
                     </div>
@@ -143,48 +143,48 @@ export default function StudentsPage() {
 
                 {/* Mobile Filter & Search Bar */}
                 <div className="lg:hidden space-y-4 mb-6">
-                      <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search by name or admission no..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-11 h-12 bg-muted/50 border-0 rounded-2xl w-full text-[13px] font-medium"
-                            />
-                        </div>
-                      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                          <Select value={classFilter} onValueChange={setClassFilter}>
-                             <SelectTrigger className="bg-[#0a6c5b] border-0 text-white rounded-full text-xs font-bold w-auto h-8 px-4 flex items-center justify-center shrink-0 focus:ring-0 [&>svg]:ml-2">
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by name or admission no..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-11 h-12 bg-muted/50 border-0 rounded-2xl w-full text-[13px] font-medium"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        <Select value={classFilter} onValueChange={setClassFilter}>
+                            <SelectTrigger className="bg-[#0a6c5b] border-0 text-white rounded-full text-xs font-bold w-auto h-8 px-4 flex items-center justify-center shrink-0 focus:ring-0 [&>svg]:ml-2">
                                 <SelectValue placeholder="All Classes" />
-                             </SelectTrigger>
-                             <SelectContent>
-                                 <SelectItem value="all">All Classes</SelectItem>
-                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((level) => (
-                                     <SelectItem key={level} value={String(level)}>Class {level}</SelectItem>
-                                 ))}
-                             </SelectContent>
-                          </Select>
-                          
-                          <Select value={statusFilter} onValueChange={setStatusFilter}>
-                             <SelectTrigger className="bg-muted/60 text-foreground border border-border rounded-full text-xs font-semibold w-auto h-8 px-4 flex items-center gap-1 shrink-0 focus:ring-0 [&>svg]:ml-2">
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Classes</SelectItem>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((level) => (
+                                    <SelectItem key={level} value={String(level)}>Class {level}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="bg-muted/60 text-foreground border border-border rounded-full text-xs font-semibold w-auto h-8 px-4 flex items-center gap-1 shrink-0 focus:ring-0 [&>svg]:ml-2">
                                 <SelectValue placeholder="Status: All" />
-                             </SelectTrigger>
-                             <SelectContent>
-                                 <SelectItem value="all">Status: All</SelectItem>
-                                 <SelectItem value="active">Active</SelectItem>
-                                 <SelectItem value="inactive">Inactive</SelectItem>
-                             </SelectContent>
-                          </Select>
-                          
-                          <Select defaultValue="all">
-                             <SelectTrigger className="bg-muted/60 text-foreground border border-border rounded-full text-xs font-semibold w-auto h-8 px-4 flex items-center gap-1 shrink-0 focus:ring-0 [&>svg]:ml-2">
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Status: All</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select defaultValue="all">
+                            <SelectTrigger className="bg-muted/60 text-foreground border border-border rounded-full text-xs font-semibold w-auto h-8 px-4 flex items-center gap-1 shrink-0 focus:ring-0 [&>svg]:ml-2">
                                 <SelectValue placeholder="Grade: All" />
-                             </SelectTrigger>
-                             <SelectContent>
-                                 <SelectItem value="all">Grade: All</SelectItem>
-                             </SelectContent>
-                          </Select>
-                      </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Grade: All</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 {/* Quick Actions Bar */}
@@ -212,37 +212,37 @@ export default function StudentsPage() {
                 <div className="hidden lg:flex bg-card border border-border shadow-sm rounded-2xl p-4 flex-col md:flex-row items-center justify-between gap-4 animate-slide-up">
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
                         <span className="text-sm font-bold text-muted-foreground shrink-0 hidden sm:block">Filter by:</span>
-                        
+
                         <div className="flex gap-3 w-full sm:w-auto">
-                           <div className="w-full sm:w-[160px]">
-                               <Select value={classFilter} onValueChange={setClassFilter}>
-                                   <SelectTrigger className="bg-muted/30 border-border rounded-xl h-10 font-medium">
-                                       <SelectValue placeholder="All Classes" />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                       <SelectItem value="all">All Classes</SelectItem>
-                                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((level) => (
-                                           <SelectItem key={level} value={String(level)}>
-                                               Class {level}
-                                           </SelectItem>
-                                       ))}
-                                   </SelectContent>
-                               </Select>
-                           </div>
-                           
+                            <div className="w-full sm:w-[160px]">
+                                <Select value={classFilter} onValueChange={setClassFilter}>
+                                    <SelectTrigger className="bg-muted/30 border-border rounded-xl h-10 font-medium">
+                                        <SelectValue placeholder="All Classes" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Classes</SelectItem>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((level) => (
+                                            <SelectItem key={level} value={String(level)}>
+                                                Class {level}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             {/* Status Filter */}
-                           <div className="w-full sm:w-[140px]">
-                               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                   <SelectTrigger className="bg-muted/30 border-border rounded-xl h-10 font-medium">
-                                       <SelectValue placeholder="Status: All" />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                       <SelectItem value="all">Status: All</SelectItem>
-                                       <SelectItem value="active">Active</SelectItem>
-                                       <SelectItem value="inactive">Inactive</SelectItem>
-                                   </SelectContent>
-                               </Select>
-                           </div>
+                            <div className="w-full sm:w-[140px]">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="bg-muted/30 border-border rounded-xl h-10 font-medium">
+                                        <SelectValue placeholder="Status: All" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Status: All</SelectItem>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="inactive">Inactive</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
 
                         <div className="relative w-full sm:w-[220px]">
@@ -268,11 +268,11 @@ export default function StudentsPage() {
 
                 {/* Table Header Row (Desktop) */}
                 <div className="hidden lg:grid grid-cols-12 gap-4 px-6 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">
-                     <div className="col-span-4">Student Information</div>
-                     <div className="col-span-2">Class</div>
-                     <div className="col-span-3">Ad. No.</div>
-                     <div className="col-span-1 text-center">Status</div>
-                     <div className="col-span-2 text-right">Actions</div>
+                    <div className="col-span-4">Student Information</div>
+                    <div className="col-span-2">Class</div>
+                    <div className="col-span-3">Ad. No.</div>
+                    <div className="col-span-1 text-center">Status</div>
+                    <div className="col-span-2 text-right">Actions</div>
                 </div>
 
                 {/* Students List Wrapper */}
@@ -303,68 +303,67 @@ export default function StudentsPage() {
                                 const adNoRaw = student.username || student.roll_number || 'N/A';
                                 const adNo = adNoRaw.replace(/^st_/i, '');
                                 const formattedAdNo = adNo !== 'N/A' && !adNo.startsWith('#') ? `#${adNo}` : adNo;
-                            
-                            return (
-                                <div
-                                    key={student.id}
-                                    onClick={() => navigate(`/students/${student.id}`)}
-                                    className="bg-card border border-border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] rounded-2xl lg:rounded-[20px] p-4 lg:px-6 lg:py-5 flex items-center lg:grid lg:grid-cols-12 gap-4 lg:gap-4 cursor-pointer hover:bg-muted/30 transition-all animate-slide-up group"
-                                    style={{ animationDelay: `${0.03 * index}s`, animationFillMode: 'backwards' }}
-                                >
-                                    {/* Responsive Column 1: Core Info */}
-                                    <div className="lg:col-span-4 flex items-center gap-4 w-full min-w-0">
-                                        <div className="relative shrink-0">
-                                            <div className="w-12 h-12 rounded-xl lg:rounded-full overflow-hidden bg-[#0e3b33] flex items-center justify-center border border-border group-hover:border-emerald-200 transition-colors">
-                                               <span className="text-sm font-black text-emerald-100">
-                                                   {student.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                                               </span>
-                                            </div>
-                                            {/* Mobile active indicator dot */}
-                                                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full lg:hidden block"></div>
-                                            )}
-                                        </div>
-                                        <div className="min-w-0 flex-1 lg:text-left">
-                                            <p className="text-[15px] lg:text-sm font-bold text-foreground truncate">{student.name}</p>
-                                            
-                                            {/* Subtext Desktop: Email */}
-                                            <p className="hidden lg:block text-[11px] font-medium text-muted-foreground truncate">{email}</p>
-                                            
-                                            {/* Subtext Mobile: Class & Ad. No. */}
-                                            <p className="text-[12px] font-medium text-muted-foreground truncate lg:hidden mt-0.5">
-                                               <span className="text-[#0a6c5b] font-bold">{student.class_room?.name ? `${student.class_room.name}` : 'N/A'}</span> <span className="opacity-40 mx-1">•</span> {formattedAdNo}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Desktop columns -> Hidden on Mobile */}
-                                    <div className="hidden lg:flex col-span-2 text-sm font-bold text-foreground items-center">
-                                        Class {student.class_room?.name || 'N/A'}
-                                    </div>
-                                    
-                                    <div className="hidden lg:flex col-span-3 text-xs font-bold text-muted-foreground items-center">
-                                        {formattedAdNo}
-                                    </div>
-                                    
-                                    <div className="hidden lg:flex col-span-1 justify-center items-center">
-                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100/80 text-emerald-700">
-                                            ACTIVE
-                                        </span>
-                                    </div>
-                                    
-                                    <div className="hidden lg:flex col-span-2 justify-end items-center">
-                                        <span className="text-[11px] font-black tracking-widest text-[#0a6c5b] group-hover:text-emerald-800 uppercase transition-colors">
-                                            View Profile
-                                        </span>
-                                    </div>
 
-                                    {/* Mobile Right Action Indicator */}
-                                    <div className="lg:hidden shrink-0 ml-auto">
-                                       <ChevronRight className="w-5 h-5 text-muted-foreground/40 font-bold" />
+                                return (
+                                    <div
+                                        key={student.id}
+                                        onClick={() => navigate(`/students/${student.id}`)}
+                                        className="bg-card border border-border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] rounded-2xl lg:rounded-[20px] p-4 lg:px-6 lg:py-5 flex items-center lg:grid lg:grid-cols-12 gap-4 lg:gap-4 cursor-pointer hover:bg-muted/30 transition-all animate-slide-up group"
+                                        style={{ animationDelay: `${0.03 * index}s`, animationFillMode: 'backwards' }}
+                                    >
+                                        {/* Responsive Column 1: Core Info */}
+                                        <div className="lg:col-span-4 flex items-center gap-4 w-full min-w-0">
+                                            <div className="relative shrink-0">
+                                                <div className="w-12 h-12 rounded-xl lg:rounded-full overflow-hidden bg-[#0e3b33] flex items-center justify-center border border-border group-hover:border-emerald-200 transition-colors">
+                                                    <span className="text-sm font-black text-emerald-100">
+                                                        {student.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                {/* Mobile active indicator dot */}
+                                                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full lg:hidden block"></div>
+                                            </div>
+                                            <div className="min-w-0 flex-1 lg:text-left">
+                                                <p className="text-[15px] lg:text-sm font-bold text-foreground truncate">{student.name}</p>
+
+                                                {/* Subtext Desktop: Email */}
+                                                <p className="hidden lg:block text-[11px] font-medium text-muted-foreground truncate">{email}</p>
+
+                                                {/* Subtext Mobile: Class & Ad. No. */}
+                                                <p className="text-[12px] font-medium text-muted-foreground truncate lg:hidden mt-0.5">
+                                                    <span className="text-[#0a6c5b] font-bold">{student.class_room?.name ? `${student.class_room.name}` : 'N/A'}</span> <span className="opacity-40 mx-1">•</span> {formattedAdNo}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Desktop columns -> Hidden on Mobile */}
+                                        <div className="hidden lg:flex col-span-2 text-sm font-bold text-foreground items-center">
+                                            Class {student.class_room?.name || 'N/A'}
+                                        </div>
+
+                                        <div className="hidden lg:flex col-span-3 text-xs font-bold text-muted-foreground items-center">
+                                            {formattedAdNo}
+                                        </div>
+
+                                        <div className="hidden lg:flex col-span-1 justify-center items-center">
+                                            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100/80 text-emerald-700">
+                                                ACTIVE
+                                            </span>
+                                        </div>
+
+                                        <div className="hidden lg:flex col-span-2 justify-end items-center">
+                                            <span className="text-[11px] font-black tracking-widest text-[#0a6c5b] group-hover:text-emerald-800 uppercase transition-colors">
+                                                View Profile
+                                            </span>
+                                        </div>
+
+                                        {/* Mobile Right Action Indicator */}
+                                        <div className="lg:hidden shrink-0 ml-auto">
+                                            <ChevronRight className="w-5 h-5 text-muted-foreground/40 font-bold" />
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        });
-                    })()
+                                );
+                            });
+                        })()
                     )}
                 </div>
 
@@ -374,39 +373,38 @@ export default function StudentsPage() {
                         <p className="text-xs font-semibold text-muted-foreground">
                             Showing <span className="text-foreground">{(pagination.current_page - 1) * pagination.per_page + 1}</span> to <span className="text-foreground">{Math.min(pagination.current_page * pagination.per_page, pagination.total)}</span> of <span className="text-foreground font-bold">{pagination.total}</span> entries
                         </p>
-                        
+
                         <div className="flex items-center gap-2">
-                            <button 
+                            <button
                                 onClick={() => handlePageChange(pagination.current_page - 1)}
                                 disabled={pagination.current_page === 1}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-muted/70 text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 &lt;
                             </button>
-                            
+
                             {Array.from({ length: Math.min(5, pagination.last_page) }).map((_, idx) => {
                                 // Simplified logic to show first few pages
                                 const p = idx + 1;
                                 const isActive = p === pagination.current_page;
                                 return (
-                                    <button 
+                                    <button
                                         key={p}
                                         onClick={() => handlePageChange(p)}
-                                        className={`w-8 h-8 flex flex-col items-center justify-center rounded-full font-bold text-sm transition-colors ${
-                                            isActive 
-                                              ? 'bg-emerald-700 text-white shadow-sm' 
-                                              : 'bg-transparent text-foreground hover:bg-muted'
-                                        }`}
+                                        className={`w-8 h-8 flex flex-col items-center justify-center rounded-full font-bold text-sm transition-colors ${isActive
+                                            ? 'bg-emerald-700 text-white shadow-sm'
+                                            : 'bg-transparent text-foreground hover:bg-muted'
+                                            }`}
                                     >
                                         {p}
                                     </button>
                                 );
                             })}
-                            
+
                             {pagination.last_page > 5 && (
                                 <>
                                     <span className="px-1 text-muted-foreground font-black tracking-widest">...</span>
-                                    <button 
+                                    <button
                                         onClick={() => handlePageChange(pagination.last_page)}
                                         className={`w-8 h-8 flex flex-col items-center justify-center rounded-full font-bold text-sm transition-colors bg-transparent text-foreground hover:bg-muted`}
                                     >
@@ -414,8 +412,8 @@ export default function StudentsPage() {
                                     </button>
                                 </>
                             )}
-                            
-                            <button 
+
+                            <button
                                 onClick={() => handlePageChange(pagination.current_page + 1)}
                                 disabled={pagination.current_page === pagination.last_page}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-muted/70 text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
