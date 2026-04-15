@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     Users, TrendingUp, Trophy, Calendar, User, ChevronRight,
     CheckCircle2, XCircle, Search, ArrowUpDown, ArrowUp, ArrowDown,
-    MoreHorizontal, CheckCheck
+    MoreHorizontal, CheckCheck, UserX
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -79,6 +79,7 @@ export default function ClassPerformanceReportPage() {
     const navigate = useNavigate();
     const [report, setReport] = useState<ClassReport | null>(null);
     const [loading, setLoading] = useState(true);
+    const [removing, setRemoving] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortField, setSortField] = useState<SortField>('roll_number');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
@@ -91,6 +92,20 @@ export default function ClassPerformanceReportPage() {
             .catch(() => toast.error('Failed to load class report'))
             .finally(() => setLoading(false));
     }, [id]);
+
+    const handleRemoveTeacher = async () => {
+        if (!window.confirm('Remove class teacher from this class?')) return;
+        setRemoving(true);
+        try {
+            await api.delete(`/classes/${id}/remove-teacher`);
+            toast.success('Class teacher removed');
+            setReport(prev => prev ? { ...prev, class: { ...prev.class, class_teacher: null } } : prev);
+        } catch {
+            toast.error('Failed to remove class teacher');
+        } finally {
+            setRemoving(false);
+        }
+    };
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -171,13 +186,23 @@ export default function ClassPerformanceReportPage() {
                 {report.class.class_teacher && (
                     <Card className="animate-slide-up bg-gradient-to-r from-primary/5 to-transparent border-primary/20">
                         <CardContent className="p-4 flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-md">
+                            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-md shrink-0">
                                 {report.class.class_teacher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                             </div>
-                            <div>
+                            <div className="flex-1 min-w-0">
                                 <p className="text-xs text-primary font-bold uppercase tracking-wider mb-0.5">Class Teacher</p>
-                                <p className="text-lg font-semibold">{toTitleCase(report.class.class_teacher.name)}</p>
+                                <p className="text-lg font-semibold truncate">{toTitleCase(report.class.class_teacher.name)}</p>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={removing}
+                                onClick={handleRemoveTeacher}
+                                className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                            >
+                                <UserX className="w-4 h-4" />
+                                <span className="hidden sm:inline">{removing ? 'Removing...' : 'Remove'}</span>
+                            </Button>
                         </CardContent>
                     </Card>
                 )}
