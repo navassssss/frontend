@@ -43,6 +43,7 @@ import StudentDetailPage from "./pages/StudentDetailPage";
 import StudentAttendanceOverviewPage from "./pages/StudentAttendanceOverviewPage";
 import ClassesPage from "./pages/ClassesPage";
 import ClassPerformanceReportPage from "./pages/ClassPerformanceReportPage";
+import MedicalPage from "./pages/MedicalPage";
 import NotFound from "./pages/NotFound";
 
 // Academic Pages
@@ -583,6 +584,15 @@ function AppRoutes() {
           <StudentProtectedRoute>
             <StudentAnnouncementsPage />
           </StudentProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/medical"
+        element={
+          <ProtectedRoute>
+            <MedicalPage />
+          </ProtectedRoute>
         }
       />
 

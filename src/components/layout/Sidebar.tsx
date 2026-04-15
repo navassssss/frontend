@@ -4,7 +4,7 @@ import {
     Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText,
     BookOpen, IndianRupee, GraduationCap, LayoutDashboard, LogOut, Settings, Calendar,
     Plus, ChevronDown, Award, Briefcase, DollarSign, Building2, HelpCircle, HeartHandshake,
-    AlertTriangle, Trophy, Megaphone, Bell
+    AlertTriangle, Trophy, Megaphone, Bell, Stethoscope
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -66,6 +66,7 @@ const principalNavItems: NavItem[] = [
     { icon: AlertTriangle, label: 'Issues', path: '/issues', showBadge: true },
     { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: Megaphone, label: 'Announcements', path: '/announcements' },
+    { icon: Stethoscope, label: 'Medical', path: '/medical' },
     { icon: User, label: 'My Profile', path: '/profile' },
 ];
 
@@ -129,6 +130,10 @@ export function Sidebar() {
 
         if (hasPermission('manage_announcements')) {
             extendedItems.push({ icon: Megaphone, label: 'Announcements', path: '/announcements' });
+        }
+
+        if (hasPermission('manage_medical')) {
+            extendedItems.push({ icon: Stethoscope, label: 'Medical', path: '/medical' });
         }
 
         // Insert extended items right before the Profile nav item (which is at the end)
