@@ -151,27 +151,50 @@ export default function CreateTaskPage() {
 
   /* ── submit ── */
   const handleSubmit = async () => {
-    if (!title.trim())                return toast.error('Enter task title');
-    if (!datetime)                    return toast.error('Select a date & time');
-    if (effectiveTeacherIds.length === 0) {
-      return toast.error(
-        mode === 'duty'
-          ? 'Select at least one duty with assigned teachers'
-          : 'Select at least one teacher'
-      );
+    if (!datetime) return toast.error('Select a date & time');
+
+    if (mode === 'duty') {
+      if (selectedDutyIds.length === 0) return toast.error('Select at least one duty');
+      if (effectiveTeacherIds.length === 0) return toast.error('Selected duties have no assigned teachers');
+    } else {
+      if (!title.trim()) return toast.error('Enter task title');
+      if (selectedTeacherIds.length === 0) return toast.error('Select at least one teacher');
     }
 
     const [date, time] = datetime.split('T');
     setSubmitting(true);
 
     try {
-      const { data } = await api.post('/tasks', {
-        title,
-        instructions,
-        scheduled_date: date,
-        scheduled_time: time || null,
-        teacher_ids: effectiveTeacherIds,
-      });
+      let payload: Record<string, any>;
+
+      if (mode === 'duty') {
+        // Build duty_assignments: one entry per selected duty with its teacher IDs
+        const dutyAssignments = duties
+          .filter(d => selectedDutyIds.includes(d.id))
+          .map(d => ({
+            duty_id:     d.id,
+            teacher_ids: d.teachers.map(t => t.id),
+          }))
+          .filter(a => a.teacher_ids.length > 0); // skip duties with no teachers
+
+        payload = {
+          duty_assignments:  dutyAssignments,
+          custom_title:      title.trim() || undefined, // optional suffix
+          scheduled_date:    date,
+          scheduled_time:    time || null,
+          instructions,
+        };
+      } else {
+        payload = {
+          title,
+          instructions,
+          scheduled_date: date,
+          scheduled_time: time || null,
+          teacher_ids:    selectedTeacherIds,
+        };
+      }
+
+      const { data } = await api.post('/tasks', payload);
       toast.success(`${data.count ?? 1} task${(data.count ?? 1) > 1 ? 's' : ''} created!`);
       navigate('/tasks');
     } catch {
@@ -227,15 +250,32 @@ export default function CreateTaskPage() {
                   {/* Title */}
                   <div className="space-y-2 mb-4">
                     <label className="text-sm font-semibold text-foreground">
-                      Title <span className="text-destructive">*</span>
+                      {mode === 'duty' ? (
+                        <>Custom Title Suffix <span className="text-muted-foreground font-normal">(optional)</span></>
+                      ) : (
+                        <>Title <span className="text-destructive">*</span></>
+                      )}
                     </label>
                     <Input
                       id="task-title"
-                      placeholder="e.g. Prepare CCE evaluation sheet"
+                      placeholder={
+                        mode === 'duty'
+                          ? 'e.g. "Morning Session" → "Play - Morning Session"'
+                          : 'e.g. Prepare CCE evaluation sheet'
+                      }
                       value={title}
                       onChange={e => setTitle(e.target.value)}
                       className="h-11 rounded-xl text-base"
                     />
+                    {mode === 'duty' && (
+                      <p className="text-xs text-muted-foreground flex items-start gap-1.5 mt-1">
+                        <span className="shrink-0 font-bold text-primary">Auto:</span>
+                        Titles will be generated as <span className="font-semibold mx-1">"{'{Duty Name}'} Report"</span>
+                        {title.trim() && (
+                          <span>or <span className="font-semibold">"{'{Duty Name}'} - {title.trim()}"</span></span>
+                        )}
+                      </p>
+                    )}
                   </div>
 
                   {/* Date & Time */}
