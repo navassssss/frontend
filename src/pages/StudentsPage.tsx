@@ -288,12 +288,7 @@ export default function StudentsPage() {
                         </div>
                     ) : (
                         (() => {
-                            const filteredStudents = students.filter(student => {
-                                if (statusFilter === 'all') return true;
-                                const isInactive = student.id % 7 === 0;
-                                const statusStr = isInactive ? 'inactive' : 'active';
-                                return statusStr === statusFilter;
-                            });
+                            const filteredStudents = students;
 
                             if (filteredStudents.length === 0) {
                                 return (
@@ -305,7 +300,6 @@ export default function StudentsPage() {
 
                             return filteredStudents.map((student, index) => {
                                 const email = student.email || student.user?.email || `${student.name.split(' ')[0].toLowerCase()}@civic.edu`;
-                                const status = student.id % 7 === 0 ? 'INACTIVE' : 'ACTIVE';
                                 const adNoRaw = student.username || student.roll_number || 'N/A';
                                 const adNo = adNoRaw.replace(/^st_/i, '');
                                 const formattedAdNo = adNo !== 'N/A' && !adNo.startsWith('#') ? `#${adNo}` : adNo;
@@ -326,7 +320,6 @@ export default function StudentsPage() {
                                                </span>
                                             </div>
                                             {/* Mobile active indicator dot */}
-                                            {status === 'ACTIVE' && (
                                                 <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full lg:hidden block"></div>
                                             )}
                                         </div>
@@ -353,12 +346,8 @@ export default function StudentsPage() {
                                     </div>
                                     
                                     <div className="hidden lg:flex col-span-1 justify-center items-center">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                                            status === 'ACTIVE' 
-                                            ? 'bg-emerald-100/80 text-emerald-700' 
-                                            : 'bg-red-100/80 text-red-700'
-                                        }`}>
-                                            {status}
+                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100/80 text-emerald-700">
+                                            ACTIVE
                                         </span>
                                     </div>
                                     

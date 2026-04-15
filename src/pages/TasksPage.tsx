@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus, Users, User, ClipboardList, Trash2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +51,7 @@ export default function TasksPage() {
   // Bulk Delete State
   const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -99,6 +100,34 @@ export default function TasksPage() {
     if (activeFilter === 'today') return isToday(task);
     return true;
   });
+
+  // Derived select-all state
+  const filteredIds = filteredTasks.map(t => t.id);
+  const selectedInView = selectedTaskIds.filter(id => filteredIds.includes(id));
+  const allSelected = filteredIds.length > 0 && selectedInView.length === filteredIds.length;
+  const someSelected = selectedInView.length > 0 && !allSelected;
+
+  // Sync indeterminate attribute
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someSelected;
+    }
+  }, [someSelected]);
+
+  // Clear selection when filter or view changes
+  useEffect(() => {
+    setSelectedTaskIds([]);
+  }, [activeFilter, viewMode]);
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      // Deselect all visible
+      setSelectedTaskIds(prev => prev.filter(id => !filteredIds.includes(id)));
+    } else {
+      // Select all visible (merge with any from other pages)
+      setSelectedTaskIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+    }
+  };
 
   const visibleBase = tasks.filter(t => ownerMatch(t) && t.status !== 'completed');
   const allCount = visibleBase.length;
@@ -198,6 +227,37 @@ export default function TasksPage() {
           </div>
         ) : (
           <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden divide-y divide-border">
+            {/* Select All row */}
+            {isPrincipal && (
+              <div className="flex items-center gap-3 px-5 py-3 bg-muted/30 border-b border-border">
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  id="select-all-tasks"
+                  className="w-4 h-4 rounded border-border text-primary cursor-pointer"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                />
+                <label
+                  htmlFor="select-all-tasks"
+                  className="text-xs font-semibold text-muted-foreground cursor-pointer select-none"
+                >
+                  {allSelected
+                    ? `All ${filteredIds.length} selected`
+                    : someSelected
+                    ? `${selectedInView.length} of ${filteredIds.length} selected`
+                    : `Select all (${filteredIds.length})`}
+                </label>
+                {someSelected && (
+                  <button
+                    onClick={() => setSelectedTaskIds(prev => prev.filter(id => !filteredIds.includes(id)))}
+                    className="ml-auto text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            )}
             {filteredTasks.map((task, index) => {
               const cfg = statusConfig[isMissed(task) ? 'missed' : task.status] || statusConfig.pending;
               // Strip auto-generated "Report: " prefix
