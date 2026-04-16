@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
     BookOpen,
     Calendar,
     Award,
     FileText,
-    Layers
+    Layers,
+    Settings2
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -167,7 +168,16 @@ export default function CreateCCEWorkPage() {
                                     )}
 
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Subject</Label>
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Subject</Label>
+                                            <Link
+                                                to="/subjects"
+                                                className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                <Settings2 className="w-3 h-3" />
+                                                Manage Subjects
+                                            </Link>
+                                        </div>
                                         <Select
                                             value={formData.subject_id}
                                             onValueChange={(v) => setFormData({ ...formData, subject_id: v })}
