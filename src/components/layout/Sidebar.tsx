@@ -136,9 +136,13 @@ export function Sidebar() {
             extendedItems.push({ icon: Stethoscope, label: 'Medical', path: '/medical' });
         }
 
+        // All teachers can see their assigned class
+        extendedItems.push({ icon: Users, label: 'My Class', path: '/classes' });
+
         // Insert extended items right before the Profile nav item (which is at the end)
         navItems.splice(navItems.length - 1, 0, ...extendedItems);
     }
+
 
     useEffect(() => {
         if (!isPrincipal) return;

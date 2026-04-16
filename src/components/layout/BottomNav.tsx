@@ -46,6 +46,16 @@ export function BottomNav() {
   if (isPrincipal) navItems = principalNavItems;
   if (isManager) navItems = managerNavItems;
 
+  // Plain class teachers get a "My Class" shortcut in the bottom bar
+  const isPlainTeacher = user?.role === 'teacher' && !user?.is_vice_principal;
+  if (isPlainTeacher) {
+    navItems = [
+      ...baseNavItems.slice(0, 4),
+      { icon: Users, label: 'My Class', path: '/classes' },
+    ];
+  }
+
+
   useEffect(() => {
     if (!isPrincipal) return;
 
