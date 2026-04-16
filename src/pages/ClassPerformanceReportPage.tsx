@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from 'sonner';
 import api from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Achievement {
     id: number;
@@ -77,12 +78,15 @@ type SortOrder = 'asc' | 'desc';
 export default function ClassPerformanceReportPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [report, setReport] = useState<ClassReport | null>(null);
     const [loading, setLoading] = useState(true);
     const [removing, setRemoving] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortField, setSortField] = useState<SortField>('roll_number');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
+    const isClassTeacher = user?.role === 'teacher';
 
     useEffect(() => {
         api.get(`/classes/${id}/report`)
@@ -193,16 +197,19 @@ export default function ClassPerformanceReportPage() {
                                 <p className="text-xs text-primary font-bold uppercase tracking-wider mb-0.5">Class Teacher</p>
                                 <p className="text-lg font-semibold truncate">{toTitleCase(report.class.class_teacher.name)}</p>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                disabled={removing}
-                                onClick={handleRemoveTeacher}
-                                className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
-                            >
-                                <UserX className="w-4 h-4" />
-                                <span className="hidden sm:inline">{removing ? 'Removing...' : 'Remove'}</span>
-                            </Button>
+                            {/* Only principals/managers can remove a class teacher */}
+                            {!isClassTeacher && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={removing}
+                                    onClick={handleRemoveTeacher}
+                                    className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                                >
+                                    <UserX className="w-4 h-4" />
+                                    <span className="hidden sm:inline">{removing ? 'Removing...' : 'Remove'}</span>
+                                </Button>
+                            )}
                         </CardContent>
                     </Card>
                 )}

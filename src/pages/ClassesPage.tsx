@@ -7,6 +7,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import api from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ClassRoom {
     id: number;
@@ -67,18 +68,22 @@ const getAvatarColor = (name: string) => {
 
 export default function ClassesPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [classes, setClasses] = useState<ClassRoom[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const isClassTeacher = user?.role === 'teacher';
+
     useEffect(() => {
-        Promise.all([
-            api.get('/classes'),
-            api.get('/teachers')
-        ])
+        const requests: Promise<any>[] = [api.get('/classes')];
+        // Teachers don't need the teachers list (no assignment dropdown)
+        if (!isClassTeacher) requests.push(api.get('/teachers'));
+
+        Promise.all(requests)
             .then(([classesRes, teachersRes]) => {
                 setClasses(classesRes.data);
-                setTeachers(teachersRes.data);
+                if (teachersRes) setTeachers(teachersRes.data);
             })
             .catch(() => toast.error('Failed to load data'))
             .finally(() => setLoading(false));
@@ -110,8 +115,10 @@ export default function ClassesPage() {
             <div className="p-4 space-y-4">
                 {/* Header */}
                 <div className="animate-fade-in">
-                    <h2 className="text-xl font-bold text-foreground">Class Management</h2>
-                    <p className="text-sm text-muted-foreground">{classes.length} classes</p>
+                    <h2 className="text-xl font-bold text-foreground">
+                        {isClassTeacher ? 'My Class' : 'Class Management'}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">{classes.length} {isClassTeacher ? 'class assigned' : 'classes'}</p>
                 </div>
 
                 {/* Classes Grid - Responsive */}
@@ -155,6 +162,9 @@ export default function ClassesPage() {
                                                 {toTitleCase(classRoom.class_teacher.name)}
                                             </span>
                                         </div>
+                                    ) : isClassTeacher ? (
+                                        // Teachers cannot assign a class teacher
+                                        <p className="text-xs text-muted-foreground italic px-1">Not assigned</p>
                                     ) : (
                                         <Select
                                             value=""
