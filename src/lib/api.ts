@@ -6,12 +6,17 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // Isolate tokens based on route
+    // Prefer student_token on explicitly student routes.
+    // Fall back to student_token when staff token is absent (student portal
+    // pages that call shared routes like /notifications or /push/subscribe).
     const isStudentRoute = config.url?.startsWith('/student');
-    const token = isStudentRoute 
-      ? localStorage.getItem("student_token") 
-      : localStorage.getItem("token");
-      
+    const staffToken   = localStorage.getItem("token");
+    const studentToken = localStorage.getItem("student_token");
+
+    const token = isStudentRoute
+      ? studentToken                          // /student/* → always student token
+      : (staffToken ?? studentToken ?? null); // others → staff first, student fallback
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -20,25 +25,36 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle authentication errors
+// Response interceptor — handle auth errors per-portal
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Skip the hard redirect if the failed request was a login attempt
-    const isLoginEndpoint = 
-      error.config && 
+    const isLoginEndpoint =
+      error.config &&
       (error.config.url?.endsWith('/login') || error.config.url?.endsWith('/student/login'));
 
-    // Handle 401 Unauthorized or 403 Forbidden
     if (!isLoginEndpoint && error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Clear tokens
-      localStorage.removeItem("token");
-      localStorage.removeItem("student_token");
+      // Determine which token was used for this request
+      const authHeader: string = error.config?.headers?.Authorization || '';
+      const usedToken = authHeader.replace('Bearer ', '');
 
-      // Redirect to login page (root path)
-      if (window.location.pathname !== '/' && window.location.pathname !== '/student/login') {
-        window.location.href = "/";
+      const staffToken   = localStorage.getItem("token");
+      const studentToken = localStorage.getItem("student_token");
+
+      if (usedToken && usedToken === studentToken) {
+        // Student session expired — clear only student state
+        localStorage.removeItem("student_token");
+        if (window.location.pathname !== '/student/login') {
+          window.location.href = "/student/login";
+        }
+      } else if (usedToken && usedToken === staffToken) {
+        // Staff session expired — clear only staff state
+        localStorage.removeItem("token");
+        if (window.location.pathname !== '/' && window.location.pathname !== '/staff/login') {
+          window.location.href = "/";
+        }
       }
+      // If token doesn't match either (edge case), do nothing — avoid false logouts
     }
     return Promise.reject(error);
   }
