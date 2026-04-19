@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Search, Heart, Home, CheckCircle2, Clock, RefreshCw,
   ChevronRight, Stethoscope, History, AlertTriangle, X, User,
-  Calendar, FileText, Thermometer,
+  Calendar, FileText, Thermometer, Filter, Shield, Briefcase
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,22 +52,22 @@ const relativeTime = (iso: string) => {
   const hours = Math.floor(mins / 60);
   const days  = Math.floor(hours / 24);
   if (mins < 2)  return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  if (hours < 24)return `${hours}h ago`;
-  return `${days}d ago`;
+  if (mins < 60) return `${mins} min ago`;
+  if (hours < 24)return `${hours} hours ago`;
+  return `${days} days ago`;
 };
 
 const fmtTime = (iso: string) =>
   new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
 const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
 /* ─────────────────────── status config ─────────────────────── */
 const statusCfg = {
-  active:    { label: 'Active',     bg: 'bg-rose-100 text-rose-700 border border-rose-200',     dot: 'bg-rose-500',     icon: Thermometer },
-  recovered: { label: 'Recovered',  bg: 'bg-emerald-100 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500', icon: CheckCircle2 },
-  sent_home: { label: 'Sent Home',  bg: 'bg-blue-100 text-blue-700 border border-blue-200',     dot: 'bg-blue-500',     icon: Home },
+  active:    { label: 'Active',     dot: 'bg-rose-500' },
+  recovered: { label: 'Recovered',  dot: 'bg-[#00865B]' },
+  sent_home: { label: 'Sent Home',  dot: 'bg-blue-500' },
 };
 
 /* ═══════════════════════ MAIN PAGE ═══════════════════════ */
@@ -199,8 +198,8 @@ export default function MedicalPage() {
       <AppLayout title="Medical">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
           <AlertTriangle className="w-12 h-12 text-amber-400 mb-4" />
-          <h2 className="text-lg font-bold text-foreground mb-2">Access Restricted</h2>
-          <p className="text-sm text-muted-foreground">You don't have permission to access Medical Records.</p>
+          <h2 className="text-lg font-bold text-slate-800 mb-2">Access Restricted</h2>
+          <p className="text-sm text-slate-500">You don't have permission to access Medical Records.</p>
         </div>
       </AppLayout>
     );
@@ -209,56 +208,85 @@ export default function MedicalPage() {
   /* ─────────────────────── render ─────────────────────── */
   return (
     <AppLayout title="Medical">
-      <div className="p-4 md:p-8 max-w-[1280px] mx-auto pb-28 space-y-6">
+      <div className="p-4 md:p-10 max-w-[1280px] mx-auto pb-28 space-y-8 bg-slate-50/30 min-h-screen">
 
         {/* ── Page Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 animate-fade-in">
           <div>
-            <h1 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
-              <Stethoscope className="w-6 h-6 text-rose-500" />
+            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
               Medical Records
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Track student health — {active.length} active case{active.length !== 1 ? 's' : ''}
+            <p className="text-base text-slate-600 mt-2 font-medium">
+              Track student health — active cases
             </p>
           </div>
-          <Button
-            id="btn-add-medical"
-            onClick={() => setShowForm(true)}
-            className="h-10 rounded-xl gap-2 bg-rose-600 hover:bg-rose-700 text-white shrink-0"
-          >
-            <Plus className="w-4 h-4" /> Add Record
-          </Button>
+          <div className="flex items-center gap-3 shrink-0">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-2xl border-0 bg-white shadow-sm text-slate-600 hover:bg-slate-100"
+            >
+              <Filter className="w-5 h-5" />
+            </Button>
+            <Button
+              id="btn-add-medical"
+              onClick={() => setShowForm(true)}
+              className="h-12 px-6 rounded-2xl gap-2 bg-[#00865B] hover:bg-[#00704c] text-white shadow-md border-0 transition-all font-semibold"
+            >
+              <Plus className="w-5 h-5" /> Add Record
+            </Button>
+          </div>
         </div>
 
         {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-3 gap-3 animate-slide-up">
-          {[
-            { label: 'Active',    value: active.length,                                       color: 'text-rose-600',    bg: 'bg-rose-50 dark:bg-rose-950/30' },
-            { label: 'Recovery',  value: history.filter(h => h.status === 'recovered').length, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
-            { label: 'Sent Home', value: history.filter(h => h.status === 'sent_home').length, color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-950/30' },
-          ].map(s => (
-            <Card key={s.label} className={`border-0 shadow-sm ${s.bg}`}>
-              <CardContent className="p-4">
-                <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{s.label}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up">
+          {/* Active Card */}
+          <div className="rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 bg-rose-100/80 w-full relative overflow-hidden transition-all hover:-translate-y-1">
+            <div className="bg-rose-200/60 rounded-2xl p-4 shrink-0 text-rose-700">
+              <Briefcase className="w-8 h-8" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-5xl font-black text-rose-800 tracking-tight">{active.length.toString().padStart(2, '0')}</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-rose-600 mt-1">Active</span>
+            </div>
+          </div>
+
+          {/* Recovered Card */}
+          <div className="rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 bg-emerald-100 w-full relative overflow-hidden transition-all hover:-translate-y-1">
+            <div className="bg-emerald-200/70 rounded-2xl p-4 shrink-0 text-[#00865B]">
+              <Shield className="w-8 h-8" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-5xl font-black text-emerald-900 tracking-tight">{(history.filter(h => h.status === 'recovered').length).toString().padStart(2, '0')}</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-[#00865B] mt-1">Recovered</span>
+            </div>
+          </div>
+
+          {/* Sent Home Card */}
+          <div className="rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 bg-[#ebf3ff] w-full relative overflow-hidden transition-all hover:-translate-y-1">
+             <div className="bg-[#d1e4fb] rounded-2xl p-4 shrink-0 text-blue-600">
+              <Home className="w-8 h-8" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-5xl font-black text-blue-900 tracking-tight">{(history.filter(h => h.status === 'sent_home').length).toString().padStart(2, '0')}</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-blue-600 mt-1">Sent Home</span>
+            </div>
+          </div>
         </div>
 
         {/* ── Tab Toggle ── */}
-        <div className="flex gap-1 bg-muted rounded-xl p-1 w-fit animate-slide-up">
+        <div className="flex gap-1 p-1.5 bg-slate-100 rounded-full w-fit animate-slide-up mb-2">
           {(['active', 'history'] as const).map(t => (
             <button
               key={t}
               id={`tab-${t}`}
               onClick={() => setTab(t)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-sm font-semibold transition-all ${
-                tab === t ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+              className={`flex items-center px-6 py-2.5 rounded-full text-base font-bold transition-all ${
+                tab === t 
+                  ? 'bg-white shadow-sm text-[#00865B]' 
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              {t === 'active' ? <Heart className="w-3.5 h-3.5" /> : <History className="w-3.5 h-3.5" />}
               {t === 'active' ? 'Active Cases' : 'History'}
             </button>
           ))}
@@ -266,25 +294,23 @@ export default function MedicalPage() {
 
         {/* ════════════ ACTIVE TAB ════════════ */}
         {tab === 'active' && (
-          <div className="animate-slide-up">
+          <div className="animate-slide-up space-y-4">
             {loading ? (
-              <div className="space-y-3">
-                {[1,2,3].map(i => <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />)}
+              <div className="space-y-4">
+                {[1,2,3].map(i => <div key={i} className="h-28 rounded-3xl bg-slate-200/50 animate-pulse" />)}
               </div>
             ) : active.length === 0 ? (
-              <Card className="border-dashed border-2">
-                <CardContent className="p-12 flex flex-col items-center text-center gap-3">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center">
-                    <CheckCircle2 className="w-7 h-7 text-emerald-500" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-foreground">All clear!</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">No active medical cases right now.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="py-20 flex flex-col items-center text-center gap-4 bg-white rounded-[2rem] shadow-sm">
+                <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center">
+                  <CheckCircle2 className="w-10 h-10 text-slate-300" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800">Clear queue</h3>
+                  <p className="text-slate-500 mt-2 font-medium">There are no active medical cases.</p>
+                </div>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="flex flex-col space-y-4">
                 {active.map((rec, idx) => (
                   <ActiveCard
                     key={rec.id}
@@ -295,6 +321,12 @@ export default function MedicalPage() {
                     delay={idx * 0.04}
                   />
                 ))}
+                
+                <div className="pt-8 pb-4 text-center">
+                  <span className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">
+                    End of current medical queue
+                  </span>
+                </div>
               </div>
             )}
           </div>
@@ -302,49 +334,62 @@ export default function MedicalPage() {
 
         {/* ════════════ HISTORY TAB ════════════ */}
         {tab === 'history' && (
-          <div className="space-y-4 animate-slide-up">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="animate-slide-up space-y-6">
+            <div className="relative max-w-xl">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input
                 id="history-search"
-                placeholder="Search by student or illness..."
+                placeholder="Search past records..."
                 value={histSearch}
                 onChange={e => setHistSearch(e.target.value)}
-                className="pl-9 rounded-xl"
+                className="pl-14 h-14 bg-white border-0 rounded-2xl shadow-sm text-base font-medium focus-visible:ring-[#00865B]/20"
               />
             </div>
 
             {history.length === 0 ? (
-              <Card>
-                <CardContent className="p-10 text-center text-muted-foreground">
-                  <History className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium">No resolved cases yet.</p>
-                </CardContent>
-              </Card>
+              <div className="py-20 text-center text-slate-500 bg-white rounded-[2rem] shadow-sm">
+                <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                <p className="font-bold text-lg text-slate-400">No resolved cases found.</p>
+              </div>
             ) : (
-              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden divide-y divide-border">
-                {history.map((rec) => {
-                  const cfg = statusCfg[rec.status];
-                  return (
-                    <div key={rec.id} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/20 transition-colors">
-                      {/* Avatar */}
-                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0">
+              <div className="flex flex-col space-y-4">
+                {history.map((rec, idx) => (
+                  <div 
+                    key={rec.id} 
+                    className="flex flex-col lg:flex-row lg:items-center gap-6 p-5 lg:p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center gap-5 w-full lg:w-[35%] shrink-0">
+                      <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-lg font-black text-slate-700 shrink-0">
                         {initials(rec.student?.name || '?')}
                       </div>
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">{rec.student?.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {rec.illness_name} · {rec.student?.class} · {fmtDate(rec.reported_at)}
+                        <p className="text-lg font-bold text-slate-900 truncate">{rec.student?.name}</p>
+                        <p className="text-sm font-medium text-slate-500 mt-1">
+                          {rec.student?.class} <span className="opacity-50 mx-1">•</span> ID #{rec.student?.roll_number || 'N/A'}
                         </p>
                       </div>
-                      {/* Badge */}
-                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-full shrink-0 ${cfg.bg}`}>
-                        {cfg.label}
-                      </span>
                     </div>
-                  );
-                })}
+
+                    <div className="flex-1 w-full lg:w-auto border-t lg:border-t-0 lg:border-l border-slate-100 pt-4 lg:pt-0 lg:pl-6 bg">
+                       <div className="flex flex-wrap items-center gap-3">
+                          <p className="text-base font-bold text-slate-900">{rec.illness_name}</p>
+                          <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
+                            rec.status === 'recovered' 
+                              ? 'bg-emerald-100 text-emerald-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}
+                          </span>
+                       </div>
+                       <div className="mt-3 flex items-start gap-4 text-[13px] font-semibold text-slate-400">
+                          <span className="flex flex-col gap-1">
+                            <span><Clock className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />{fmtDate(rec.reported_at)}</span>
+                            <span className="ml-5">{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                          </span>
+                       </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -353,76 +398,67 @@ export default function MedicalPage() {
 
       {/* ════════════ ADD RECORD MODAL ════════════ */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-          <Card className="w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col rounded-2xl shadow-2xl animate-scale-in">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-rose-500" />
-                <h2 className="text-base font-bold text-foreground">New Medical Record</h2>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-900">New Medical Record</h2>
               <button
                 onClick={resetForm}
-                className="w-8 h-8 rounded-full hover:bg-secondary flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-500"
               >
-                <X className="w-4 h-4 text-muted-foreground" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
-
-              {/* Student selector */}
+            <div className="flex-1 overflow-y-auto p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">
-                  Student <span className="text-rose-500">*</span>
-                </label>
+                <label className="text-sm font-bold text-slate-700">Student</label>
                 {selectedStudent ? (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border-2 border-primary">
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#ebf3ff]/50 border border-blue-100">
+                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-sm font-bold text-blue-700 shrink-0 shadow-sm">
                       {initials(selectedStudent.name)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground">{selectedStudent.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {selectedStudent.class_room?.name} · #{selectedStudent.roll_number || selectedStudent.username}
+                      <p className="font-bold text-slate-900">{selectedStudent.name}</p>
+                      <p className="text-sm font-medium text-slate-500">
+                        {selectedStudent.class_room?.name} · ID #{selectedStudent.roll_number || selectedStudent.username}
                       </p>
                     </div>
                     <button
                       onClick={() => { setSelectedStudent(null); setStudentSearch(''); }}
-                      className="w-6 h-6 rounded-full hover:bg-secondary flex items-center justify-center shrink-0"
+                      className="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center shrink-0 transition-colors shadow-sm bg-blue-50/50"
                     >
-                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                      <X className="w-4 h-4 text-slate-500" />
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input
                         id="student-search-medical"
-                        placeholder="Search by name or roll no..."
+                        placeholder="Search student names..."
                         value={studentSearch}
                         onChange={e => setStudentSearch(e.target.value)}
-                        className="pl-9 rounded-xl"
+                        className="pl-12 h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-[#00865B]/20 font-medium"
                       />
                     </div>
                     {studentSearch && (
-                      <div className="max-h-44 overflow-y-auto rounded-xl border border-border bg-card shadow-sm">
+                      <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-lg p-2 mt-2">
                         {filteredStudents.length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">No students found</p>
+                          <p className="text-sm text-slate-500 text-center py-6 font-medium">No students found</p>
                         ) : filteredStudents.map(s => (
                           <button
                             key={s.id}
                             onClick={() => { setSelectedStudent(s); setStudentSearch(''); }}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 rounded-xl transition-colors text-left"
                           >
-                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0">
                               {initials(s.name)}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold">{s.name}</p>
-                              <p className="text-xs text-muted-foreground">{s.class_room?.name} · #{s.roll_number}</p>
+                              <p className="text-sm font-bold text-slate-900">{s.name}</p>
+                              <p className="text-xs font-medium text-slate-500">{s.class_room?.name} · #{s.roll_number}</p>
                             </div>
                           </button>
                         ))}
@@ -432,93 +468,83 @@ export default function MedicalPage() {
                 )}
               </div>
 
-              {/* Illness name */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">
-                  Illness / Complaint <span className="text-rose-500">*</span>
-                </label>
+                <label className="text-sm font-bold text-slate-700">Illness / Condition</label>
                 <Input
                   id="illness-name"
-                  placeholder="e.g. Fever, Headache, Stomach ache..."
+                  placeholder="e.g. Seasonal Flu, Sprained Ankle"
                   value={illnessName}
                   onChange={e => setIllnessName(e.target.value)}
-                  className="rounded-xl"
+                  className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-[#00865B]/20 font-medium"
                 />
               </div>
 
-              {/* Date & Time */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">
-                  Reported At <span className="text-rose-500">*</span>
-                </label>
+                <label className="text-sm font-bold text-slate-700">Time Reported</label>
                 <Input
                   id="reported-at"
                   type="datetime-local"
                   value={reportedAt}
                   onChange={e => setReportedAt(e.target.value)}
-                  className="rounded-xl"
+                  className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-[#00865B]/20 font-medium"
                 />
               </div>
 
-              {/* Doctor toggle */}
-              <div>
+              <div className="pt-2">
                 <button
                   id="toggle-doctor"
                   onClick={() => setWentToDoctor(v => !v)}
-                  className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                    wentToDoctor ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
+                  className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all border ${
+                    wentToDoctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <span className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Stethoscope className="w-4 h-4 text-primary" />
-                    Student visited the doctor
+                  <span className={`text-sm font-bold flex items-center gap-3 ${wentToDoctor ? 'text-[#00865B]' : 'text-slate-700'}`}>
+                    <div className={`p-2 rounded-lg ${wentToDoctor ? 'bg-[#00865B]/10' : 'bg-slate-100'}`}>
+                      <Stethoscope className="w-5 h-5" />
+                    </div>
+                    Student Requires Doctor Visit
                   </span>
-                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                    wentToDoctor ? 'bg-primary border-primary' : 'border-border'
+                  <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                    wentToDoctor ? 'bg-[#00865B] border-[#00865B]' : 'border-slate-300 bg-white'
                   }`}>
-                    {wentToDoctor && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
+                    {wentToDoctor && <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />}
                   </div>
                 </button>
               </div>
 
-              {/* Notes */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">
-                  Notes <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
+              <div className="space-y-2 pt-2">
+                <label className="text-sm font-bold text-slate-700">Additional Notes <span className="text-slate-400 font-normal ml-1">(Optional)</span></label>
                 <textarea
                   id="medical-notes"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   rows={3}
-                  placeholder="Any additional observations, medication given, etc..."
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground resize-none text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full px-4 py-3 rounded-xl border-0 bg-slate-50 text-slate-900 resize-none text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#00865B]/20"
                 />
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-border flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl" onClick={resetForm}>
+            <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/50">
+              <Button variant="ghost" className="flex-1 h-12 rounded-xl text-slate-600 font-bold hover:bg-slate-200" onClick={resetForm}>
                 Cancel
               </Button>
               <Button
                 id="submit-medical"
-                className="flex-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white"
+                className="flex-1 h-12 rounded-xl bg-[#00865B] hover:bg-[#00704c] text-white font-bold tracking-wide"
                 onClick={handleSubmit}
                 disabled={submitting}
               >
                 {submitting ? 'Saving...' : 'Add Record'}
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </AppLayout>
   );
 }
 
-/* ─────────────────────── ActiveCard ─────────────────────── */
+/* ─────────────────────── ActiveCard (Matched to Screenshot) ─────────────────────── */
 function ActiveCard({
   record, loading, onRecover, onSentHome, delay
 }: {
@@ -529,94 +555,87 @@ function ActiveCard({
   delay: number;
 }) {
   return (
-    <Card
-      className="shadow-sm hover:shadow-md transition-all animate-slide-up border-l-4 border-l-rose-400"
+    <div
+      className="bg-white rounded-3xl p-5 lg:p-6 shadow-sm border border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:shadow-md transition-shadow animate-slide-up"
       style={{ animationDelay: `${delay}s`, animationFillMode: 'backwards' }}
     >
-      <CardContent className="p-4 md:p-5">
-        <div className="flex items-start gap-4">
-          {/* Avatar */}
-          <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-sm font-bold text-rose-700 shrink-0">
-            {initials(record.student?.name || '?')}
-          </div>
+      {/* LEFT SECTION - Avatar & Name */}
+      <div className="flex items-center gap-5 w-full lg:w-[35%] shrink-0">
+        <div className="w-16 h-16 rounded-full bg-[#bffff0]/40 flex items-center justify-center text-[22px] font-black text-[#00a877] shrink-0">
+          {initials(record.student?.name || '?')}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xl font-bold text-slate-900 truncate">{record.student?.name}</p>
+          <p className="text-[15px] font-semibold text-slate-500 mt-0.5">
+            {record.student?.class} <span className="opacity-50 mx-1.5">•</span> ID #{record.student?.roll_number || 'N/A'}
+          </p>
+        </div>
+      </div>
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="font-bold text-foreground text-base leading-tight">{record.student?.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {record.student?.class}
-                  {record.student?.roll_number && ` · #${record.student.roll_number}`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {record.went_to_doctor && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200">
-                    Doctor Visit
-                  </span>
-                )}
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse inline-block" />
-                  Active
+      {/* MIDDLE SECTION - Illness Details */}
+      <div className="flex-1 min-w-0 w-full lg:w-auto border-t lg:border-t-0 border-slate-100 pt-5 lg:pt-0">
+         <div className="flex flex-wrap items-center gap-3">
+            <p className="text-[17px] font-bold text-slate-900">{record.illness_name}</p>
+            {record.went_to_doctor ? (
+              <span className="text-[10px] font-extrabold px-3 py-1.5 rounded-full bg-[#dcfce7] text-[#166534] uppercase tracking-wide">
+                DOCTOR VISIT
+              </span>
+            ) : (
+               <span className="text-[10px] font-extrabold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wide">
+                INFIRMARY OBSERVATION
+              </span>
+            )}
+         </div>
+         
+         <div className="mt-2.5 flex items-start gap-3.5 text-[13px] font-semibold text-slate-400">
+            <div className="flex flex-col gap-1 w-[120px] shrink-0">
+               <span><Clock className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" />{relativeTime(record.reported_at)}</span>
+               <span className="ml-[22px]">• {fmtTime(record.reported_at)}</span>
+            </div>
+            
+            {record.reported_by && (
+              <div className="flex gap-2">
+                <span className="text-slate-300 -mt-2">•</span>
+                <span className="flex flex-col gap-1 max-w-[160px]">
+                  <span>Reported by {record.reported_by.name.split(' ')[0]}</span>
+                  <span>{record.reported_by.name.split(' ').slice(1).join(' ')}</span>
                 </span>
               </div>
-            </div>
-
-            {/* Illness + time */}
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
-              <span className="flex items-center gap-1.5 font-semibold text-foreground">
-                <Thermometer className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                {record.illness_name}
-              </span>
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {relativeTime(record.reported_at)} · {fmtTime(record.reported_at)}
-              </span>
-            </div>
-
-            {/* Notes */}
-            {record.notes && (
-              <p className="mt-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 line-clamp-2">
-                {record.notes}
-              </p>
             )}
+         </div>
+         
+         {record.notes && (
+           <p className="mt-3 text-[13px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+             {record.notes}
+           </p>
+         )}
+      </div>
 
-            {/* Reporter */}
-            {record.reported_by && (
-              <p className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-1">
-                <User className="w-3 h-3" />
-                Reported by {record.reported_by.name}
-              </p>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-2 mt-3">
-              <Button
-                id={`recover-${record.id}`}
-                size="sm"
-                disabled={loading}
-                onClick={onRecover}
-                className="h-8 rounded-lg gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white flex-1 sm:flex-none"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Recovered
-              </Button>
-              <Button
-                id={`sent-home-${record.id}`}
-                size="sm"
-                disabled={loading}
-                onClick={onSentHome}
-                variant="outline"
-                className="h-8 rounded-lg gap-1.5 text-xs border-blue-200 text-blue-700 hover:bg-blue-50 flex-1 sm:flex-none"
-              >
-                <Home className="w-3.5 h-3.5" />
-                Sent Home
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      {/* RIGHT SECTION - Actions */}
+      <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto mt-2 lg:mt-0 pt-4 lg:pt-0 justify-start lg:justify-end border-t lg:border-t-0 border-slate-100 shrink-0">
+        <span className="px-5 py-2.5 rounded-full bg-rose-100/80 text-rose-700 text-sm font-bold mr-2">
+          Active
+        </span>
+        <Button
+          id={`recover-${record.id}`}
+          size="sm"
+          disabled={loading}
+          onClick={onRecover}
+          className="h-11 px-7 rounded-full bg-[#00865B] hover:bg-[#00704c] text-white text-sm font-bold"
+        >
+          Recovered
+        </Button>
+        <Button
+          id={`sent-home-${record.id}`}
+          size="sm"
+          disabled={loading}
+          onClick={onSentHome}
+          variant="outline"
+          className="h-11 px-6 rounded-full border-2 border-blue-100 text-blue-600 hover:bg-blue-50 hover:text-blue-700 text-sm font-bold bg-white"
+        >
+          Sent Home
+        </Button>
+      </div>
+    </div>
   );
 }

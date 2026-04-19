@@ -369,7 +369,7 @@ export default function AttendancePage() {
                                                             Absent Students List
                                                         </h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                            {record.absentStudents.map((student) => (
+                                                            {(Array.isArray(record.absentStudents) ? record.absentStudents : []).map((student) => (
                                                                 <div key={student.id} className="flex items-center justify-between p-3 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
                                                                     <span className="font-medium text-foreground">{student.name}</span>
                                                                     <Badge variant="secondary" className="text-[10px]">
