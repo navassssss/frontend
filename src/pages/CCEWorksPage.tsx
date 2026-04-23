@@ -167,8 +167,8 @@ export default function CCEWorksPage() {
                         const classSubjects = groupedByClass[className];
                         const isExpanded = expandedClasses.has(className);
                         const classNum = className.replace(/\D/g, '').padStart(2, '0');
-                        const totalClassWorks = classSubjects.reduce((sum, s) => sum + s.total_works, 0);
-                        const completedClassWorks = classSubjects.reduce((sum, s) => sum + s.completed_works, 0);
+                        const totalClassWorks = classSubjects.reduce((sum, s) => sum + Number(s.total_works || 0), 0);
+                        const completedClassWorks = classSubjects.reduce((sum, s) => sum + Number(s.completed_works || 0), 0);
                         const classPercent = totalClassWorks > 0 ? Math.round((completedClassWorks / totalClassWorks) * 100) : 0;
 
                         return (
