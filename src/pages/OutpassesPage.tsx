@@ -575,7 +575,7 @@ export default function OutpassesPage() {
                         <p className="text-sm text-muted-foreground">Track students leaving and returning to campus</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={loadData} size="icon" disabled={loading}>
+                        <Button variant="outline" onClick={() => loadData()} size="icon" disabled={loading}>
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                         {canCreate && (
