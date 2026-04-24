@@ -33,6 +33,7 @@ interface AttendanceRecord {
         id: number;
         name: string;
         roll_number: string;
+        reason?: string;
     }>;
     date: string;
     submittedAt: string;
@@ -100,7 +101,8 @@ export default function AttendancePage() {
                         .map((r: any) => ({
                             id: parseInt(studentId),
                             name: data.student.name,
-                            roll_number: ''
+                            roll_number: '',
+                            reason: r.remarks || r.reason
                         })),
                     date: selectedDate,
                     submittedAt: new Date().toISOString()
@@ -370,11 +372,18 @@ export default function AttendancePage() {
                                                         </h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                             {(Array.isArray(record.absentStudents) ? record.absentStudents : []).map((student) => (
-                                                                <div key={student.id} className="flex items-center justify-between p-3 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
-                                                                    <span className="font-medium text-foreground">{student.name}</span>
-                                                                    <Badge variant="secondary" className="text-[10px]">
-                                                                        Roll #{student.roll_number}
-                                                                    </Badge>
+                                                                <div key={student.id} className="flex flex-col p-3 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="font-medium text-foreground">{student.name}</span>
+                                                                        <Badge variant="secondary" className="text-[10px]">
+                                                                            Roll #{student.roll_number}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    {student.reason && (
+                                                                        <div className="mt-2 text-xs text-muted-foreground bg-muted/50 p-1.5 rounded-md border-l-2 border-primary/40">
+                                                                            Reason: <span className="italic">{student.reason}</span>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             ))}
                                                         </div>

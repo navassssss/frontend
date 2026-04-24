@@ -7,7 +7,8 @@ import {
     X,
     Check,
     Users,
-    ChevronRight
+    ChevronRight,
+    AlertCircle
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,8 +28,17 @@ import {
 import { format } from 'date-fns';
 import api from '@/lib/api';
 
-// ... interfaces
+interface ClassData {
+    id: number;
+    name: string;
+    studentCount: number;
+}
 
+interface StudentData {
+    id: number;
+    name: string;
+    roll_number: string;
+}
 export default function TakeAttendancePage() {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -39,7 +49,7 @@ export default function TakeAttendancePage() {
     const [selectedSession, setSelectedSession] = useState<'morning' | 'afternoon'>('morning');
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [searchQuery, setSearchQuery] = useState('');
-    const [absentStudents, setAbsentStudents] = useState<number[]>([]);
+    const [absentStudents, setAbsentStudents] = useState<{id: number, reason: string}[]>([]);
     const [students, setStudents] = useState<StudentData[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [duplicateError, setDuplicateError] = useState(false);
@@ -99,14 +109,18 @@ export default function TakeAttendancePage() {
     }, [students, searchQuery]);
 
     const addAbsent = (studentId: number) => {
-        if (!absentStudents.includes(studentId)) {
-            setAbsentStudents([...absentStudents, studentId]);
+        if (!absentStudents.some(s => s.id === studentId)) {
+            setAbsentStudents([...absentStudents, { id: studentId, reason: '' }]);
         }
         setSearchQuery('');
     };
 
     const removeAbsent = (studentId: number) => {
-        setAbsentStudents(absentStudents.filter(id => id !== studentId));
+        setAbsentStudents(absentStudents.filter(s => s.id !== studentId));
+    };
+
+    const updateReason = (studentId: number, reason: string) => {
+        setAbsentStudents(prev => prev.map(s => s.id === studentId ? { ...s, reason } : s));
     };
 
     const handleSubmit = async () => {
@@ -137,7 +151,7 @@ export default function TakeAttendancePage() {
         }
     };
 
-    const absentStudentDetails = students.filter(s => absentStudents.includes(s.id));
+    const absentStudentDetails = students.filter(s => absentStudents.some(abs => abs.id === s.id));
     const presentCount = selectedClassInfo ? selectedClassInfo.studentCount - absentStudents.length : 0;
 
     return (
@@ -263,16 +277,16 @@ export default function TakeAttendancePage() {
                                             <button
                                                 key={student.id}
                                                 type="button"
-                                                className={`w-full p-3 text-left rounded-lg flex items-center justify-between hover:bg-primary/10 transition-colors ${absentStudents.includes(student.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                                className={`w-full p-3 text-left rounded-lg flex items-center justify-between hover:bg-primary/10 transition-colors ${absentStudents.some(abs => abs.id === student.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                                                     }`}
                                                 onClick={() => addAbsent(student.id)}
-                                                disabled={absentStudents.includes(student.id)}
+                                                disabled={absentStudents.some(abs => abs.id === student.id)}
                                             >
                                                 <div>
                                                     <p className="font-medium text-foreground">{student.name}</p>
                                                     <p className="text-sm text-muted-foreground">Roll: {student.roll_number}</p>
                                                 </div>
-                                                {absentStudents.includes(student.id) ? (
+                                                {absentStudents.some(abs => abs.id === student.id) ? (
                                                     <Badge variant="destructive">Already Absent</Badge>
                                                 ) : (
                                                     <Badge variant="outline">Mark Absent</Badge>
@@ -291,15 +305,24 @@ export default function TakeAttendancePage() {
                                 <div className="space-y-2">
                                     {absentStudentDetails.map((student) => (
                                         <Card key={student.id} className="border-destructive/30 bg-destructive/5">
-                                            <CardContent className="p-3 flex items-center justify-between">
-                                                <div>
+                                            <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                                                <div className="flex-1">
                                                     <p className="font-medium text-foreground">{student.name}</p>
                                                     <p className="text-sm text-muted-foreground">Roll: {student.roll_number}</p>
+                                                </div>
+                                                <div className="flex-1 max-w-sm">
+                                                    <Input 
+                                                        placeholder="Reason (Optional)" 
+                                                        value={absentStudents.find(s => s.id === student.id)?.reason || ''}
+                                                        onChange={(e) => updateReason(student.id, e.target.value)}
+                                                        className="h-8 text-sm"
+                                                    />
                                                 </div>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => removeAbsent(student.id)}
+                                                    className="shrink-0"
                                                 >
                                                     <X className="w-4 h-4 text-destructive" />
                                                 </Button>
