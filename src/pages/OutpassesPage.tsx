@@ -380,80 +380,74 @@ function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
             outpass.status === 'overdue' ? 'border-red-300 bg-red-50/30' : ''
         }`}>
             <CardContent className="p-0">
-                {/* Main Row */}
-                <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                    {/* Left: Student Info — clickable to expand */}
-                    <div className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer" onClick={() => setExpanded(e => !e)}>
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                <div className="p-4 flex flex-col gap-2">
+                    {/* Row 1: Icon · Name · Status · Return btn */}
+                    <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                             outpass.status === 'overdue' ? 'bg-red-100 text-red-700'
                             : outpass.status === 'returned' ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-amber-100 text-amber-700'
                         }`}>
                             {outpass.status === 'returned' ? <LogIn className="w-5 h-5" /> : <LogOut className="w-5 h-5" />}
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpanded(e => !e)}>
                             <div className="flex items-center gap-2 flex-wrap">
-                                <p className="font-semibold text-sm text-foreground truncate">{outpass.student?.user?.name ?? '—'}</p>
+                                <p className="font-semibold text-sm text-foreground leading-tight">{outpass.student?.user?.name ?? '—'}</p>
                                 <StatusBadge status={outpass.status} />
                             </div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                                 {outpass.student?.classRoom?.name} · Roll #{outpass.student?.roll_number}
                             </p>
-                            {/* Duration chip — always visible */}
-                            {outpass.status !== 'returned' && (
-                                <p className={`text-xs font-medium mt-0.5 ${
-                                    outpass.status === 'overdue' ? 'text-red-600' : 'text-amber-700'
-                                }`}>
-                                    ⏱ {formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })}
-                                </p>
-                            )}
                         </div>
-                    </div>
-
-                    {/* Right: Times + Actions */}
-                    <div className="flex items-center gap-3 pl-[52px] sm:pl-0 flex-wrap">
-                        <div className="text-right cursor-pointer" onClick={() => setExpanded(e => !e)}>
-                            <p className="text-xs text-muted-foreground">Left at</p>
-                            <p className="text-sm font-medium">{fSmartDateTime(outpass.out_time)}</p>
-                        </div>
-                        <div className="text-right cursor-pointer" onClick={() => setExpanded(e => !e)}>
-                            <p className="text-xs text-muted-foreground">
-                                {outpass.status === 'returned' ? 'Returned' : 'Expected back'}
-                            </p>
-                            <p className={`text-sm font-medium ${
-                                outpass.status === 'overdue' ? 'text-red-600' : ''
-                            }`}>
-                                {outpass.status === 'returned' && outpass.actual_in_time
-                                    ? fSmartDateTime(outpass.actual_in_time)
-                                    : fSmartDateTime(outpass.expected_in_time)
-                                }
-                            </p>
-                        </div>
-
-                        {/* Return button — always visible for active outpasses */}
-                        {isActionable && (
+                        {isActionable ? (
                             <Button
                                 size="sm"
                                 disabled={checkingIn}
                                 onClick={handleCheckinClick}
-                                className={`shrink-0 transition-all ${
+                                className={`shrink-0 text-xs px-2.5 h-8 transition-all ${
                                     confirming
                                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white animate-pulse'
                                         : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300'
                                 }`}
                             >
-                                <LogIn className="w-3.5 h-3.5 mr-1.5" />
-                                {checkingIn ? 'Returning...' : confirming ? 'Confirm?' : 'Return'}
+                                <LogIn className="w-3.5 h-3.5 mr-1" />
+                                {checkingIn ? 'Saving...' : confirming ? 'Confirm?' : 'Return'}
                             </Button>
+                        ) : (
+                            <ChevronDown
+                                className={`w-4 h-4 text-muted-foreground shrink-0 mt-1 transition-transform cursor-pointer ${expanded ? 'rotate-180' : ''}`}
+                                onClick={() => setExpanded(e => !e)}
+                            />
                         )}
-
-                        <ChevronDown
-                            className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform cursor-pointer ${
-                                expanded ? 'rotate-180' : ''
-                            }`}
-                            onClick={() => setExpanded(e => !e)}
-                        />
                     </div>
+
+                    {/* Row 2 (indented): Duration · spacer · Times · Chevron */}
+                    <div className="flex items-center gap-2 pl-[52px] cursor-pointer" onClick={() => setExpanded(e => !e)}>
+                        {outpass.status !== 'returned' && (
+                            <span className={`text-xs font-medium ${outpass.status === 'overdue' ? 'text-red-600' : 'text-amber-700'}`}>
+                                ⏱ {formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })}
+                            </span>
+                        )}
+                        <div className="flex-1" />
+                        <div className="text-right">
+                            <p className="text-[10px] text-muted-foreground">Left at</p>
+                            <p className="text-xs font-medium">{fSmartDateTime(outpass.out_time)}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] text-muted-foreground">
+                                {outpass.status === 'returned' ? 'Returned' : 'Exp. back'}
+                            </p>
+                            <p className={`text-xs font-medium ${outpass.status === 'overdue' ? 'text-red-600' : ''}`}>
+                                {outpass.status === 'returned' && outpass.actual_in_time
+                                    ? fSmartDateTime(outpass.actual_in_time)
+                                    : fSmartDateTime(outpass.expected_in_time)}
+                            </p>
+                        </div>
+                        {isActionable && (
+                            <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                        )}
+                    </div>
+
                 </div>
 
                 {/* Expanded Details */}
