@@ -372,18 +372,21 @@ export default function AttendancePage() {
                                                         </h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                             {(Array.isArray(record.absentStudents) ? record.absentStudents : []).map((student) => (
-                                                                <div key={student.id} className="flex flex-col p-3 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <span className="font-medium text-foreground">{student.name}</span>
-                                                                        <Badge variant="secondary" className="text-[10px]">
+                                                                <div key={student.id} className="flex flex-col md:flex-row md:items-center gap-2 p-3 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
+                                                                    <div className="flex items-center justify-between md:w-auto md:shrink-0">
+                                                                        <span className="font-medium text-foreground md:min-w-[150px] pr-2">{student.name}</span>
+                                                                        <Badge variant="secondary" className="text-[10px] md:hidden">
                                                                             Roll #{student.roll_number}
                                                                         </Badge>
                                                                     </div>
                                                                     {student.reason && (
-                                                                        <div className="mt-2 text-xs text-muted-foreground bg-muted/50 p-1.5 rounded-md border-l-2 border-primary/40">
+                                                                        <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1.5 rounded-md border-l-2 border-primary/40 truncate flex-1">
                                                                             Reason: <span className="italic">{student.reason}</span>
                                                                         </div>
                                                                     )}
+                                                                    <Badge variant="secondary" className="text-[10px] hidden md:inline-flex ml-auto shrink-0">
+                                                                        Roll #{student.roll_number}
+                                                                    </Badge>
                                                                 </div>
                                                             ))}
                                                         </div>
