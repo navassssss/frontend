@@ -43,20 +43,83 @@ function fTime(dateStr: string): string {
     return formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
-function fDate(dateStr: string): string {
-    return formatIST(dateStr, { year: 'numeric', month: '2-digit', day: '2-digit' });
+// Smart label: "Today 5:30 PM", "Yesterday 3:15 PM", "22 Apr 4:00 PM"
+function fSmartDateTime(dateStr: string): string {
+    const date = new Date(dateStr);
+    const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date());
+    const yesterdayStr = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date(Date.now() - 86400000));
+    const dateOnly = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(date);
+    const time = formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true });
+    if (dateOnly === todayStr) return `Today, ${time}`;
+    if (dateOnly === yesterdayStr) return `Yesterday, ${time}`;
+    const day = formatIST(dateStr, { day: 'numeric', month: 'short' });
+    return `${day}, ${time}`;
 }
 
 function todayIST(): string {
-    return new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date()); // yyyy-mm-dd
+    return new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date());
 }
 
-function nowLocalIST(): string {
-    // Returns datetime-local compatible string in IST for <input type="datetime-local">
-    const now = new Date();
-    const ist = new Date(now.toLocaleString('en-US', { timeZone: IST }));
+function istOffsetISO(offsetHours = 0): string {
+    const d = new Date(Date.now() + offsetHours * 3600000);
+    const ist = new Date(d.toLocaleString('en-US', { timeZone: IST }));
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${ist.getFullYear()}-${pad(ist.getMonth()+1)}-${pad(ist.getDate())}T${pad(ist.getHours())}:${pad(ist.getMinutes())}`;
+}
+
+// 12-hr time picker component
+function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+    // value format: HH:MM (24hr from datetime-local)
+    const toH12 = (h24: number) => h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24;
+    const [h24, setH24] = useState(() => parseInt(value.split('T')[1]?.split(':')[0] ?? '8'));
+    const [min, setMin] = useState(() => parseInt(value.split('T')[1]?.split(':')[1] ?? '0'));
+    const [ampm, setAmpm] = useState<'AM'|'PM'>(() => parseInt(value.split('T')[1]?.split(':')[0] ?? '8') < 12 ? 'AM' : 'PM');
+    const datepart = value.split('T')[0] ?? todayIST();
+
+    const emit = (newH24: number, newMin: number) => {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        onChange(`${datepart}T${pad(newH24)}:${pad(newMin)}`);
+    };
+
+    const setHour = (h12: number) => {
+        let h24new = ampm === 'PM' ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
+        setH24(h24new); emit(h24new, min);
+    };
+    const setMinute = (m: number) => { setMin(m); emit(h24, m); };
+    const toggleAmPm = (ap: 'AM'|'PM') => {
+        let newH = ap === 'PM' ? (h24 < 12 ? h24 + 12 : h24) : (h24 >= 12 ? h24 - 12 : h24);
+        setAmpm(ap); setH24(newH); emit(newH, min);
+    };
+
+    return (
+        <div className="flex items-center gap-1">
+            <select
+                className="border border-input rounded-md px-2 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                value={toH12(h24)}
+                onChange={e => setHour(parseInt(e.target.value))}
+            >
+                {Array.from({length:12},(_,i)=>i+1).map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
+            </select>
+            <span className="text-muted-foreground font-bold">:</span>
+            <select
+                className="border border-input rounded-md px-2 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                value={min}
+                onChange={e => setMinute(parseInt(e.target.value))}
+            >
+                {Array.from({length:12},(_,i)=>i*5).map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
+            </select>
+            <div className="flex rounded-md overflow-hidden border border-input">
+                {(['AM','PM'] as const).map(ap => (
+                    <button key={ap} type="button"
+                        className={`px-2 py-2 text-xs font-bold transition-colors ${
+                            ampm === ap ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-muted'
+                        }`}
+                        onClick={() => toggleAmPm(ap)}
+                    >{ap}</button>
+                ))}
+            </div>
+        </div>
+    );
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -132,14 +195,10 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
     const [selectedStudent, setSelectedStudent] = useState<StudentOption | null>(null);
     const [reason, setReason] = useState('');
     const [notes, setNotes] = useState('');
-    const [outTime, setOutTime] = useState(nowLocalIST());
-    const [expectedInTime, setExpectedInTime] = useState(() => {
-        const d = new Date();
-        d.setHours(d.getHours() + 2);
-        const ist = new Date(d.toLocaleString('en-US', { timeZone: IST }));
-        const pad = (n: number) => String(n).padStart(2, '0');
-        return `${ist.getFullYear()}-${pad(ist.getMonth()+1)}-${pad(ist.getDate())}T${pad(ist.getHours())}:${pad(ist.getMinutes())}`;
-    });
+    const [outDate, setOutDate] = useState(todayIST());
+    const [outTime, setOutTime] = useState(istOffsetISO(0));
+    const [expectedDate, setExpectedDate] = useState(todayIST());
+    const [expectedInTime, setExpectedInTime] = useState(istOffsetISO(2));
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -169,12 +228,15 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
 
         setSubmitting(true);
         try {
+            // Combine date + time parts before sending
+            const fullOutTime = `${outDate}T${outTime.split('T')[1]}`;
+            const fullExpected = `${expectedDate}T${expectedInTime.split('T')[1]}`;
             await api.post('/outpasses', {
                 student_id: selectedStudent.id,
                 reason: reason.trim(),
                 notes: notes.trim() || undefined,
-                out_time: outTime,
-                expected_in_time: expectedInTime,
+                out_time: fullOutTime,
+                expected_in_time: fullExpected,
             });
             toast.success(`Outpass created for ${selectedStudent.name}`);
             onSuccess();
@@ -256,15 +318,20 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
                         <Input placeholder="e.g. Doctor appointment, Family emergency..." value={reason} onChange={e => setReason(e.target.value)} />
                     </div>
 
-                    {/* Times */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                            <Label>Out Time <span className="text-destructive">*</span></Label>
-                            <Input type="datetime-local" value={outTime} onChange={e => setOutTime(e.target.value)} />
+                    {/* Out Time */}
+                    <div className="space-y-2">
+                        <Label>Out Date & Time <span className="text-destructive">*</span></Label>
+                        <div className="flex gap-2 flex-wrap items-center">
+                            <Input type="date" className="w-auto flex-1 min-w-[130px]" value={outDate} onChange={e => setOutDate(e.target.value)} />
+                            <TimePicker value={outTime} onChange={setOutTime} />
                         </div>
-                        <div className="space-y-2">
-                            <Label>Expected Return <span className="text-destructive">*</span></Label>
-                            <Input type="datetime-local" value={expectedInTime} onChange={e => setExpectedInTime(e.target.value)} />
+                    </div>
+                    {/* Expected Return */}
+                    <div className="space-y-2">
+                        <Label>Expected Return <span className="text-destructive">*</span></Label>
+                        <div className="flex gap-2 flex-wrap items-center">
+                            <Input type="date" className="w-auto flex-1 min-w-[130px]" value={expectedDate} onChange={e => setExpectedDate(e.target.value)} />
+                            <TimePicker value={expectedInTime} onChange={setExpectedInTime} />
                         </div>
                     </div>
 
@@ -298,18 +365,25 @@ interface OutpassCardProps {
 
 function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
     const [expanded, setExpanded] = useState(false);
+    const [confirming, setConfirming] = useState(false);
     const isActionable = outpass.status !== 'returned';
 
+    const handleCheckinClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirming) { setConfirming(true); return; }
+        setConfirming(false);
+        onCheckin(outpass.id);
+    };
+
     return (
-        <Card className={`transition-all duration-200 shadow-sm hover:shadow-md ${outpass.status === 'overdue' ? 'border-red-300 bg-red-50/30' : ''}`}>
+        <Card className={`transition-all duration-200 shadow-sm hover:shadow-md ${
+            outpass.status === 'overdue' ? 'border-red-300 bg-red-50/30' : ''
+        }`}>
             <CardContent className="p-0">
                 {/* Main Row */}
-                <div
-                    className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 cursor-pointer"
-                    onClick={() => setExpanded(e => !e)}
-                >
-                    {/* Left: Student Info */}
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    {/* Left: Student Info — clickable to expand */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer" onClick={() => setExpanded(e => !e)}>
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                             outpass.status === 'overdue' ? 'bg-red-100 text-red-700'
                             : outpass.status === 'returned' ? 'bg-emerald-100 text-emerald-700'
@@ -317,7 +391,7 @@ function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
                         }`}>
                             {outpass.status === 'returned' ? <LogIn className="w-5 h-5" /> : <LogOut className="w-5 h-5" />}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold text-sm text-foreground truncate">{outpass.student?.user?.name ?? '—'}</p>
                                 <StatusBadge status={outpass.status} />
@@ -325,33 +399,66 @@ function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
                             <p className="text-xs text-muted-foreground">
                                 {outpass.student?.classRoom?.name} · Roll #{outpass.student?.roll_number}
                             </p>
+                            {/* Duration chip — always visible */}
+                            {outpass.status !== 'returned' && (
+                                <p className={`text-xs font-medium mt-0.5 ${
+                                    outpass.status === 'overdue' ? 'text-red-600' : 'text-amber-700'
+                                }`}>
+                                    ⏱ {formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })}
+                                </p>
+                            )}
                         </div>
                     </div>
 
-                    {/* Right: Times + Chevron */}
-                    <div className="flex items-center gap-4 pl-[52px] sm:pl-0">
-                        <div className="text-right">
+                    {/* Right: Times + Actions */}
+                    <div className="flex items-center gap-3 pl-[52px] sm:pl-0 flex-wrap">
+                        <div className="text-right cursor-pointer" onClick={() => setExpanded(e => !e)}>
                             <p className="text-xs text-muted-foreground">Left at</p>
-                            <p className="text-sm font-medium">{fTime(outpass.out_time)}</p>
+                            <p className="text-sm font-medium">{fSmartDateTime(outpass.out_time)}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right cursor-pointer" onClick={() => setExpanded(e => !e)}>
                             <p className="text-xs text-muted-foreground">
                                 {outpass.status === 'returned' ? 'Returned' : 'Expected back'}
                             </p>
-                            <p className={`text-sm font-medium ${outpass.status === 'overdue' ? 'text-red-600' : ''}`}>
+                            <p className={`text-sm font-medium ${
+                                outpass.status === 'overdue' ? 'text-red-600' : ''
+                            }`}>
                                 {outpass.status === 'returned' && outpass.actual_in_time
-                                    ? fTime(outpass.actual_in_time)
-                                    : fTime(outpass.expected_in_time)
+                                    ? fSmartDateTime(outpass.actual_in_time)
+                                    : fSmartDateTime(outpass.expected_in_time)
                                 }
                             </p>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+
+                        {/* Return button — always visible for active outpasses */}
+                        {isActionable && (
+                            <Button
+                                size="sm"
+                                disabled={checkingIn}
+                                onClick={handleCheckinClick}
+                                className={`shrink-0 transition-all ${
+                                    confirming
+                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white animate-pulse'
+                                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                }`}
+                            >
+                                <LogIn className="w-3.5 h-3.5 mr-1.5" />
+                                {checkingIn ? 'Returning...' : confirming ? 'Confirm?' : 'Return'}
+                            </Button>
+                        )}
+
+                        <ChevronDown
+                            className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform cursor-pointer ${
+                                expanded ? 'rotate-180' : ''
+                            }`}
+                            onClick={() => setExpanded(e => !e)}
+                        />
                     </div>
                 </div>
 
                 {/* Expanded Details */}
                 {expanded && (
-                    <div className="border-t border-border px-4 py-3 bg-muted/20 space-y-3">
+                    <div className="border-t border-border px-4 py-3 bg-muted/20">
                         <div className="grid grid-cols-2 gap-3 text-sm">
                             <div>
                                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Reason</p>
@@ -367,24 +474,7 @@ function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
                                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Created by</p>
                                 <p>{outpass.creator?.name ?? '—'}</p>
                             </div>
-                            {outpass.status === 'outside' || outpass.status === 'overdue' ? (
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-medium mb-0.5">Duration</p>
-                                    <p>{formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })} ago</p>
-                                </div>
-                            ) : null}
                         </div>
-                        {isActionable && (
-                            <Button
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                                size="sm"
-                                disabled={checkingIn}
-                                onClick={(e) => { e.stopPropagation(); onCheckin(outpass.id); }}
-                            >
-                                <LogIn className="w-4 h-4 mr-2" />
-                                {checkingIn ? 'Checking in...' : 'Mark as Returned'}
-                            </Button>
-                        )}
                     </div>
                 )}
             </CardContent>
@@ -403,18 +493,18 @@ export default function OutpassesPage() {
     const [checkingInId, setCheckingInId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
 
-    // Filters
-    const [filterStatus, setFilterStatus] = useState('all');
+    // Filters — default: Outside, all dates
+    const [filterStatus, setFilterStatus] = useState('outside');
     const [filterClass, setFilterClass] = useState('all');
-    const [filterDate, setFilterDate] = useState(todayIST());
+    const [filterDate, setFilterDate] = useState('');
     const [searchStudent, setSearchStudent] = useState('');
 
     const canCreate = user?.role === 'principal' || user?.role === 'manager'
         || (user?.role === 'teacher' && user?.is_vice_principal)
         || user?.permissions?.some((p: any) => p.name === 'manage_outpasses');
 
-    const loadData = useCallback(async () => {
-        setLoading(true);
+    const loadData = useCallback(async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const params: Record<string, string> = {};
             if (filterStatus !== 'all') params.status = filterStatus;
@@ -428,17 +518,30 @@ export default function OutpassesPage() {
             ]);
 
             setStats(statsRes.data);
-            const data = listRes.data;
-            setOutpasses(data.data ?? data);
+            const raw: Outpass[] = listRes.data.data ?? listRes.data;
+            // Sort: overdue first, then outside (oldest first), then returned
+            const order = { overdue: 0, outside: 1, returned: 2 };
+            raw.sort((a, b) =>
+                order[a.status] !== order[b.status]
+                    ? order[a.status] - order[b.status]
+                    : new Date(a.out_time).getTime() - new Date(b.out_time).getTime()
+            );
+            setOutpasses(raw);
             setClasses(classesRes.data);
         } catch {
-            toast.error('Failed to load outpasses');
+            if (!silent) toast.error('Failed to load outpasses');
         } finally {
             setLoading(false);
         }
     }, [filterStatus, filterClass, filterDate]);
 
     useEffect(() => { loadData(); }, [loadData]);
+
+    // Auto-refresh every 60s (silent — no spinner)
+    useEffect(() => {
+        const id = setInterval(() => loadData(true), 60_000);
+        return () => clearInterval(id);
+    }, [loadData]);
 
     const handleCheckin = async (id: number) => {
         setCheckingInId(id);
