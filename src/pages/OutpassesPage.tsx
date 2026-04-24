@@ -28,8 +28,36 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import api from '@/lib/api';
+
+// ── IST Time Formatter ─────────────────────────────────────────────────────
+
+const IST = 'Asia/Kolkata';
+
+function formatIST(dateStr: string, opts: Intl.DateTimeFormatOptions): string {
+    return new Intl.DateTimeFormat('en-IN', { timeZone: IST, ...opts }).format(new Date(dateStr));
+}
+
+function fTime(dateStr: string): string {
+    return formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function fDate(dateStr: string): string {
+    return formatIST(dateStr, { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+function todayIST(): string {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date()); // yyyy-mm-dd
+}
+
+function nowLocalIST(): string {
+    // Returns datetime-local compatible string in IST for <input type="datetime-local">
+    const now = new Date();
+    const ist = new Date(now.toLocaleString('en-US', { timeZone: IST }));
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${ist.getFullYear()}-${pad(ist.getMonth()+1)}-${pad(ist.getDate())}T${pad(ist.getHours())}:${pad(ist.getMinutes())}`;
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -104,9 +132,14 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
     const [selectedStudent, setSelectedStudent] = useState<StudentOption | null>(null);
     const [reason, setReason] = useState('');
     const [notes, setNotes] = useState('');
-    const now = new Date();
-    const [outTime, setOutTime] = useState(format(now, "yyyy-MM-dd'T'HH:mm"));
-    const [expectedInTime, setExpectedInTime] = useState(format(new Date(now.getTime() + 2 * 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"));
+    const [outTime, setOutTime] = useState(nowLocalIST());
+    const [expectedInTime, setExpectedInTime] = useState(() => {
+        const d = new Date();
+        d.setHours(d.getHours() + 2);
+        const ist = new Date(d.toLocaleString('en-US', { timeZone: IST }));
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${ist.getFullYear()}-${pad(ist.getMonth()+1)}-${pad(ist.getDate())}T${pad(ist.getHours())}:${pad(ist.getMinutes())}`;
+    });
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -299,7 +332,7 @@ function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
                     <div className="flex items-center gap-4 pl-[52px] sm:pl-0">
                         <div className="text-right">
                             <p className="text-xs text-muted-foreground">Left at</p>
-                            <p className="text-sm font-medium">{format(new Date(outpass.out_time), 'h:mm a')}</p>
+                            <p className="text-sm font-medium">{fTime(outpass.out_time)}</p>
                         </div>
                         <div className="text-right">
                             <p className="text-xs text-muted-foreground">
@@ -307,8 +340,8 @@ function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
                             </p>
                             <p className={`text-sm font-medium ${outpass.status === 'overdue' ? 'text-red-600' : ''}`}>
                                 {outpass.status === 'returned' && outpass.actual_in_time
-                                    ? format(new Date(outpass.actual_in_time), 'h:mm a')
-                                    : format(new Date(outpass.expected_in_time), 'h:mm a')
+                                    ? fTime(outpass.actual_in_time)
+                                    : fTime(outpass.expected_in_time)
                                 }
                             </p>
                         </div>
@@ -373,7 +406,7 @@ export default function OutpassesPage() {
     // Filters
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterClass, setFilterClass] = useState('all');
-    const [filterDate, setFilterDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [filterDate, setFilterDate] = useState(todayIST());
     const [searchStudent, setSearchStudent] = useState('');
 
     const canCreate = user?.role === 'principal' || user?.role === 'manager'
@@ -410,9 +443,7 @@ export default function OutpassesPage() {
     const handleCheckin = async (id: number) => {
         setCheckingInId(id);
         try {
-            await api.put(`/outpasses/${id}/checkin`, {
-                actual_in_time: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
-            });
+            await api.put(`/outpasses/${id}/checkin`);
             toast.success('Student marked as returned');
             loadData();
         } catch {
