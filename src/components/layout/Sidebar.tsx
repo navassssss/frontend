@@ -4,7 +4,7 @@ import {
     Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText,
     BookOpen, IndianRupee, GraduationCap, LayoutDashboard, LogOut, Settings, Calendar,
     Plus, ChevronDown, Award, Briefcase, DollarSign, Building2, HelpCircle, HeartHandshake,
-    AlertTriangle, Trophy, Megaphone, Bell, Stethoscope
+    AlertTriangle, Trophy, Megaphone, Bell, Stethoscope, DoorOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,6 +67,7 @@ const principalNavItems: NavItem[] = [
     { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: Megaphone, label: 'Announcements', path: '/announcements' },
     { icon: Stethoscope, label: 'Medical', path: '/medical' },
+    { icon: DoorOpen, label: 'Outpasses', path: '/outpasses' },
     { icon: User, label: 'My Profile', path: '/profile' },
 ];
 
@@ -134,6 +135,10 @@ export function Sidebar() {
 
         if (hasPermission('manage_medical')) {
             extendedItems.push({ icon: Stethoscope, label: 'Medical', path: '/medical' });
+        }
+
+        if (hasPermission('manage_outpasses')) {
+            extendedItems.push({ icon: DoorOpen, label: 'Outpasses', path: '/outpasses' });
         }
 
         // All teachers can see their assigned class

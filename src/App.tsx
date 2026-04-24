@@ -44,6 +44,7 @@ import StudentAttendanceOverviewPage from "./pages/StudentAttendanceOverviewPage
 import ClassesPage from "./pages/ClassesPage";
 import ClassPerformanceReportPage from "./pages/ClassPerformanceReportPage";
 import MedicalPage from "./pages/MedicalPage";
+import OutpassesPage from "./pages/OutpassesPage";
 import NotFound from "./pages/NotFound";
 
 // Academic Pages
@@ -592,6 +593,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MedicalPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/outpasses"
+        element={
+          <ProtectedRoute>
+            <OutpassesPage />
           </ProtectedRoute>
         }
       />

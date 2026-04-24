@@ -1,4 +1,4 @@
-import { Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText, BookOpen, IndianRupee, GraduationCap, LayoutDashboard, Calendar } from 'lucide-react';
+import { Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText, BookOpen, IndianRupee, GraduationCap, LayoutDashboard, Calendar, DoorOpen } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +23,7 @@ const baseNavItems: NavItem[] = [
 const principalNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: GraduationCap, label: 'Students', path: '/students' },
-  { icon: Users, label: 'Teachers', path: '/teachers' },
+  { icon: DoorOpen, label: 'Outpasses', path: '/outpasses' },
   { icon: AlertCircle, label: 'Issues', path: '/issues', showBadge: true },
   { icon: FileText, label: 'Reports', path: '/reports' },
 ];
