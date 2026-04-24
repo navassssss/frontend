@@ -63,6 +63,7 @@ export default function SubjectsPage() {
     const [loading, setLoading] = useState(true);
     const [collapsedClasses, setCollapsedClasses] = useState<string[]>([]);
     const [showDialog, setShowDialog] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         code: '',
@@ -93,12 +94,47 @@ export default function SubjectsPage() {
         }
     };
 
+    const openCreateDialog = () => {
+        setEditingId(null);
+        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30' });
+        setShowDialog(true);
+    };
+
+    const handleEdit = (subject: Subject) => {
+        setEditingId(subject.id);
+        setFormData({
+            name: subject.name,
+            code: subject.code,
+            class_id: subject.classId.toString(),
+            teacher_id: subject.teacherId ? subject.teacherId.toString() : '',
+            final_max_marks: subject.finalMaxMarks.toString()
+        });
+        setShowDialog(true);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this subject? (Soft delete)')) return;
+        try {
+            await api.delete(`/subjects/${id}`);
+            toast.success('Subject deleted successfully');
+            loadData();
+        } catch (error) {
+            toast.error('Failed to delete subject');
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.post('/subjects', formData);
-            toast.success('Subject created successfully');
+            if (editingId) {
+                await api.put(`/subjects/${editingId}`, formData);
+                toast.success('Subject updated successfully');
+            } else {
+                await api.post('/subjects', formData);
+                toast.success('Subject created successfully');
+            }
             setShowDialog(false);
+            setEditingId(null);
             setFormData({
                 name: '',
                 code: '',
@@ -108,7 +144,7 @@ export default function SubjectsPage() {
             });
             loadData();
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to create subject');
+            toast.error(error.response?.data?.message || 'Failed to save subject');
         }
     };
 
@@ -156,7 +192,7 @@ export default function SubjectsPage() {
                     </div>
                     <Button
                         className="w-full sm:w-auto hover:scale-105 transition-transform rounded-xl bg-[#008f6c] hover:bg-[#007a5c]"
-                        onClick={() => setShowDialog(true)}
+                        onClick={openCreateDialog}
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         Create Subject
@@ -263,12 +299,26 @@ export default function SubjectsPage() {
                                                             </div>
                                                         </td>
                                                         <td className="py-4 px-4 text-right">
-                                                            <button 
-                                                                onClick={() => toggleLock(subject.id)} 
-                                                                className="w-8 h-8 rounded-full hover:bg-slate-100 inline-flex items-center justify-center transition-colors shadow-sm bg-white"
-                                                            >
-                                                                {subject.isLocked ? <Lock className="w-3.5 h-3.5 text-rose-500" /> : <Unlock className="w-3.5 h-3.5 text-slate-400" />}
-                                                            </button>
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <button 
+                                                                    onClick={() => handleEdit(subject)} 
+                                                                    className="w-8 h-8 rounded-full hover:bg-blue-50 inline-flex items-center justify-center transition-colors shadow-sm bg-white"
+                                                                >
+                                                                    <Edit className="w-3.5 h-3.5 text-blue-500" />
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDelete(subject.id)} 
+                                                                    className="w-8 h-8 rounded-full hover:bg-rose-50 inline-flex items-center justify-center transition-colors shadow-sm bg-white"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => toggleLock(subject.id)} 
+                                                                    className="w-8 h-8 rounded-full hover:bg-slate-100 inline-flex items-center justify-center transition-colors shadow-sm bg-white ml-1"
+                                                                >
+                                                                    {subject.isLocked ? <Lock className="w-3.5 h-3.5 text-rose-500" /> : <Unlock className="w-3.5 h-3.5 text-slate-400" />}
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -291,7 +341,7 @@ export default function SubjectsPage() {
                 <Dialog open={showDialog} onOpenChange={setShowDialog}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Create Subject</DialogTitle>
+                            <DialogTitle>{editingId ? 'Edit Subject' : 'Create Subject'}</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
@@ -365,7 +415,7 @@ export default function SubjectsPage() {
                                 <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
                                     Cancel
                                 </Button>
-                                <Button type="submit">Create Subject</Button>
+                                <Button type="submit">{editingId ? 'Update Subject' : 'Create Subject'}</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>
