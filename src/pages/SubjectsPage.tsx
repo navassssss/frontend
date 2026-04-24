@@ -7,8 +7,12 @@ import {
     Unlock,
     Edit,
     Trash2,
-    ChevronDown
+    ChevronDown,
+    Download,
+    Upload,
+    AlertCircle
 } from 'lucide-react';
+import { read, utils, writeFile } from 'xlsx';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +59,17 @@ interface Teacher {
     name: string;
 }
 
+interface ImportRow {
+    name: string;
+    code: string;
+    maxMarks: string | number;
+    className: string;
+    teacherName: string;
+    classId?: number;
+    teacherId?: number;
+    hasError?: boolean;
+}
+
 export default function SubjectsPage() {
     const navigate = useNavigate();
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -64,6 +79,8 @@ export default function SubjectsPage() {
     const [collapsedClasses, setCollapsedClasses] = useState<string[]>([]);
     const [showDialog, setShowDialog] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [showImportDialog, setShowImportDialog] = useState(false);
+    const [importData, setImportData] = useState<ImportRow[]>([]);
     const [formData, setFormData] = useState({
         name: '',
         code: '',
@@ -174,6 +191,106 @@ export default function SubjectsPage() {
         );
     };
 
+    const handleDownloadTemplate = () => {
+        const templateData = [
+            { 'Subject Name': 'Mathematics', 'Subject Code': 'MTH101', 'Max Marks': 50, 'Class Name': 'Class 1A', 'Teacher Name': 'John Doe' }
+        ];
+        const ws = utils.json_to_sheet(templateData);
+
+        const referenceData: any[] = [];
+        const maxLen = Math.max(classes.length, teachers.length);
+        for(let i=0; i<maxLen; i++) {
+            referenceData.push({
+                'Available Classes': classes[i] ? classes[i].name : '',
+                'Available Teachers': teachers[i] ? teachers[i].name : ''
+            });
+        }
+        const wsRef = utils.json_to_sheet(referenceData);
+
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, 'Template');
+        utils.book_append_sheet(wb, wsRef, 'Reference Data');
+
+        writeFile(wb, 'Subjects_Import_Template.xlsx');
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const bstr = evt.target?.result;
+                const wb = read(bstr, { type: 'binary' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const data = utils.sheet_to_json(ws);
+
+                const mappedData: ImportRow[] = data.map((row: any) => {
+                    const cName = row['Class Name']?.toString().trim();
+                    const tName = row['Teacher Name']?.toString().trim();
+                    
+                    const matchedClass = classes.find(c => c.name.toLowerCase() === cName?.toLowerCase());
+                    const matchedTeacher = teachers.find(t => t.name.toLowerCase() === tName?.toLowerCase());
+
+                    return {
+                        name: row['Subject Name'] || '',
+                        code: row['Subject Code'] || '',
+                        maxMarks: row['Max Marks'] || '30',
+                        className: cName || '',
+                        teacherName: tName || '',
+                        classId: matchedClass?.id,
+                        teacherId: matchedTeacher?.id,
+                        hasError: !matchedClass || !matchedTeacher || !row['Subject Name'] || !row['Subject Code']
+                    };
+                });
+
+                setImportData(mappedData);
+                setShowImportDialog(true);
+            } catch (error) {
+                toast.error('Failed to parse Excel file');
+            }
+        };
+        reader.readAsBinaryString(file);
+        e.target.value = '';
+    };
+
+    const handleImportSubmit = async () => {
+        if (importData.some(d => d.hasError)) {
+            toast.error('Please fix all errors before importing');
+            return;
+        }
+
+        const payload = importData.map(d => ({
+            name: d.name,
+            code: d.code,
+            class_id: d.classId,
+            teacher_id: d.teacherId,
+            final_max_marks: Number(d.maxMarks) || 30
+        }));
+
+        try {
+            await api.post('/subjects/bulk', { subjects: payload });
+            toast.success('Subjects imported successfully');
+            setShowImportDialog(false);
+            setImportData([]);
+            loadData();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to import subjects');
+        }
+    };
+
+    const updateImportRow = (index: number, field: keyof ImportRow, value: any) => {
+        setImportData(prev => {
+            const newData = [...prev];
+            newData[index] = { ...newData[index], [field]: value };
+            const row = newData[index];
+            row.hasError = !row.classId || !row.teacherId || !row.name || !row.code;
+            return newData;
+        });
+    };
+
     const groupedSubjects = subjects.reduce((acc, subject) => {
         const className = subject.className || 'Unassigned';
         if (!acc[className]) acc[className] = [];
@@ -190,13 +307,35 @@ export default function SubjectsPage() {
                         <h2 className="text-xl font-bold text-foreground">Subjects Directory</h2>
                         <p className="text-sm text-muted-foreground">Manage institutional syllabus structures</p>
                     </div>
-                    <Button
-                        className="w-full sm:w-auto hover:scale-105 transition-transform rounded-xl bg-[#008f6c] hover:bg-[#007a5c]"
-                        onClick={openCreateDialog}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Subject
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <Button
+                            variant="outline"
+                            className="rounded-xl flex-1 sm:flex-none"
+                            onClick={handleDownloadTemplate}
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            Template
+                        </Button>
+                        <div className="relative flex-1 sm:flex-none">
+                            <input
+                                type="file"
+                                accept=".xlsx, .xls, .csv"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                onChange={handleFileUpload}
+                            />
+                            <Button variant="outline" className="w-full rounded-xl">
+                                <Upload className="w-4 h-4 mr-2" />
+                                Import
+                            </Button>
+                        </div>
+                        <Button
+                            className="flex-1 sm:flex-none hover:scale-105 transition-transform rounded-xl bg-[#008f6c] hover:bg-[#007a5c]"
+                            onClick={openCreateDialog}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create Subject
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Grouped Subjects List */}
@@ -418,6 +557,109 @@ export default function SubjectsPage() {
                                 <Button type="submit">{editingId ? 'Update Subject' : 'Create Subject'}</Button>
                             </DialogFooter>
                         </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Import Review Dialog */}
+                <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                    <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-4 sm:p-6">
+                        <DialogHeader>
+                            <DialogTitle>Review Imported Subjects</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex-1 overflow-auto py-4 border rounded-xl my-2">
+                            <table className="w-full text-sm text-left whitespace-nowrap">
+                                <thead className="text-xs text-muted-foreground uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th className="px-4 py-3">Subject Name</th>
+                                        <th className="px-4 py-3">Code</th>
+                                        <th className="px-4 py-3">Max Marks</th>
+                                        <th className="px-4 py-3 w-48">Class</th>
+                                        <th className="px-4 py-3 w-48">Teacher</th>
+                                        <th className="px-4 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {importData.map((row, i) => (
+                                        <tr key={i} className={`border-b last:border-0 ${row.hasError ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
+                                            <td className="px-4 py-2">
+                                                <Input 
+                                                    value={row.name} 
+                                                    onChange={(e) => updateImportRow(i, 'name', e.target.value)}
+                                                    className="h-8 min-w-[120px]"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <Input 
+                                                    value={row.code} 
+                                                    onChange={(e) => updateImportRow(i, 'code', e.target.value)}
+                                                    className="h-8 w-24"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <Input 
+                                                    type="number"
+                                                    value={row.maxMarks} 
+                                                    onChange={(e) => updateImportRow(i, 'maxMarks', e.target.value)}
+                                                    className="h-8 w-20"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <Select 
+                                                    value={row.classId?.toString() || ''} 
+                                                    onValueChange={(val) => updateImportRow(i, 'classId', parseInt(val))}
+                                                >
+                                                    <SelectTrigger className={`h-8 ${!row.classId ? 'border-rose-300 bg-white' : 'bg-white'}`}>
+                                                        <SelectValue placeholder={row.className || 'Select Class'} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {classes.map(c => (
+                                                            <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <Select 
+                                                    value={row.teacherId?.toString() || ''} 
+                                                    onValueChange={(val) => updateImportRow(i, 'teacherId', parseInt(val))}
+                                                >
+                                                    <SelectTrigger className={`h-8 ${!row.teacherId ? 'border-rose-300 bg-white' : 'bg-white'}`}>
+                                                        <SelectValue placeholder={row.teacherName || 'Select Teacher'} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {teachers.map(t => (
+                                                            <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {row.hasError ? (
+                                                    <span title="Missing required fields or unmapped teacher/class">
+                                                        <AlertCircle className="w-5 h-5 text-rose-500" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-emerald-600 font-medium text-xs bg-emerald-50 px-2 py-1 rounded-md">Ready</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {importData.length === 0 && (
+                                <div className="text-center py-10 text-muted-foreground text-sm">
+                                    No rows found in the imported file.
+                                </div>
+                            )}
+                        </div>
+                        <DialogFooter className="mt-4">
+                            <Button type="button" variant="outline" onClick={() => setShowImportDialog(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="button" className="bg-[#008f6c] hover:bg-[#007a5c]" onClick={handleImportSubmit} disabled={importData.some(d => d.hasError) || importData.length === 0}>
+                                Confirm & Import ({importData.filter(d => !d.hasError).length})
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>
