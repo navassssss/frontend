@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Calendar,
@@ -15,7 +15,9 @@ import {
     Search,
     Filter,
     ArrowUpDown,
-    ArrowLeft
+    ArrowLeft,
+    X,
+    Layers
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -108,6 +110,23 @@ export default function CCEWorkDetailPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Bulk selection state
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [bulkMarks, setBulkMarks] = useState('');
+    const [bulkFeedback, setBulkFeedback] = useState('');
+    const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+    const [bulkLoading, setBulkLoading] = useState(false);
+    const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
+
+    // Drive indeterminate state on the select-all checkbox (after each render)
+    useEffect(() => {
+        if (selectAllCheckboxRef.current) {
+            const total = work?.submissions?.length ?? 0;
+            const some = selectedIds.size > 0 && selectedIds.size < total;
+            selectAllCheckboxRef.current.indeterminate = some;
+        }
+    });
+
     useEffect(() => {
         if (id) loadWork();
     }, [id]);
@@ -148,6 +167,49 @@ export default function CCEWorkDetailPage() {
             loadWork();
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to evaluate');
+        }
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.size === filteredSubmissions.length && filteredSubmissions.length > 0) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(filteredSubmissions.map(s => s.id)));
+        }
+    };
+
+    const toggleSelectOne = (subId: number) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.has(subId) ? next.delete(subId) : next.add(subId);
+            return next;
+        });
+    };
+
+    const handleBulkEvaluate = async () => {
+        if (!bulkMarks) { toast.error('Enter marks'); return; }
+        const marksNum = parseFloat(bulkMarks);
+        if (marksNum < 0 || marksNum > (work?.maxMarks || 100)) {
+            toast.error(`Marks must be 0–${work?.maxMarks}`);
+            return;
+        }
+        setBulkLoading(true);
+        try {
+            await api.post('/cce/submissions/bulk-evaluate', {
+                submission_ids: [...selectedIds],
+                marks_obtained: marksNum,
+                feedback: bulkFeedback || null,
+            });
+            toast.success(`${selectedIds.size} student${selectedIds.size > 1 ? 's' : ''} evaluated!`);
+            setBulkDialogOpen(false);
+            setBulkMarks('');
+            setBulkFeedback('');
+            setSelectedIds(new Set());
+            loadWork();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Bulk evaluation failed');
+        } finally {
+            setBulkLoading(false);
         }
     };
 
@@ -343,28 +405,57 @@ export default function CCEWorkDetailPage() {
                 <Card className="border border-slate-100 shadow-sm rounded-[1.5rem] bg-white overflow-hidden">
                     
                     {/* Toolbar */}
-                    <div className="p-4 md:p-6 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/50">
-                        <div className="relative w-full md:w-80">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search by student name or roll number..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-[13px] font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00a67e]/20"
-                            />
-                        </div>
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                                <Filter className="w-4 h-4" /> All Status
-                            </button>
-                            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                                <ArrowUpDown className="w-4 h-4" /> Sort
-                            </button>
-                            <div className="hidden lg:block text-[13px] font-medium text-slate-500 min-w-max ml-2">
-                                Showing <strong className="text-slate-800">{filteredSubmissions.length}</strong> of <strong className="text-slate-800">{stats.total}</strong> Students
+                    <div className="p-4 md:p-6 border-b border-slate-100 bg-slate-50/50 space-y-3">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div className="relative w-full md:w-80">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by student name or roll number..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-[13px] font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00a67e]/20"
+                                />
+                            </div>
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                                    <Filter className="w-4 h-4" /> All Status
+                                </button>
+                                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                                    <ArrowUpDown className="w-4 h-4" /> Sort
+                                </button>
+                                <div className="hidden lg:block text-[13px] font-medium text-slate-500 min-w-max ml-2">
+                                    Showing <strong className="text-slate-800">{filteredSubmissions.length}</strong> of <strong className="text-slate-800">{stats.total}</strong> Students
+                                </div>
                             </div>
                         </div>
+
+                        {/* Selection Bar */}
+                        {selectedIds.size > 0 && (
+                            <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-[#00a67e]/8 border border-[#00a67e]/20 rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#00a67e] text-white text-[11px] font-black">{selectedIds.size}</span>
+                                    <span className="text-[13px] font-bold text-slate-700">
+                                        student{selectedIds.size > 1 ? 's' : ''} selected
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => { setBulkMarks(''); setBulkFeedback(''); setBulkDialogOpen(true); }}
+                                        className="flex items-center gap-2 h-9 px-4 bg-[#00a67e] text-white text-[12px] font-black rounded-xl hover:bg-[#008f6c] transition-colors"
+                                    >
+                                        <Layers className="w-3.5 h-3.5" /> Bulk Evaluate
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedIds(new Set())}
+                                        className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors"
+                                        title="Clear selection"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Table */}
@@ -372,7 +463,17 @@ export default function CCEWorkDetailPage() {
                         <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead>
                                 <tr className="border-b border-slate-100 bg-white">
-                                    <th className="py-5 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[30%]">Student Details</th>
+                                    <th className="py-5 pl-6 pr-2 w-10">
+                                        <input
+                                            ref={selectAllCheckboxRef}
+                                            type="checkbox"
+                                            checked={filteredSubmissions.length > 0 && selectedIds.size === filteredSubmissions.length}
+                                            onChange={toggleSelectAll}
+                                            className="w-4 h-4 rounded accent-[#00a67e] cursor-pointer"
+                                            title="Select all"
+                                        />
+                                    </th>
+                                    <th className="py-5 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[28%]">Student Details</th>
                                     <th className="py-5 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Roll Number</th>
                                     <th className="py-5 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Submission Status</th>
                                     <th className="py-5 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date Submitted</th>
@@ -382,16 +483,26 @@ export default function CCEWorkDetailPage() {
                             <tbody className="divide-y divide-slate-50">
                                 {filteredSubmissions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="py-12 text-center">
+                                        <td colSpan={6} className="py-12 text-center">
                                             <p className="text-sm font-semibold text-slate-400">No submissions found matching criteria.</p>
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredSubmissions.map((submission) => (
-                                        <tr key={submission.id} className="hover:bg-slate-50/50 transition-colors group">
-                                            
+                                    filteredSubmissions.map((submission) => {
+                                        const isSelected = selectedIds.has(submission.id);
+                                        return (
+                                        <tr key={submission.id} className={`hover:bg-slate-50/50 transition-colors group ${isSelected ? 'bg-[#00a67e]/5' : ''}`}>
+                                            {/* Checkbox */}
+                                            <td className="py-4 pl-6 pr-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => toggleSelectOne(submission.id)}
+                                                    className="w-4 h-4 rounded accent-[#00a67e] cursor-pointer"
+                                                />
+                                            </td>
                                             {/* Details */}
-                                            <td className="py-4 px-6">
+                                            <td className="py-4 px-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-[42px] h-[42px] rounded-full bg-[#00a67e]/10 text-[#00a67e] font-black flex items-center justify-center text-sm shrink-0 border border-[#00a67e]/20">
                                                         {getInitials(submission.studentName)}
@@ -463,7 +574,8 @@ export default function CCEWorkDetailPage() {
                                                 )}
                                             </td>
                                         </tr>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
@@ -550,6 +662,65 @@ export default function CCEWorkDetailPage() {
                                 </div>
                             </div>
                         )}
+                    </DialogContent>
+                </Dialog>
+
+                {/* Bulk Evaluate Dialog */}
+                <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+                    <DialogContent className="rounded-3xl border-0 overflow-hidden sm:max-w-md p-0">
+                        <div className="bg-[#00a67e] px-6 py-8">
+                            <h2 className="text-2xl font-black text-white">Bulk Evaluate</h2>
+                            <p className="text-emerald-100 font-medium mt-1">
+                                Applying same score to {selectedIds.size} student{selectedIds.size > 1 ? 's' : ''}
+                            </p>
+                            {/* Mini name preview */}
+                            <p className="text-emerald-200 text-[11px] font-medium mt-2 leading-relaxed">
+                                {work && (() => {
+                                    const names = work.submissions
+                                        .filter(s => selectedIds.has(s.id))
+                                        .map(s => s.studentName);
+                                    const preview = names.slice(0, 3).join(', ');
+                                    return names.length > 3 ? `${preview} +${names.length - 3} more` : preview;
+                                })()}
+                            </p>
+                        </div>
+                        <div className="p-6 space-y-5 bg-white">
+                            <div className="space-y-2">
+                                <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400">Score for All (Max {work?.maxMarks})</Label>
+                                <div className="relative">
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max={work?.maxMarks}
+                                        step="0.5"
+                                        value={bulkMarks}
+                                        onChange={(e) => setBulkMarks(e.target.value)}
+                                        placeholder="Enter score"
+                                        className="h-14 font-black text-lg bg-slate-50 border-0 rounded-xl px-4"
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-black text-slate-400">/ {work?.maxMarks}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400">Shared Feedback (optional)</Label>
+                                <Textarea
+                                    value={bulkFeedback}
+                                    onChange={(e) => setBulkFeedback(e.target.value)}
+                                    placeholder="Common feedback for all selected students..."
+                                    rows={3}
+                                    className="resize-none font-medium text-[14px] bg-slate-50 border-0 rounded-xl px-4 py-3"
+                                />
+                            </div>
+                            <div className="pt-2">
+                                <Button
+                                    onClick={handleBulkEvaluate}
+                                    disabled={bulkLoading || !bulkMarks}
+                                    className="w-full h-14 rounded-full font-black text-[14px] bg-[#00a67e] hover:bg-[#008f6c] shadow-sm disabled:opacity-60"
+                                >
+                                    {bulkLoading ? 'Evaluating...' : `Evaluate ${selectedIds.size} Student${selectedIds.size > 1 ? 's' : ''}`}
+                                </Button>
+                            </div>
+                        </div>
                     </DialogContent>
                 </Dialog>
             </div>
