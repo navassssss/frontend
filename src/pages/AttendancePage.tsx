@@ -63,7 +63,10 @@ export default function AttendancePage() {
         afternoonAbsent: 0
     });
     const [loading, setLoading] = useState(true);
-    const [sessionFilter, setSessionFilter] = useState<'all' | 'morning' | 'afternoon'>('all');
+    const [sessionFilter, setSessionFilter] = useState<'morning' | 'afternoon'>(() => {
+        const hour = new Date().getHours();
+        return hour >= 13 ? 'afternoon' : 'morning';
+    });
 
     useEffect(() => {
         loadRecords();
@@ -276,7 +279,7 @@ export default function AttendancePage() {
                             <Clock className="w-5 h-5 text-primary" />
                             Attendance Records
                             <Badge variant="outline" className="text-xs font-normal ml-2">
-                                {records.filter(r => sessionFilter === 'all' || r.session === sessionFilter).length} Records Found
+                                {records.filter(r => r.session === sessionFilter).length} Records Found
                             </Badge>
                         </h2>
 
