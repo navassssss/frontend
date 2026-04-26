@@ -49,7 +49,7 @@ export default function TakeAttendancePage() {
     const [selectedSession, setSelectedSession] = useState<'morning' | 'afternoon'>('morning');
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [searchQuery, setSearchQuery] = useState('');
-    const [absentStudents, setAbsentStudents] = useState<{id: number, reason: string}[]>([]);
+    const [absentStudents, setAbsentStudents] = useState<{ id: number, reason: string }[]>([]);
     const [students, setStudents] = useState<StudentData[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [duplicateError, setDuplicateError] = useState(false);
@@ -242,7 +242,7 @@ export default function TakeAttendancePage() {
                                     <div className="flex items-center gap-2">
                                         <Users className="w-5 h-5 text-primary" />
                                         <span className="font-medium text-foreground">
-                                            {selectedClassInfo?.name}
+                                            Class  {selectedClassInfo?.name}
                                         </span>
                                     </div>
                                     <div className="flex gap-2">
@@ -311,8 +311,8 @@ export default function TakeAttendancePage() {
                                                     <p className="text-sm text-muted-foreground">Roll: {student.roll_number}</p>
                                                 </div>
                                                 <div className="flex-1 max-w-sm">
-                                                    <Input 
-                                                        placeholder="Reason (Optional)" 
+                                                    <Input
+                                                        placeholder="Reason (Optional)"
                                                         value={absentStudents.find(s => s.id === student.id)?.reason || ''}
                                                         onChange={(e) => updateReason(student.id, e.target.value)}
                                                         className="h-8 text-sm"

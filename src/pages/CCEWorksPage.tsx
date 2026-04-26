@@ -232,10 +232,6 @@ export default function CCEWorksPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-5">
-                                                                <div className="text-right hidden sm:block">
-                                                                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest leading-tight">Weightage</p>
-                                                                    <p className="text-[13px] font-black text-slate-700">{totalClassWorks > 0 ? Math.round((subject.total_works / totalClassWorks) * 100) : 0}% of Class</p>
-                                                                </div>
                                                                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-emerald-700">
                                                                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isSubjectExpanded ? 'rotate-180' : ''}`} />
                                                                 </div>
@@ -246,13 +242,11 @@ export default function CCEWorksPage() {
                                                         {isSubjectExpanded && (
                                                             <div className="px-2 pb-2 mt-1">
                                                                 <div className="bg-white rounded-[1.25rem] shadow-sm border border-slate-100 overflow-hidden">
-                                                                    <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
-                                                                        <div className="col-span-5 md:col-span-4">Assessment Title</div>
-                                                                        <div className="col-span-2 hidden md:block">Type</div>
-                                                                        <div className="col-span-3 md:col-span-2">Status</div>
+                                                                    <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b-2 border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
+                                                                        <div className="col-span-6 md:col-span-5">Assessment Title</div>
+                                                                        <div className="col-span-3 hidden md:block">Tool</div>
+                                                                        <div className="col-span-3 md:col-span-2">Issue Date</div>
                                                                         <div className="col-span-3 md:col-span-2">Due Date</div>
-                                                                        <div className="col-span-2 hidden lg:block">Distribution</div>
-                                                                        <div className="col-span-1 text-center ml-auto">Actions</div>
                                                                     </div>
 
                                                                     {worksForSubject.length === 0 ? (
@@ -260,45 +254,28 @@ export default function CCEWorksPage() {
                                                                             No assessments created yet.
                                                                         </div>
                                                                     ) : (
-                                                                        <div className="divide-y divide-slate-50">
+                                                                        <div className="divide-y-2 divide-slate-100">
                                                                             {worksForSubject.map(work => {
-                                                                                const isDraft = !work.issuedDate || new Date(work.issuedDate) > new Date();
-                                                                                const statusColor = isDraft ? 'bg-orange-500' : 'bg-emerald-500';
-                                                                                const statusText = isDraft ? 'Drafting' : 'Published';
-                                                                                const distWidth = subject.max_marks > 0 ? Math.min(100, Math.round((work.maxMarks / subject.max_marks) * 100)) : 10;
-
                                                                                 return (
                                                                                     <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 p-4 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
 
-                                                                                        <div className="col-span-5 md:col-span-4 w-full">
+                                                                                        <div className="col-span-6 md:col-span-5 w-full">
                                                                                             <p className="text-[14px] font-bold text-slate-800 leading-tight truncate">{work.title}</p>
                                                                                             <p className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-1">{work.description || work.submissionType || 'Internal Assessment'}</p>
                                                                                         </div>
 
-                                                                                        <div className="col-span-2 hidden md:block">
+                                                                                        <div className="col-span-3 hidden md:block">
                                                                                             <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
                                                                                                 {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
                                                                                             </span>
                                                                                         </div>
 
-                                                                                        <div className="col-span-3 md:col-span-2 flex items-center gap-2">
-                                                                                            <div className={`w-1.5 h-1.5 rounded-full ${statusColor}`}></div>
-                                                                                            <span className="text-[12px] font-bold text-slate-700">{statusText}</span>
+                                                                                        <div className="col-span-3 md:col-span-2 text-[12px] font-bold text-slate-600">
+                                                                                            {work.issuedDate ? format(new Date(work.issuedDate), 'MMM dd, yyyy') : 'No Date'}
                                                                                         </div>
 
                                                                                         <div className="col-span-3 md:col-span-2 text-[12px] font-bold text-slate-600">
                                                                                             {work.dueDate ? format(new Date(work.dueDate), 'MMM dd, yyyy') : 'No Date'}
-                                                                                        </div>
-
-                                                                                        <div className="col-span-2 hidden lg:block w-full max-w-[120px]">
-                                                                                            <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1.5 overflow-hidden">
-                                                                                                <div className="bg-emerald-700 h-full rounded-full transition-all" style={{ width: `${distWidth}%` }}></div>
-                                                                                            </div>
-                                                                                            <p className="text-[10px] font-bold text-slate-400">{distWidth}% of Subj.</p>
-                                                                                        </div>
-
-                                                                                        <div className="col-span-1 hidden sm:flex justify-end text-slate-300 hover:text-slate-600 cursor-pointer ml-auto transition-colors">
-                                                                                            <MoreVertical className="w-5 h-5" />
                                                                                         </div>
                                                                                     </div>
                                                                                 );
