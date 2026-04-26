@@ -110,12 +110,6 @@ export default function CCEWorkDetailPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Mobile evaluation state
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'evaluated'>('all');
-    const [inlineMarks, setInlineMarks] = useState<Record<number, string>>({});
-    const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
-    const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
-
     // Bulk selection state
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [bulkMarks, setBulkMarks] = useState('');
@@ -219,38 +213,6 @@ export default function CCEWorkDetailPage() {
         }
     };
 
-    const handleInlineSave = async (submission: Submission, pendingList: Submission[]) => {
-        const marksVal = inlineMarks[submission.id];
-        if (!marksVal) { toast.error('Enter marks first'); return; }
-        const marksNum = parseFloat(marksVal);
-        if (isNaN(marksNum) || marksNum < 0 || marksNum > (work?.maxMarks || 100)) {
-            toast.error(`Marks must be 0–${work?.maxMarks}`);
-            return;
-        }
-        setSavingIds(prev => new Set(prev).add(submission.id));
-        try {
-            await api.post(`/cce/submissions/${submission.id}/evaluate`, {
-                marks_obtained: marksNum,
-                feedback: ''
-            });
-            toast.success(`Saved ${marksNum}/${work?.maxMarks} for ${submission.studentName}`);
-            setInlineMarks(prev => { const n = { ...prev }; delete n[submission.id]; return n; });
-            await loadWork();
-            // Auto-focus next pending student
-            const currentIdx = pendingList.findIndex(s => s.id === submission.id);
-            const next = pendingList[currentIdx + 1];
-            if (next) {
-                setTimeout(() => inputRefs.current[next.id]?.focus(), 100);
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Save failed');
-        } finally {
-            setSavingIds(prev => { const n = new Set(prev); n.delete(submission.id); return n; });
-        }
-    };
-
-
-
     if (loading) {
         return (
             <AppLayout title="CCE Work" showBack>
@@ -258,7 +220,6 @@ export default function CCEWorkDetailPage() {
             </AppLayout>
         );
     }
-
 
     if (!work) {
         return (
@@ -298,18 +259,13 @@ export default function CCEWorkDetailPage() {
     const markingRate = stats.submitted > 0 ? Math.round((stats.evaluated / stats.submitted) * 100) : 0;
     const pendingMarking = stats.submitted - stats.evaluated;
 
-    const filteredSubmissions = work.submissions.filter(s =>
-        (s.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         s.rollNumber.toLowerCase().includes(searchQuery.toLowerCase())) &&
-        (statusFilter === 'all' || s.status === statusFilter)
+    const filteredSubmissions = work.submissions.filter(s => 
+        s.studentName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        s.rollNumber.toLowerCase().includes(searchQuery.toLowerCase())
     ).sort((a, b) => {
         const order = { submitted: 0, pending: 1, evaluated: 2 };
         return order[a.status] - order[b.status];
     });
-
-    // Pending-first list used for auto-focus-next on mobile
-    const mobilePendingList = filteredSubmissions.filter(s => s.status !== 'evaluated');
-
 
     const handleExport = () => {
         const headers = ['Student Name', 'Roll Number', 'Email', 'Status', 'Date Submitted', 'Marks Obtained', 'Max Marks', 'Feedback'];
@@ -445,178 +401,8 @@ export default function CCEWorkDetailPage() {
                     </Card>
                 </div>
 
-
-                {/* ═══════════════════════════════════════
-                    MOBILE-ONLY EVALUATION UI  (sm:hidden)
-                    ═══════════════════════════════════════ */}
-                <div className="sm:hidden space-y-3">
-
-                    {/* Progress Bar */}
-                    <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Evaluation Progress</span>
-                            <span className="text-[11px] font-black text-slate-700">{stats.evaluated}/{stats.total} done</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div
-                                className="h-full bg-[#00a67e] rounded-full transition-all duration-500"
-                                style={{ width: `${stats.total > 0 ? Math.round((stats.evaluated / stats.total) * 100) : 0}%` }}
-                            />
-                        </div>
-                        <div className="flex justify-between mt-1.5">
-                            <span className="text-[10px] font-bold text-slate-400">{stats.pending} pending</span>
-                            <span className="text-[10px] font-bold text-[#00a67e]">{stats.total > 0 ? Math.round((stats.evaluated / stats.total) * 100) : 0}%</span>
-                        </div>
-                    </div>
-
-                    {/* Sticky Toolbar */}
-                    <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm pt-1 pb-2 space-y-2">
-                        {/* Search */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search student..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-[13px] font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00a67e]/20"
-                            />
-                        </div>
-                        {/* Filter pills + select all */}
-                        <div className="flex items-center gap-2">
-                            <div className="flex gap-1.5 flex-1">
-                                {(['all', 'pending', 'evaluated'] as const).map(f => (
-                                    <button
-                                        key={f}
-                                        onClick={() => setStatusFilter(f)}
-                                        className={`flex-1 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wide transition-colors ${
-                                            statusFilter === f
-                                                ? 'bg-[#00a67e] text-white'
-                                                : 'bg-white border border-slate-200 text-slate-500'
-                                        }`}
-                                    >
-                                        {f === 'all' ? `All (${stats.total})` : f === 'pending' ? `Pending (${stats.pending})` : `Done (${stats.evaluated})`}
-                                    </button>
-                                ))}
-                            </div>
-                            <button
-                                onClick={toggleSelectAll}
-                                className="flex items-center gap-1 h-8 px-3 bg-white border border-slate-200 rounded-lg text-[11px] font-black text-slate-600 whitespace-nowrap"
-                            >
-                                <input
-                                    type="checkbox"
-                                    readOnly
-                                    checked={filteredSubmissions.length > 0 && selectedIds.size === filteredSubmissions.length}
-                                    className="w-3.5 h-3.5 accent-[#00a67e]"
-                                />
-                                All
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Compact Student Rows */}
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
-                        {filteredSubmissions.length === 0 ? (
-                            <div className="p-8 text-center text-sm font-semibold text-slate-400">No students found.</div>
-                        ) : (
-                            filteredSubmissions.map((sub) => {
-                                const isSelected = selectedIds.has(sub.id);
-                                const isSaving = savingIds.has(sub.id);
-                                const isEvaluated = sub.status === 'evaluated';
-                                return (
-                                    <div
-                                        key={sub.id}
-                                        className={`flex items-center gap-2.5 px-3 py-2.5 transition-colors ${isSelected ? 'bg-[#00a67e]/5' : isEvaluated ? 'bg-slate-50/50' : 'bg-white'}`}
-                                    >
-                                        {/* Checkbox */}
-                                        <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            onChange={() => toggleSelectOne(sub.id)}
-                                            className="w-4 h-4 accent-[#00a67e] shrink-0"
-                                        />
-                                        {/* Avatar */}
-                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isEvaluated ? 'bg-[#00a67e]/10 text-[#00a67e]' : 'bg-slate-100 text-slate-500'}`}>
-                                            {getInitials(sub.studentName)}
-                                        </div>
-                                        {/* Name + Roll */}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[13px] font-bold text-slate-800 truncate leading-tight">{sub.studentName}</p>
-                                            <p className="text-[10px] font-medium text-slate-400">#{sub.rollNumber}</p>
-                                        </div>
-                                        {/* Marks input or grade badge */}
-                                        {isEvaluated ? (
-                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                <span className="text-[12px] font-black text-[#00a67e]">{sub.marksObtained}/{work.maxMarks}</span>
-                                                <button
-                                                    onClick={() => { setSelectedSubmission(sub); setMarks(sub.marksObtained?.toString() || ''); setFeedback(sub.feedback || ''); setDialogOpen(true); }}
-                                                    className="text-[10px] font-black text-slate-400 underline"
-                                                >Edit</button>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                <div className="relative w-14">
-                                                    <input
-                                                        ref={el => { inputRefs.current[sub.id] = el; }}
-                                                        type="number"
-                                                        min="0"
-                                                        max={work.maxMarks}
-                                                        step="0.5"
-                                                        value={inlineMarks[sub.id] ?? ''}
-                                                        onChange={e => setInlineMarks(prev => ({ ...prev, [sub.id]: e.target.value }))}
-                                                        onKeyDown={e => { if (e.key === 'Enter') handleInlineSave(sub, mobilePendingList); }}
-                                                        placeholder="—"
-                                                        className="w-full h-8 text-center text-[13px] font-black bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a67e]/30"
-                                                    />
-                                                </div>
-                                                <span className="text-[10px] text-slate-400 font-bold">/{work.maxMarks}</span>
-                                                <button
-                                                    onClick={() => handleInlineSave(sub, mobilePendingList)}
-                                                    disabled={isSaving || !inlineMarks[sub.id]}
-                                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#00a67e] text-white disabled:opacity-40 transition-opacity"
-                                                >
-                                                    {isSaving ? (
-                                                        <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                                                    ) : (
-                                                        <CheckSquare className="w-4 h-4" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>
-
-                {/* Sticky Bottom Bulk Bar — mobile only */}
-                {selectedIds.size > 0 && (
-                    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-4 py-3 pb-[env(safe-area-inset-bottom,12px)] shadow-lg flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                            <span className="w-6 h-6 rounded-full bg-[#00a67e] text-white text-[11px] font-black flex items-center justify-center">{selectedIds.size}</span>
-                            <span className="text-[13px] font-bold text-slate-700">selected</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => { setBulkMarks(''); setBulkFeedback(''); setBulkDialogOpen(true); }}
-                                className="flex items-center gap-2 h-10 px-5 bg-[#00a67e] text-white text-[13px] font-black rounded-xl"
-                            >
-                                <Layers className="w-4 h-4" /> Bulk Evaluate
-                            </button>
-                            <button
-                                onClick={() => setSelectedIds(new Set())}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Submissions Table Layout — DESKTOP ONLY */}
-                <Card className="hidden sm:block border border-slate-100 shadow-sm rounded-[1.5rem] bg-white overflow-hidden">
-
+                {/* Submissions Table Layout */}
+                <Card className="border border-slate-100 shadow-sm rounded-[1.5rem] bg-white overflow-hidden">
                     
                     {/* Toolbar */}
                     <div className="p-4 md:p-6 border-b border-slate-100 bg-slate-50/50 space-y-3">
