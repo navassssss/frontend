@@ -243,8 +243,9 @@ export default function CCEWorksPage() {
                                                             <div className="px-2 pb-2 mt-1">
                                                                 <div className="bg-white rounded-[1.25rem] shadow-sm border border-slate-100 overflow-hidden">
                                                                     <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b-2 border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
-                                                                        <div className="col-span-6 md:col-span-5">Assessment Title</div>
-                                                                        <div className="col-span-3 hidden md:block">Tool</div>
+                                                                        <div className="col-span-1">No.</div>
+                                                                        <div className="col-span-5 md:col-span-4">Assessment Title</div>
+                                                                        <div className="col-span-3 hidden md:block">Tool & Level</div>
                                                                         <div className="col-span-3 md:col-span-2">Issue Date</div>
                                                                         <div className="col-span-3 md:col-span-2">Due Date</div>
                                                                     </div>
@@ -255,27 +256,55 @@ export default function CCEWorksPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="divide-y-2 divide-slate-100">
-                                                                            {worksForSubject.map(work => {
+                                                                            {worksForSubject.map((work, index) => {
                                                                                 return (
-                                                                                    <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 p-4 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
+                                                                                    <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-4 p-4 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
 
-                                                                                        <div className="col-span-6 md:col-span-5 w-full">
+                                                                                        {/* Work Number and Badges for mobile */}
+                                                                                        <div className="sm:hidden flex items-center justify-between w-full mb-1">
+                                                                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Work No. {index + 1}</span>
+                                                                                            <div className="flex gap-1.5">
+                                                                                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
+                                                                                                    {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
+                                                                                                </span>
+                                                                                                <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                                                                                                    Lvl {work.level}
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div className="hidden sm:block col-span-1 text-[12px] font-bold text-slate-400">
+                                                                                            #{index + 1}
+                                                                                        </div>
+
+                                                                                        <div className="col-span-5 md:col-span-4 w-full">
                                                                                             <p className="text-[14px] font-bold text-slate-800 leading-tight truncate">{work.title}</p>
                                                                                             <p className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-1">{work.description || work.submissionType || 'Internal Assessment'}</p>
                                                                                         </div>
 
-                                                                                        <div className="col-span-3 hidden md:block">
+                                                                                        <div className="col-span-3 hidden md:flex items-center gap-2">
                                                                                             <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
                                                                                                 {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
                                                                                             </span>
+                                                                                            <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                                                                                                Level {work.level}
+                                                                                            </span>
                                                                                         </div>
 
-                                                                                        <div className="col-span-3 md:col-span-2 text-[12px] font-bold text-slate-600">
-                                                                                            {work.issuedDate ? format(new Date(work.issuedDate), 'MMM dd, yyyy') : 'No Date'}
-                                                                                        </div>
+                                                                                        <div className="w-full flex items-center justify-between sm:contents mt-1 sm:mt-0">
+                                                                                            <div className="col-span-3 md:col-span-2 flex flex-col">
+                                                                                                <span className="sm:hidden text-[9px] font-black uppercase text-slate-400 mb-0.5">Issue Date</span>
+                                                                                                <span className="text-[11px] sm:text-[12px] font-bold text-slate-600">
+                                                                                                    {work.issuedDate ? format(new Date(work.issuedDate), 'MMM dd, yyyy') : 'No Date'}
+                                                                                                </span>
+                                                                                            </div>
 
-                                                                                        <div className="col-span-3 md:col-span-2 text-[12px] font-bold text-slate-600">
-                                                                                            {work.dueDate ? format(new Date(work.dueDate), 'MMM dd, yyyy') : 'No Date'}
+                                                                                            <div className="col-span-3 md:col-span-2 flex flex-col items-end sm:items-start">
+                                                                                                <span className="sm:hidden text-[9px] font-black uppercase text-slate-400 mb-0.5">Due Date</span>
+                                                                                                <span className="text-[11px] sm:text-[12px] font-bold text-slate-600">
+                                                                                                    {work.dueDate ? format(new Date(work.dueDate), 'MMM dd, yyyy') : 'No Date'}
+                                                                                                </span>
+                                                                                            </div>
                                                                                         </div>
                                                                                     </div>
                                                                                 );
