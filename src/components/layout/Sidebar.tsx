@@ -165,7 +165,7 @@ export function Sidebar() {
         safeFetch();
 
         const onVisible = () => { if (document.visibilityState === 'visible') safeFetch(); };
-        const onFocus   = () => safeFetch();
+        const onFocus = () => safeFetch();
 
         document.addEventListener('visibilitychange', onVisible);
         window.addEventListener('focus', onFocus);
@@ -302,7 +302,7 @@ export function Sidebar() {
                     </div>
                     <span className="text-[14px]">Notifications</span>
                 </button>
-                <button
+                <button hidden
                     className="w-full flex items-center gap-3 pl-6 pr-4 py-3 text-slate-600 font-bold hover:bg-slate-200/50 hover:text-slate-900 transition-colors mr-6 rounded-r-xl"
                 >
                     <HelpCircle className="w-[18px] h-[18px] flex-shrink-0 text-slate-500" strokeWidth={2.5} />
