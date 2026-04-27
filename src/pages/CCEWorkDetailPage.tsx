@@ -285,7 +285,7 @@ export default function CCEWorkDetailPage() {
         : 0;
     const avgScoreStr = evalData.length > 0 && work.maxMarks > 0
         ? ((avgScore / work.maxMarks) * 100).toFixed(1)
-        : '—';
+        : '0';
 
     const participationRate = stats.total > 0 ? Math.round((stats.submitted / stats.total) * 100) : 0;
     const markingRate = stats.submitted > 0 ? Math.round((stats.evaluated / stats.submitted) * 100) : 0;
@@ -419,7 +419,7 @@ export default function CCEWorkDetailPage() {
                         <div className="p-6 h-full flex flex-col justify-between">
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100 mb-2">Avg. Class Score</p>
-                                <span className="text-4xl md:text-[48px] font-black leading-none">{avgScoreStr}{avgScoreStr !== '—' ? '%' : ''}</span>
+                                <span className="text-4xl md:text-[48px] font-black leading-none">{avgScoreStr}%</span>
                             </div>
                             <p className="text-[12px] font-medium text-emerald-100 mt-4">
                                 {evalData.length > 0 ? `Based on ${evalData.length} evaluated submission${evalData.length > 1 ? 's' : ''}` : 'Scores will calculate once evaluated.'}
@@ -571,25 +571,28 @@ export default function CCEWorkDetailPage() {
                             })
                         )}
                     </div>
+                    {/* Bottom spacer so fixed bulk bar doesn't overlap rows */}
+                    {selectedIds.size > 0 && <div className="h-20" />}
                 </div>
 
-                {/* Sticky Bottom Bulk Bar — mobile only */}
+                {/* Sticky Bottom Bulk Bar — mobile only, always on top */}
                 {selectedIds.size > 0 && (
-                    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-4 py-3 pb-[env(safe-area-inset-bottom,12px)] shadow-lg flex items-center justify-between gap-3">
+                    <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white border-t-2 border-[#00a67e]/30 px-4 py-3 shadow-2xl flex items-center justify-between gap-3"
+                         style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
                         <div className="flex items-center gap-2">
-                            <span className="w-6 h-6 rounded-full bg-[#00a67e] text-white text-[11px] font-black flex items-center justify-center">{selectedIds.size}</span>
-                            <span className="text-[13px] font-bold text-slate-700">selected</span>
+                            <span className="w-7 h-7 rounded-full bg-[#00a67e] text-white text-[12px] font-black flex items-center justify-center">{selectedIds.size}</span>
+                            <span className="text-[14px] font-bold text-slate-700">{selectedIds.size} Selected</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => { setBulkMarks(''); setBulkFeedback(''); setBulkDialogOpen(true); }}
-                                className="flex items-center gap-2 h-10 px-5 bg-[#00a67e] text-white text-[13px] font-black rounded-xl"
+                                className="flex items-center gap-2 h-11 px-5 bg-[#00a67e] text-white text-[13px] font-black rounded-xl active:bg-[#008f6c]"
                             >
                                 <Layers className="w-4 h-4" /> Bulk Evaluate
                             </button>
                             <button
                                 onClick={() => setSelectedIds(new Set())}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500"
+                                className="w-11 h-11 flex items-center justify-center rounded-xl border-2 border-slate-200 text-slate-500"
                             >
                                 <X className="w-4 h-4" />
                             </button>
