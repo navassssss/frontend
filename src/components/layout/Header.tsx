@@ -44,7 +44,7 @@ export function Header({ title, showBack = false, onBack }: HeaderProps) {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/staff/login');
   };
 
   return (

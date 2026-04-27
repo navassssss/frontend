@@ -50,8 +50,8 @@ api.interceptors.response.use(
       } else if (usedToken && usedToken === staffToken) {
         // Staff session expired — clear only staff state
         localStorage.removeItem("token");
-        if (window.location.pathname !== '/' && window.location.pathname !== '/staff/login') {
-          window.location.href = "/";
+        if (window.location.pathname !== '/staff/login') {
+          window.location.href = "/staff/login";
         }
       }
       // If token doesn't match either (edge case), do nothing — avoid false logouts
