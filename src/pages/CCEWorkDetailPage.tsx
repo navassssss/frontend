@@ -279,9 +279,12 @@ export default function CCEWorkDetailPage() {
         pending: work.submissions.filter(s => s.status === 'pending').length
     };
 
-    const evalData = work.submissions.filter(s => s.status === 'evaluated' && s.marksObtained !== null && typeof s.marksObtained === 'number');
+    const evalData = work.submissions.filter(s => {
+        const m = parseFloat(String(s.marksObtained));
+        return s.status === 'evaluated' && !isNaN(m);
+    });
     const avgScore = evalData.length > 0
-        ? evalData.reduce((acc, curr) => acc + (curr.marksObtained as number), 0) / evalData.length
+        ? evalData.reduce((acc, curr) => acc + parseFloat(String(curr.marksObtained)), 0) / evalData.length
         : 0;
     const avgScoreStr = evalData.length > 0 && work.maxMarks > 0
         ? ((avgScore / work.maxMarks) * 100).toFixed(1)
@@ -575,10 +578,12 @@ export default function CCEWorkDetailPage() {
                     {selectedIds.size > 0 && <div className="h-20" />}
                 </div>
 
-                {/* Sticky Bottom Bulk Bar — mobile only, always on top */}
+                {/* Sticky Bottom Bulk Bar — mobile only, above bottom nav */}
                 {selectedIds.size > 0 && (
-                    <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white border-t-2 border-[#00a67e]/30 px-4 py-3 shadow-2xl flex items-center justify-between gap-3"
-                         style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+                    <div
+                        className="fixed left-0 right-0 z-[9999] sm:hidden bg-white border-t-2 border-[#00a67e]/40 px-4 py-3 shadow-2xl flex items-center justify-between gap-3"
+                        style={{ bottom: '64px', paddingBottom: '0' }}
+                    >
                         <div className="flex items-center gap-2">
                             <span className="w-7 h-7 rounded-full bg-[#00a67e] text-white text-[12px] font-black flex items-center justify-center">{selectedIds.size}</span>
                             <span className="text-[14px] font-bold text-slate-700">{selectedIds.size} Selected</span>
