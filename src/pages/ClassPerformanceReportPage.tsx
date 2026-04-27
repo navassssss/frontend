@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     Users, TrendingUp, Trophy, Calendar, User, ChevronRight,
     CheckCircle2, XCircle, Search, ArrowUpDown, ArrowUp, ArrowDown,
-    MoreHorizontal, CheckCheck, UserX
+    MoreHorizontal, CheckCheck, UserX, Trash2
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -82,6 +82,7 @@ export default function ClassPerformanceReportPage() {
     const [report, setReport] = useState<ClassReport | null>(null);
     const [loading, setLoading] = useState(true);
     const [removing, setRemoving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortField, setSortField] = useState<SortField>('roll_number');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
@@ -108,6 +109,22 @@ export default function ClassPerformanceReportPage() {
             toast.error('Failed to remove class teacher');
         } finally {
             setRemoving(false);
+        }
+    };
+
+    const handleDeleteClass = async () => {
+        if (!window.confirm('Are you sure you want to delete this class? This action cannot be undone.')) return;
+        
+        setDeleting(true);
+        try {
+            await api.delete(`/classes/${id}`);
+            toast.success('Class deleted successfully');
+            navigate('/classes');
+        } catch (error: any) {
+            const message = error.response?.data?.message || 'Failed to delete class';
+            toast.error(message);
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -184,6 +201,19 @@ export default function ClassPerformanceReportPage() {
                             <p className="text-sm text-muted-foreground">Performance Report</p>
                         </div>
                     </div>
+                    {/* Only non-teachers can delete classes */}
+                    {!isClassTeacher && (
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={deleting}
+                            onClick={handleDeleteClass}
+                            className="gap-2 shadow-sm shadow-destructive/20"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="hidden sm:inline">{deleting ? 'Deleting...' : 'Delete Class'}</span>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Class Teacher Card */}
