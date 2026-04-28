@@ -26,6 +26,7 @@ import {
     Download,
     FileSpreadsheet,
     Clock,
+    ArrowLeft,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 import { cn } from '@/lib/utils';
@@ -367,6 +368,18 @@ const FeeReportsPage: React.FC = () => {
     return (
         <AppLayout title="Donation Reports" showBack onBack={() => navigate('/fees')}>
             <div className="space-y-4">
+                {/* Desktop-only back button — mobile uses Header back button */}
+                <div className="hidden lg:flex items-center gap-2 mb-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/fees')}
+                        className="gap-1.5 text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Donations
+                    </Button>
+                </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="summary">Summary</TabsTrigger>
