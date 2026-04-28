@@ -53,7 +53,7 @@ export default function CreateCCEWorkPage() {
     const [formData, setFormData] = useState({
         subject_id: '',
         level: '',
-        week: '1',
+        week: '',
         title: '',
         description: '',
         tool_method: '',
@@ -103,7 +103,7 @@ export default function CreateCCEWorkPage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div>
-                        <button 
+                        <button
                             onClick={() => navigate(-1)}
                             className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-2 transition-colors hover:opacity-80"
                         >
@@ -122,18 +122,18 @@ export default function CreateCCEWorkPage() {
 
                     {/* Desktop-only action buttons in header */}
                     <div className="hidden md:flex items-center gap-3">
-                        <button 
+                        <button
                             onClick={() => navigate(-1)}
                             className="h-[60px] px-6 rounded-full border border-slate-200 bg-white text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors shadow-sm leading-tight text-center"
                         >
-                            Discard<br/>Draft
+                            Discard<br />Draft
                         </button>
-                        <button 
-                            onClick={handleSubmit} 
+                        <button
+                            onClick={handleSubmit}
                             disabled={isSubmitting}
                             className="h-[60px] px-6 rounded-full bg-[#00a67e] hover:bg-[#008f6c] text-white text-[13px] font-black transition-colors shadow-sm leading-tight text-center disabled:opacity-50"
                         >
-                            {isSubmitting ? 'Creating...' : <>Create<br/>CCE Work</>}
+                            {isSubmitting ? 'Creating...' : <>Create<br />CCE Work</>}
                         </button>
                     </div>
                 </div>
@@ -141,15 +141,15 @@ export default function CreateCCEWorkPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* LEFT COLUMN - Main Content */}
                     <div className="lg:col-span-8 space-y-6">
-                        
+
                         {/* Card 1: Academic Context */}
                         <Card className="border-0 shadow-sm rounded-3xl overflow-hidden bg-white">
                             <div className="p-6 md:p-8">
                                 <div className="flex items-center gap-2 mb-6">
                                     <div className="w-1 h-5 bg-[#00a67e] rounded-full"></div>
-                                    <h2 className="text-lg font-bold text-slate-800">Academic Context</h2>
+                                    <h2 className="text-lg font-bold text-slate-800">Primary Details</h2>
                                 </div>
-                                
+
                                 <div className="space-y-6">
                                     {isPrincipal && (
                                         <div className="flex items-center justify-between p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
@@ -294,11 +294,11 @@ export default function CreateCCEWorkPage() {
                                                     max="100"
                                                     value={formData.max_marks}
                                                     onChange={(e) => setFormData({ ...formData, max_marks: e.target.value })}
-                                                    placeholder="100"
+                                                    placeholder=""
                                                     className="h-14 bg-slate-50 border-0 rounded-xl font-bold text-slate-700 pl-4 pr-12 focus-visible:ring-[#00a67e]/20"
                                                 />
                                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-black text-[#00a67e]">
-                                                    PTS
+                                                    MAX
                                                 </span>
                                             </div>
                                         </div>
@@ -310,7 +310,7 @@ export default function CreateCCEWorkPage() {
 
                     {/* RIGHT COLUMN - Sidebar */}
                     <div className="lg:col-span-4 space-y-6">
-                        
+
                         {/* Card 3: Scheduling */}
                         <Card className="border-0 shadow-sm rounded-3xl overflow-hidden bg-white">
                             <div className="p-6">
@@ -318,7 +318,7 @@ export default function CreateCCEWorkPage() {
                                     <div className="w-1 h-5 bg-[#00a67e] rounded-full"></div>
                                     <h2 className="text-lg font-bold text-slate-800">Scheduling</h2>
                                 </div>
-                                
+
                                 <div className="space-y-5">
                                     <div className="space-y-2">
                                         <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Issue Date</Label>
@@ -351,9 +351,9 @@ export default function CreateCCEWorkPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <Label className="text-[13px] font-bold text-slate-800">Late Submission</Label>
-                                        <p className="text-[11px] font-medium text-slate-400">
+                                        {/* <p className="text-[11px] font-medium text-slate-400">
                                             Allow up to 3 days delay
-                                        </p>
+                                        </p> */}
                                     </div>
                                     <Switch className="data-[state=checked]:bg-[#00a67e] data-[state=checked]:opacity-100 scale-90" defaultChecked />
                                 </div>
@@ -372,11 +372,10 @@ export default function CreateCCEWorkPage() {
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, submission_type: 'online' })}
-                                        className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all duration-200 ${
-                                            formData.submission_type === 'online' 
-                                            ? 'bg-white text-[#00a67e] shadow-sm' 
+                                        className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all duration-200 ${formData.submission_type === 'online'
+                                            ? 'bg-white text-[#00a67e] shadow-sm'
                                             : 'text-slate-400 hover:text-slate-600'
-                                        }`}
+                                            }`}
                                     >
                                         <BookOpen className="w-4 h-4" />
                                         Online
@@ -384,11 +383,10 @@ export default function CreateCCEWorkPage() {
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, submission_type: 'offline' })}
-                                        className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all duration-200 ${
-                                            formData.submission_type === 'offline' 
-                                            ? 'bg-white text-slate-800 shadow-sm' 
+                                        className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all duration-200 ${formData.submission_type === 'offline'
+                                            ? 'bg-white text-slate-800 shadow-sm'
                                             : 'text-slate-400 hover:text-slate-600'
-                                        }`}
+                                            }`}
                                     >
                                         <FileText className="w-4 h-4" />
                                         Offline
@@ -398,7 +396,7 @@ export default function CreateCCEWorkPage() {
                                 {formData.submission_type === 'online' && (
                                     <>
                                         <p className="text-[11px] font-medium text-slate-400 leading-relaxed mb-4">
-                                            Accepted formats for online submission:<br/>
+                                            Accepted formats for online submission:<br />
                                             <strong className="text-slate-600">PDF, DOCX, ZIP</strong>. Maximum file size: <strong className="text-slate-600">25MB</strong>.
                                         </p>
 
@@ -406,9 +404,9 @@ export default function CreateCCEWorkPage() {
                                             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
                                                 <Layers className="w-4 h-4 text-slate-400" />
                                             </div>
-                                            <span className="text-[12px] font-bold text-slate-600">
-                                                Attach Supporting<br/>Guidelines
-                                            </span>
+                                            {/* <span className="text-[12px] font-bold text-slate-600">
+                                                Attach Supporting<br />Guidelines
+                                            </span> */}
                                         </div>
                                     </>
                                 )}

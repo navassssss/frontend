@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     BookOpen,
     Plus,
+    Lock,
+    Unlock,
     Edit,
     Trash2,
     ChevronDown,
@@ -434,13 +436,13 @@ export default function SubjectsPage() {
                                 {/* Class Subjects Table */}
                                 {!isCollapsed && (
                                     <div className="mt-8">
-                                        <div className="overflow-x-auto">
-                                        <table className="w-full text-left border-collapse min-w-[480px]">
+                                        <table className="w-full text-left border-collapse min-w-[600px]">
                                             <thead>
                                                 <tr>
                                                     <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">SUBJECT NAME & CODE</th>
                                                     <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">ASSIGNED FACULTY</th>
                                                     <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-center">MAX MARKS</th>
+                                                    <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 min-w-[200px]">SYLLABUS PROGRESS</th>
                                                     <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">ACTIONS</th>
                                                 </tr>
                                             </thead>
@@ -463,7 +465,7 @@ export default function SubjectsPage() {
                                                                     <SelectTrigger className="h-8 border-transparent hover:border-slate-200 bg-transparent hover:bg-slate-50 focus:ring-0 shadow-none px-2 -ml-2 text-[13px] font-bold text-slate-700 w-[160px] cursor-pointer">
                                                                         <SelectValue placeholder="Assign Faculty" />
                                                                     </SelectTrigger>
-                                                                    <SelectContent position="popper" side="bottom" align="start" className="z-50">
+                                                                    <SelectContent>
                                                                         {teachers.map(t => (
                                                                             <SelectItem key={t.id} value={t.id.toString()}>
                                                                                 {t.name}
@@ -475,6 +477,14 @@ export default function SubjectsPage() {
                                                         </td>
                                                         <td className="py-4 px-4 text-center">
                                                             <span className="text-[14px] font-black text-slate-800">{subject.finalMaxMarks}</span>
+                                                        </td>
+                                                        <td className="py-4 px-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                                    <div className="h-full bg-[#008f6c] rounded-full" style={{ width: `${subject.completion_percent || 0}%` }}></div>
+                                                                </div>
+                                                                <span className="text-[11px] font-black text-[#008f6c] w-8">{subject.completion_percent || 0}%</span>
+                                                            </div>
                                                         </td>
                                                         <td className="py-4 px-4 text-right">
                                                             <div className="flex items-center justify-end gap-1">
@@ -490,12 +500,23 @@ export default function SubjectsPage() {
                                                                 >
                                                                     <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                                                                 </button>
+                                                                <button 
+                                                                    onClick={() => toggleLock(subject.id)} 
+                                                                    className="w-8 h-8 rounded-full hover:bg-slate-100 inline-flex items-center justify-center transition-colors shadow-sm bg-white ml-1"
+                                                                >
+                                                                    {subject.isLocked ? <Lock className="w-3.5 h-3.5 text-rose-500" /> : <Unlock className="w-3.5 h-3.5 text-slate-400" />}
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
+                                        
+                                        <div className="text-center pt-5 mt-2 border-t border-slate-50">
+                                            <button className="text-[10px] font-black text-[#008f6c] uppercase tracking-widest hover:text-[#007a5c] transition-colors">
+                                                VIEW ALL {classSubjects.length} SUBJECTS
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -506,11 +527,11 @@ export default function SubjectsPage() {
 
                 {/* Create Dialog */}
                 <Dialog open={showDialog} onOpenChange={setShowDialog}>
-                    <DialogContent className="max-w-md w-full max-h-[90vh] flex flex-col">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>{editingId ? 'Edit Subject' : 'Create Subject'}</DialogTitle>
                         </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-3 overflow-y-auto flex-1 pr-1">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
                                 <Label>Subject Name</Label>
                                 <Input
