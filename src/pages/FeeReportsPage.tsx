@@ -159,7 +159,7 @@ const exportClassWiseToPDF = (report: ClassWiseSummary) => {
         doc.addPage();
     }
 
-    const summaryY = doc.internal.getNumberOfPages() > 1
+    const summaryY = (doc.internal as any).getNumberOfPages() > 1
         ? pageHeight - 45
         : Math.max(finalY + 15, pageHeight - 45);
 
@@ -506,11 +506,8 @@ const OverallSummaryReport: React.FC = () => {
 };
 
 // ==================== Class-wise Report ====================
-interface ClassWiseReportSectionProps {
-    academicYearId: string;
-}
 
-const ClassWiseReportSection: React.FC<ClassWiseReportSectionProps> = ({ academicYearId }) => {
+const ClassWiseReportSection: React.FC = () => {
     const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
     const [selectedClass, setSelectedClass] = useState<string>('');
     const [report, setReport] = useState<ClassWiseSummary | null>(null);
