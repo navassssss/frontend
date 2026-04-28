@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     BookOpen,
@@ -10,9 +10,7 @@ import {
     ChevronDown,
     Download,
     Upload,
-    AlertCircle,
-    Users,
-    Search
+    AlertCircle
 } from 'lucide-react';
 import { read, utils, writeFile } from 'xlsx';
 import { Card, CardContent } from '@/components/ui/card';
@@ -48,14 +46,7 @@ interface Subject {
     teacherId: number;
     finalMaxMarks: number;
     isLocked: boolean;
-    assignmentScope?: 'full_class' | 'selected_students';
     completion_percent?: number;
-}
-
-interface StudentOption {
-    id: number;
-    name: string;
-    username: string;
 }
 
 interface ClassRoom {
@@ -95,13 +86,8 @@ export default function SubjectsPage() {
         code: '',
         class_id: '',
         teacher_id: '',
-        final_max_marks: '30',
-        assignment_scope: 'full_class' as 'full_class' | 'selected_students',
+        final_max_marks: '30'
     });
-    const [classStudents, setClassStudents] = useState<StudentOption[]>([]);
-    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
-    const [studentSearch, setStudentSearch] = useState('');
-    const [loadingStudents, setLoadingStudents] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -125,52 +111,21 @@ export default function SubjectsPage() {
         }
     };
 
-    const fetchClassStudents = useCallback(async (classId: string) => {
-        if (!classId) { setClassStudents([]); return; }
-        setLoadingStudents(true);
-        try {
-            const res = await api.get(`/classes/${classId}/students`);
-            // API returns array of {id, name, roll_number/username}
-            const arr = (res.data || []).map((s: any) => ({
-                id: s.id,
-                name: s.name || 'Unknown',
-                username: s.roll_number || s.username || '',
-            }));
-            setClassStudents(arr);
-        } catch {
-            setClassStudents([]);
-        } finally {
-            setLoadingStudents(false);
-        }
-    }, []);
-
     const openCreateDialog = () => {
         setEditingId(null);
-        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class' });
-        setSelectedStudentIds([]);
-        setClassStudents([]);
-        setStudentSearch('');
+        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30' });
         setShowDialog(true);
     };
 
-    const handleEdit = async (subject: Subject) => {
+    const handleEdit = (subject: Subject) => {
         setEditingId(subject.id);
         setFormData({
             name: subject.name,
             code: subject.code,
             class_id: subject.classId.toString(),
             teacher_id: subject.teacherId ? subject.teacherId.toString() : '',
-            final_max_marks: subject.finalMaxMarks.toString(),
-            assignment_scope: subject.assignmentScope || 'full_class',
+            final_max_marks: subject.finalMaxMarks.toString()
         });
-        setSelectedStudentIds([]);
-        setStudentSearch('');
-        // Load subject detail to get existing studentIds
-        try {
-            const res = await api.get(`/subjects/${subject.id}`);
-            if (res.data.studentIds) setSelectedStudentIds(res.data.studentIds);
-        } catch {}
-        await fetchClassStudents(subject.classId.toString());
         setShowDialog(true);
     };
 
@@ -187,27 +142,23 @@ export default function SubjectsPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (formData.assignment_scope === 'selected_students' && selectedStudentIds.length === 0) {
-            toast.error('Select at least one student for selected-students scope');
-            return;
-        }
-        const payload: any = { ...formData };
-        if (formData.assignment_scope === 'selected_students') {
-            payload.student_ids = selectedStudentIds;
-        }
         try {
             if (editingId) {
-                await api.put(`/subjects/${editingId}`, payload);
+                await api.put(`/subjects/${editingId}`, formData);
                 toast.success('Subject updated successfully');
             } else {
-                await api.post('/subjects', payload);
+                await api.post('/subjects', formData);
                 toast.success('Subject created successfully');
             }
             setShowDialog(false);
             setEditingId(null);
-            setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class' });
-            setSelectedStudentIds([]);
-            setClassStudents([]);
+            setFormData({
+                name: '',
+                code: '',
+                class_id: '',
+                teacher_id: '',
+                final_max_marks: '30'
+            });
             loadData();
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to save subject');
@@ -554,11 +505,7 @@ export default function SubjectsPage() {
                                 <Label>Class</Label>
                                 <Select
                                     value={formData.class_id}
-                                    onValueChange={(value) => {
-                                        setFormData({ ...formData, class_id: value });
-                                        setSelectedStudentIds([]);
-                                        fetchClassStudents(value);
-                                    }}
+                                    onValueChange={(value) => setFormData({ ...formData, class_id: value })}
                                     required
                                 >
                                     <SelectTrigger>
@@ -603,114 +550,6 @@ export default function SubjectsPage() {
                                     required
                                 />
                             </div>
-
-                            {/* Assignment Scope */}
-                            <div className="space-y-2">
-                                <Label>Assignment Scope</Label>
-                                <Select
-                                    value={formData.assignment_scope}
-                                    onValueChange={(v) =>
-                                        setFormData({ ...formData, assignment_scope: v as 'full_class' | 'selected_students' })
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="full_class">Full Class (all students)</SelectItem>
-                                        <SelectItem value="selected_students">Selected Students only</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Student Picker — visible only when selected_students */}
-                            {formData.assignment_scope === 'selected_students' && (
-                                <div className="space-y-2">
-                                    <Label className="flex items-center gap-2">
-                                        <Users className="w-4 h-4" />
-                                        Select Students
-                                        {selectedStudentIds.length > 0 && (
-                                            <span className="ml-auto text-xs font-bold text-[#008f6c]">{selectedStudentIds.length} selected</span>
-                                        )}
-                                    </Label>
-                                    {!formData.class_id ? (
-                                        <p className="text-xs text-muted-foreground">Pick a class first.</p>
-                                    ) : loadingStudents ? (
-                                        <p className="text-xs text-muted-foreground animate-pulse">Loading students...</p>
-                                    ) : (
-                                        <div className="border rounded-lg overflow-hidden">
-                                            {/* Search + Select All bar */}
-                                            <div className="flex items-center gap-2 px-3 py-2 border-b bg-slate-50">
-                                                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Search name or roll no..."
-                                                    value={studentSearch}
-                                                    onChange={e => setStudentSearch(e.target.value)}
-                                                    className="flex-1 text-[12px] bg-transparent outline-none placeholder:text-slate-400"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const filtered = classStudents.filter(s =>
-                                                            !studentSearch ||
-                                                            s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-                                                            s.username.toLowerCase().includes(studentSearch.toLowerCase())
-                                                        );
-                                                        const filteredIds = filtered.map(s => s.id);
-                                                        const allSelected = filteredIds.every(id => selectedStudentIds.includes(id));
-                                                        if (allSelected) {
-                                                            setSelectedStudentIds(prev => prev.filter(id => !filteredIds.includes(id)));
-                                                        } else {
-                                                            setSelectedStudentIds(prev => Array.from(new Set([...prev, ...filteredIds])));
-                                                        }
-                                                    }}
-                                                    className="text-[10px] font-black text-[#008f6c] uppercase tracking-wide shrink-0"
-                                                >
-                                                    All
-                                                </button>
-                                            </div>
-                                            {/* Student list */}
-                                            <div className="max-h-48 overflow-y-auto divide-y">
-                                                {classStudents
-                                                    .filter(s =>
-                                                        !studentSearch ||
-                                                        s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-                                                        s.username.toLowerCase().includes(studentSearch.toLowerCase())
-                                                    )
-                                                    .map(s => (
-                                                        <label
-                                                            key={s.id}
-                                                            className={`flex items-center gap-3 px-3 py-2 cursor-pointer select-none transition-colors ${
-                                                                selectedStudentIds.includes(s.id) ? 'bg-emerald-50' : 'hover:bg-slate-50'
-                                                            }`}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                className="accent-[#008f6c] w-4 h-4 shrink-0"
-                                                                checked={selectedStudentIds.includes(s.id)}
-                                                                onChange={() =>
-                                                                    setSelectedStudentIds(prev =>
-                                                                        prev.includes(s.id)
-                                                                            ? prev.filter(id => id !== s.id)
-                                                                            : [...prev, s.id]
-                                                                    )
-                                                                }
-                                                            />
-                                                            <span className="text-[13px] font-medium text-slate-700 truncate flex-1">{s.name}</span>
-                                                            <span className="text-[11px] text-slate-400">#{s.username}</span>
-                                                        </label>
-                                                    ))
-                                                }
-                                                {classStudents.length === 0 && (
-                                                    <p className="text-center text-xs text-muted-foreground py-4">No students in this class.</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
                                     Cancel
