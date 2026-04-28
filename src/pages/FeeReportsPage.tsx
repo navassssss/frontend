@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -360,10 +361,11 @@ const exportDailyToExcel = (report: DailyCollectionSummary) => {
 
 // ==================== Main Component ====================
 const FeeReportsPage: React.FC = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('summary');
 
     return (
-        <AppLayout title="Donation Reports" showBack>
+        <AppLayout title="Donation Reports" showBack onBack={() => navigate('/fees')}>
             <div className="space-y-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">

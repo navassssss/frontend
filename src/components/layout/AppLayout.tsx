@@ -11,16 +11,17 @@ interface AppLayoutProps {
   title?: string;
   hideNav?: boolean;
   showBack?: boolean;
+  onBack?: () => void;
 }
 
-export function AppLayout({ children, title, hideNav = false, showBack = false }: AppLayoutProps) {
+export function AppLayout({ children, title, hideNav = false, showBack = false, onBack }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <PWAPrompt />
 
       {/* Mobile Header - Hidden on Desktop */}
       <div className="lg:hidden">
-        <Header title={title} showBack={showBack} />
+        <Header title={title} showBack={showBack} onBack={onBack} />
       </div>
 
       {/* Desktop Sidebar */}
