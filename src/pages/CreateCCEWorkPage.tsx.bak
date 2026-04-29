@@ -81,7 +81,7 @@ export default function CreateCCEWorkPage() {
 
     const handleSubmit = async () => {
         if (!formData.subject_id || !formData.level || !formData.title || !formData.max_marks) {
-            toast.error('Please fill all required fields');
+            toast.error('Please fill all required fields (Subject, Level, Title, Max Marks)');
             return;
         }
 
@@ -269,21 +269,20 @@ export default function CreateCCEWorkPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Tool/Method</Label>
-                                            <Select
-                                                value={formData.tool_method}
-                                                onValueChange={(v) => setFormData({ ...formData, tool_method: v })}
-                                            >
-                                                <SelectTrigger className="h-14 bg-slate-50 border-0 rounded-xl font-bold text-slate-700">
-                                                    <SelectValue placeholder="Project Work" />
-                                                </SelectTrigger>
-                                                <SelectContent>
+                                            <div className="relative">
+                                                <input
+                                                    list="cce-tool-methods"
+                                                    value={formData.tool_method}
+                                                    onChange={(e) => setFormData({ ...formData, tool_method: e.target.value })}
+                                                    placeholder="e.g., Project Work"
+                                                    className="h-14 w-full bg-slate-50 border-0 rounded-xl font-bold text-slate-700 px-4 focus:outline-none focus:ring-2 focus:ring-[#00a67e]/20 placeholder:text-slate-400 placeholder:font-normal"
+                                                />
+                                                {/* <datalist id="cce-tool-methods">
                                                     {cceToolMethods.map((method) => (
-                                                        <SelectItem key={method} value={method} className="font-semibold">
-                                                            {method}
-                                                        </SelectItem>
+                                                        <option key={method} value={method} />
                                                     ))}
-                                                </SelectContent>
-                                            </Select>
+                                                </datalist> */}
+                                            </div>
                                         </div>
                                         <div className="space-y-2 relative">
                                             <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Maximum Marks</Label>
