@@ -277,11 +277,11 @@ export default function CreateCCEWorkPage() {
                                                     placeholder="e.g., Project Work"
                                                     className="h-14 w-full bg-slate-50 border-0 rounded-xl font-bold text-slate-700 px-4 focus:outline-none focus:ring-2 focus:ring-[#00a67e]/20 placeholder:text-slate-400 placeholder:font-normal"
                                                 />
-                                                <datalist id="cce-tool-methods">
+                                                {/* <datalist id="cce-tool-methods">
                                                     {cceToolMethods.map((method) => (
                                                         <option key={method} value={method} />
                                                     ))}
-                                                </datalist>
+                                                </datalist> */}
                                             </div>
                                         </div>
                                         <div className="space-y-2 relative">
