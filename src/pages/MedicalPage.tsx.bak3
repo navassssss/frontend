@@ -90,11 +90,7 @@ export default function MedicalPage() {
   const [studentSearch, setStudentSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [illnessName,   setIllnessName]   = useState('');
-  const [reportedAt,    setReportedAt]    = useState(() => {
-    const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000;
-    return new Date(now.getTime() - offset).toISOString().slice(0, 16);
-  });
+  const [reportedAt,    setReportedAt]    = useState(() => new Date().toISOString().slice(0, 16));
   const [wentToDoctor,  setWentToDoctor]  = useState(false);
   const [notes,         setNotes]         = useState('');
 
@@ -243,37 +239,37 @@ export default function MedicalPage() {
         </div>
 
         {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-slide-up">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up">
           {/* Active Card */}
-          <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-rose-100/80 w-full relative overflow-hidden transition-all hover:bg-rose-100 group">
-            <div className="bg-rose-200/60 rounded-xl p-3 shrink-0 text-rose-700 transition-colors group-hover:bg-rose-200">
-              <Briefcase className="w-6 h-6" />
+          <div className="rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 bg-rose-100/80 w-full relative overflow-hidden transition-all hover:-translate-y-1">
+            <div className="bg-rose-200/60 rounded-2xl p-4 shrink-0 text-rose-700">
+              <Briefcase className="w-8 h-8" />
             </div>
             <div className="flex flex-col">
-              <span className="text-4xl font-black text-rose-800 tracking-tight">{active.length.toString().padStart(2, '0')}</span>
-              <span className="text-[11px] font-black uppercase tracking-widest text-rose-600">Active</span>
+              <span className="text-5xl font-black text-rose-800 tracking-tight">{active.length.toString().padStart(2, '0')}</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-rose-600 mt-1">Active</span>
             </div>
           </div>
 
           {/* Recovered Card */}
-          <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-emerald-100/80 w-full relative overflow-hidden transition-all hover:bg-emerald-100 group">
-            <div className="bg-emerald-200/70 rounded-xl p-3 shrink-0 text-[#00865B] transition-colors group-hover:bg-emerald-200">
-              <Shield className="w-6 h-6" />
+          <div className="rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 bg-emerald-100 w-full relative overflow-hidden transition-all hover:-translate-y-1">
+            <div className="bg-emerald-200/70 rounded-2xl p-4 shrink-0 text-[#00865B]">
+              <Shield className="w-8 h-8" />
             </div>
             <div className="flex flex-col">
-              <span className="text-4xl font-black text-emerald-900 tracking-tight">{(history.filter(h => h.status === 'recovered').length).toString().padStart(2, '0')}</span>
-              <span className="text-[11px] font-black uppercase tracking-widest text-[#00865B]">Recovered</span>
+              <span className="text-5xl font-black text-emerald-900 tracking-tight">{(history.filter(h => h.status === 'recovered').length).toString().padStart(2, '0')}</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-[#00865B] mt-1">Recovered</span>
             </div>
           </div>
 
           {/* Sent Home Card */}
-          <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-[#ebf3ff]/80 w-full relative overflow-hidden transition-all hover:bg-[#ebf3ff] group">
-             <div className="bg-[#d1e4fb] rounded-xl p-3 shrink-0 text-blue-600 transition-colors group-hover:bg-[#d1e4fb]">
-              <Home className="w-6 h-6" />
+          <div className="rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 bg-[#ebf3ff] w-full relative overflow-hidden transition-all hover:-translate-y-1">
+             <div className="bg-[#d1e4fb] rounded-2xl p-4 shrink-0 text-blue-600">
+              <Home className="w-8 h-8" />
             </div>
             <div className="flex flex-col">
-              <span className="text-4xl font-black text-blue-900 tracking-tight">{(history.filter(h => h.status === 'sent_home').length).toString().padStart(2, '0')}</span>
-              <span className="text-[11px] font-black uppercase tracking-widest text-blue-600">Sent Home</span>
+              <span className="text-5xl font-black text-blue-900 tracking-tight">{(history.filter(h => h.status === 'sent_home').length).toString().padStart(2, '0')}</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-blue-600 mt-1">Sent Home</span>
             </div>
           </div>
         </div>
@@ -422,18 +418,18 @@ export default function MedicalPage() {
       {/* ════════════ ADD RECORD MODAL ════════════ */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-              <h2 className="text-lg font-black text-slate-900">New Medical Record</h2>
+          <div className="w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-900">New Medical Record</h2>
               <button
                 onClick={resetForm}
-                className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-500"
+                className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-500"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-8 space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Student</label>
                 {selectedStudent ? (
@@ -491,30 +487,19 @@ export default function MedicalPage() {
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Illness / Condition</label>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Illness / Condition</label>
                 <Input
                   id="illness-name"
-                  list="common-illnesses"
-                  placeholder="Search or enter illness..."
+                  placeholder="e.g. Seasonal Flu, Sprained Ankle"
                   value={illnessName}
                   onChange={e => setIllnessName(e.target.value)}
-                  className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-[#00865B]/20 font-bold"
+                  className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-[#00865B]/20 font-medium"
                 />
-                <datalist id="common-illnesses">
-                   <option value="Fever / High Temperature" />
-                   <option value="Common Cold / Flu" />
-                   <option value="Headache / Migraine" />
-                   <option value="Stomach Ache / Pain" />
-                   <option value="Food Issue / Indigestion" />
-                   <option value="Sprained Ankle / Muscle" />
-                   <option value="Allergic Reaction" />
-                   <option value="Cough / Sore Throat" />
-                </datalist>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Time Reported</label>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Time Reported</label>
                 <Input
                   id="reported-at"
                   type="datetime-local"
@@ -524,26 +509,24 @@ export default function MedicalPage() {
                 />
               </div>
 
-              <div className="pt-1">
+              <div className="pt-2">
                 <button
                   id="toggle-doctor"
                   onClick={() => setWentToDoctor(v => !v)}
-                  className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all border ${
-                    wentToDoctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'
+                  className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all border ${
+                    wentToDoctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <span className={`text-[13px] font-black flex items-center gap-3 ${wentToDoctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
-                    <div className={`p-2 rounded-lg transition-colors ${wentToDoctor ? 'bg-[#00865B]/10' : 'bg-slate-100'}`}>
-                      <Stethoscope className="w-4 h-4" />
+                  <span className={`text-sm font-bold flex items-center gap-3 ${wentToDoctor ? 'text-[#00865B]' : 'text-slate-700'}`}>
+                    <div className={`p-2 rounded-lg ${wentToDoctor ? 'bg-[#00865B]/10' : 'bg-slate-100'}`}>
+                      <Stethoscope className="w-5 h-5" />
                     </div>
-                    Doctor Visit Required
+                    Student Requires Doctor Visit
                   </span>
-                  <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 ${
-                    wentToDoctor ? 'bg-[#00865B]' : 'bg-slate-200'
+                  <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                    wentToDoctor ? 'bg-[#00865B] border-[#00865B]' : 'border-slate-300 bg-white'
                   }`}>
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                      wentToDoctor ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
+                    {wentToDoctor && <CheckCircle2 className="w-4 h-4 text-white" strokeWidth={3} />}
                   </div>
                 </button>
               </div>

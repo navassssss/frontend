@@ -90,7 +90,17 @@ export default function CCEWorksPage() {
             setWorks(worksRes.data.works || worksRes.data);
             setSubjectsSummary(worksRes.data.subjects_summary || []);
 
-            // Default to all collapsed
+            // Auto expand visually first valid class
+            if (worksRes.data.subjects_summary?.length > 0) {
+                const grouped = groupByClass(worksRes.data.subjects_summary);
+                const keys = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+                if (keys.length > 0) {
+                    setExpandedClasses(new Set([keys[0]]));
+                    if (grouped[keys[0]].length > 0) {
+                        setExpandedSubjects(new Set([grouped[keys[0]][0].subject_id]));
+                    }
+                }
+            }
         } catch (error) {
             console.error('Failed to load data', error);
         } finally {

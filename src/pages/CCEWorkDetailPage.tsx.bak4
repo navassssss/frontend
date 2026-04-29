@@ -17,33 +17,8 @@ import {
     ArrowUpDown,
     ArrowLeft,
     X,
-    Layers,
-    Trash2,
-    Settings2,
-    ArrowDownAZ,
-    Binary,
-    Activity,
-    Star
+    Layers
 } from 'lucide-react';
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuLabel, 
-    DropdownMenuSeparator, 
-    DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { 
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -134,19 +109,9 @@ export default function CCEWorkDetailPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const { user } = useAuth();
-    const canManage = user?.role === 'principal' || user?.role === 'manager' || (user as any)?.permissions?.some((p: any) => p.name === 'manage_cce');
-
-    // Filter & Sort State
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'evaluated'>('all');
-    const [sortField, setSortField] = useState<'name' | 'roll' | 'status' | 'marks' | 'date'>('status');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-
-    // Delete Confirmation
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [deletingWork, setDeletingWork] = useState(false);
 
     // Mobile evaluation state
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'evaluated'>('all');
     const [inlineMarks, setInlineMarks] = useState<Record<number, string>>({});
     const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
     const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
@@ -180,20 +145,6 @@ export default function CCEWorkDetailPage() {
             toast.error('Failed to load work details');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleDeleteWork = async () => {
-        setDeletingWork(true);
-        try {
-            await api.delete(`/cce/works/${id}`);
-            toast.success('Work deleted successfully');
-            navigate('/cce/works');
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to delete work');
-        } finally {
-            setDeletingWork(false);
-            setDeleteConfirmOpen(false);
         }
     };
 
@@ -348,30 +299,8 @@ export default function CCEWorkDetailPage() {
          s.rollNumber.toLowerCase().includes(searchQuery.toLowerCase())) &&
         (statusFilter === 'all' || s.status === statusFilter)
     ).sort((a, b) => {
-        let comparison = 0;
-        
-        switch (sortField) {
-            case 'name':
-                comparison = a.studentName.localeCompare(b.studentName);
-                break;
-            case 'roll':
-                comparison = a.rollNumber.localeCompare(b.rollNumber);
-                break;
-            case 'marks':
-                comparison = (a.marksObtained || 0) - (b.marksObtained || 0);
-                break;
-            case 'date':
-                const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
-                const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
-                comparison = dateA - dateB;
-                break;
-            case 'status':
-                const order = { submitted: 0, pending: 1, evaluated: 2 };
-                comparison = order[a.status] - order[b.status];
-                break;
-        }
-
-        return sortOrder === 'asc' ? comparison : -comparison;
+        const order = { submitted: 0, pending: 1, evaluated: 2 };
+        return order[a.status] - order[b.status];
     });
 
     // Pending-first list used for auto-focus-next on mobile
@@ -427,22 +356,6 @@ export default function CCEWorkDetailPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {canManage && (
-                            <>
-                                <button 
-                                    onClick={() => navigate(`/cce/works/new?id=${id}`)}
-                                    className="h-11 px-5 rounded-full border border-slate-200 bg-white text-[13px] font-black text-slate-700 hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
-                                >
-                                    <Edit className="w-4 h-4" /> Edit
-                                </button>
-                                <button 
-                                    onClick={() => setDeleteConfirmOpen(true)}
-                                    className="h-11 px-5 rounded-full border border-rose-100 bg-rose-50 text-[13px] font-black text-rose-600 hover:bg-rose-100 transition-colors shadow-sm flex items-center gap-2"
-                                >
-                                    <Trash2 className="w-4 h-4" /> Delete
-                                </button>
-                            </>
-                        )}
                         <button 
                             onClick={handleExport}
                             className="h-11 px-5 rounded-full border border-slate-200 bg-white text-[13px] font-black text-slate-700 hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
@@ -695,55 +608,12 @@ export default function CCEWorkDetailPage() {
                                 />
                             </div>
                             <div className="flex items-center gap-3 w-full md:w-auto">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                                            <Filter className="w-4 h-4" /> {statusFilter === 'all' ? 'All Status' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
-                                        </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Filter by Status</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        {(['all', 'pending', 'submitted', 'evaluated'] as const).map(f => (
-                                            <DropdownMenuItem 
-                                                key={f} 
-                                                onClick={() => setStatusFilter(f)}
-                                                className="text-[13px] font-bold py-2.5 cursor-pointer"
-                                            >
-                                                {f === 'all' ? 'Show All' : f.charAt(0).toUpperCase() + f.slice(1)}
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                                            <ArrowUpDown className="w-4 h-4" /> Sort By
-                                        </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-56 rounded-xl">
-                                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sort Options</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => { setSortField('name'); setSortOrder(o => o === 'asc' ? 'desc' : 'asc'); }} className="flex justify-between items-center py-2.5 cursor-pointer">
-                                            <div className="flex items-center gap-2 font-bold text-[13px]"><ArrowDownAZ className="w-4 h-4" /> Student Name</div>
-                                            {sortField === 'name' && <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{sortOrder}</span>}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { setSortField('roll'); setSortOrder(o => o === 'asc' ? 'desc' : 'asc'); }} className="flex justify-between items-center py-2.5 cursor-pointer">
-                                            <div className="flex items-center gap-2 font-bold text-[13px]"><Binary className="w-4 h-4" /> Roll Number</div>
-                                            {sortField === 'roll' && <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{sortOrder}</span>}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { setSortField('status'); setSortOrder(o => o === 'asc' ? 'desc' : 'asc'); }} className="flex justify-between items-center py-2.5 cursor-pointer">
-                                            <div className="flex items-center gap-2 font-bold text-[13px]"><Activity className="w-4 h-4" /> Evaluation Status</div>
-                                            {sortField === 'status' && <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{sortOrder}</span>}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { setSortField('marks'); setSortOrder(o => o === 'asc' ? 'desc' : 'asc'); }} className="flex justify-between items-center py-2.5 cursor-pointer">
-                                            <div className="flex items-center gap-2 font-bold text-[13px]"><Star className="w-4 h-4" /> Marks Obtained</div>
-                                            {sortField === 'marks' && <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{sortOrder}</span>}
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
+                                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                                    <Filter className="w-4 h-4" /> All Status
+                                </button>
+                                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 h-11 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                                    <ArrowUpDown className="w-4 h-4" /> Sort
+                                </button>
                                 <div className="hidden lg:block text-[13px] font-medium text-slate-500 min-w-max ml-2">
                                     Showing <strong className="text-slate-800">{filteredSubmissions.length}</strong> of <strong className="text-slate-800">{stats.total}</strong> Students
                                 </div>
@@ -1026,28 +896,6 @@ export default function CCEWorkDetailPage() {
                         </div>
                     </DialogContent>
                 </Dialog>
-
-                {/* Delete Confirmation */}
-                <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-                    <AlertDialogContent className="rounded-3xl border-0">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl font-black text-slate-800">Delete CCE Work?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-slate-500 font-medium py-2">
-                                This action cannot be undone. All student evaluations and marks for this work will be permanently removed from the system.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter className="gap-2">
-                            <AlertDialogCancel className="rounded-full border-0 bg-slate-100 font-bold hover:bg-slate-200">Cancel</AlertDialogCancel>
-                            <AlertDialogAction 
-                                onClick={handleDeleteWork}
-                                className="rounded-full bg-rose-600 font-black hover:bg-rose-700"
-                                disabled={deletingWork}
-                            >
-                                {deletingWork ? 'Deleting...' : 'Yes, Delete Work'}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
             </div>
         </AppLayout>
     );
