@@ -9,74 +9,54 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      position="top-center"
-      duration={2200}
-      gap={8}
-      visibleToasts={3}
+      position="bottom-center"
+      duration={1600}
+      gap={6}
+      visibleToasts={2}
       closeButton={false}
       className="toaster group"
       toastOptions={{
         classNames: {
           toast: [
-            // Base
+            // Pill / snackbar shape
             "group toast",
-            "flex items-center gap-2.5",
-            // Size — compact
-            "min-h-0 py-2.5 px-3.5",
-            "rounded-xl",
-            // Colours — light, clean
-            "bg-white/95 backdrop-blur-sm",
-            "text-slate-800",
-            "border border-slate-200/80",
-            // Shadow — subtle
-            "shadow-md shadow-black/[0.06]",
+            "flex items-center gap-2",
+            // Compact — ~36px tall
+            "py-2 px-4",
+            "rounded-full",
+            // Dark semi-transparent background (Telegram/iOS style)
+            "bg-slate-900/88 backdrop-blur-md",
+            "text-white",
+            // No border — dark bg handles contrast
+            "border-0",
+            // Minimal shadow
+            "shadow-lg shadow-black/20",
             // Typography
-            "text-[13px] font-medium leading-snug",
-            // Width
-            "max-w-[320px] w-auto",
+            "text-[12.5px] font-medium leading-none",
+            // Width — auto, not full-width
+            "w-auto max-w-[280px] mx-auto",
+            // Cursor
+            "cursor-default select-none",
           ].join(" "),
 
-          // Success: thin left accent instead of heavy icon bg
-          success: [
-            "border-l-[3px] border-l-emerald-500",
-            "border border-slate-200/80",
-          ].join(" "),
+          // Icon — small, dim slightly for success/etc.
+          icon: "w-3.5 h-3.5 shrink-0 opacity-90",
 
-          // Error: rose accent
-          error: [
-            "border-l-[3px] border-l-rose-500",
-            "border border-slate-200/80",
-          ].join(" "),
+          description: "text-[11px] text-white/70 font-normal",
 
-          // Warning: amber accent
-          warning: [
-            "border-l-[3px] border-l-amber-400",
-            "border border-slate-200/80",
-          ].join(" "),
-
-          // Info: blue accent
-          info: [
-            "border-l-[3px] border-l-blue-500",
-            "border border-slate-200/80",
-          ].join(" "),
-
-          description: "text-[12px] text-slate-500 font-normal mt-0.5",
           actionButton:
-            "text-[12px] font-semibold bg-slate-900 text-white px-3 py-1 rounded-lg hover:bg-slate-700 transition-colors",
+            "text-[11px] font-bold text-emerald-400 ml-1 hover:text-emerald-300 transition-colors",
           cancelButton:
-            "text-[12px] font-semibold text-slate-500 hover:text-slate-700 transition-colors",
-
-          // Icon — smaller, no heavy bg
-          icon: "w-4 h-4 shrink-0 opacity-80",
-        },
-        style: {
-          // Prevent sonner from overriding our compact padding
-          padding: undefined,
+            "text-[11px] font-medium text-white/60 ml-1 hover:text-white/80 transition-colors",
         },
       }}
+      // Position above bottom nav:
+      // bottom nav is ~64px + safe-area. We offset by 80px + safe-area.
       style={{
-        // Position below safe area / header — works with pt-safe on mobile
-        top: "calc(env(safe-area-inset-top, 0px) + 12px)",
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + 72px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        right: "auto",
       }}
       {...props}
     />
