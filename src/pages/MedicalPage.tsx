@@ -9,6 +9,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -191,6 +192,16 @@ export default function MedicalPage() {
     } catch { toast.error('Failed'); } finally { setActionId(null); }
   };
 
+  /* ── Toggle doctor ── */
+  const handleToggleDoctor = async (id: number) => {
+    setActionId(id);
+    try {
+      const { data } = await api.patch(`/medical/${id}/toggle-doctor`);
+      setActive(prev => prev.map(r => r.id === id ? { ...r, went_to_doctor: data.went_to_doctor } : r));
+      toast.success(data.went_to_doctor ? 'Doctor visit required' : 'Changed to infirmary obs');
+    } catch { toast.error('Failed to update doctor visit'); } finally { setActionId(null); }
+  };
+
   /* ── Student search ── */
   const filteredStudents = students.filter(s =>
     (s.name + ' ' + (s.roll_number || '')).toLowerCase().includes(studentSearch.toLowerCase())
@@ -330,6 +341,7 @@ export default function MedicalPage() {
                     loading={actionId === rec.id}
                     onRecover={() => handleRecover(rec.id)}
                     onSentHome={() => handleSentHome(rec.id)}
+                    onToggleDoctor={() => handleToggleDoctor(rec.id)}
                     delay={idx * 0.04}
                   />
                 ))}
@@ -582,12 +594,13 @@ export default function MedicalPage() {
 
 /* ─────────────────────── ActiveCard (Matched to Screenshot) ─────────────────────── */
 function ActiveCard({
-  record, loading, onRecover, onSentHome, delay
+  record, loading, onRecover, onSentHome, onToggleDoctor, delay
 }: {
   record: MedicalRecord;
   loading: boolean;
   onRecover: () => void;
   onSentHome: () => void;
+  onToggleDoctor: () => void;
   delay: number;
 }) {
   return (
@@ -612,16 +625,16 @@ function ActiveCard({
       <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0">
          <div className="flex flex-col gap-2">
             <p className="text-[15px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
-            <div className="flex">
-              {record.went_to_doctor ? (
-                <span className="text-[9px] font-extrabold px-2 py-1 rounded bg-[#dcfce7] text-[#166534] uppercase tracking-wider">
-                  DOCTOR VISIT
-                </span>
-              ) : (
-                 <span className="text-[9px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 uppercase tracking-wider">
-                  INFIRMARY OBS.
-                </span>
-              )}
+            <div className="flex items-center gap-1.5 bg-slate-50 w-fit pl-1 pr-2 py-1 rounded border border-slate-100">
+              <Switch 
+                checked={record.went_to_doctor} 
+                onCheckedChange={onToggleDoctor}
+                disabled={loading}
+                className="scale-75 origin-left data-[state=checked]:bg-[#166534]"
+              />
+              <span className={`text-[9px] font-extrabold uppercase tracking-wider ${record.went_to_doctor ? 'text-[#166534]' : 'text-slate-500'}`}>
+                {record.went_to_doctor ? 'DOCTOR VISIT' : 'INFIRMARY OBS.'}
+              </span>
             </div>
          </div>
          {record.notes && (
