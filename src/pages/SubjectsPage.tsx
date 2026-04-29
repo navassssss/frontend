@@ -127,6 +127,11 @@ export default function SubjectsPage() {
             setSubjects(subjectsRes.data);
             setClasses(classesRes.data);
             setTeachers(teachersRes.data);
+            // Start all class sections collapsed
+            const allClassNames: string[] = Array.from(
+                new Set((subjectsRes.data as Subject[]).map((s) => s.className || 'Unassigned'))
+            );
+            setCollapsedClasses(allClassNames);
         } catch (error) {
             console.error('Failed to load data', error);
             toast.error('Failed to load data');
