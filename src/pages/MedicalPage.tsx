@@ -318,9 +318,9 @@ export default function MedicalPage() {
                 {/* Desktop Table Headers */}
                 <div className="hidden lg:grid grid-cols-12 gap-6 px-6 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   <div className="col-span-3">Student / ID</div>
-                  <div className="col-span-4">Condition & Protocol</div>
+                  <div className="col-span-3">Condition & Protocol</div>
                   <div className="col-span-3">Reporting Metadata</div>
-                  <div className="col-span-2 text-right">Actions</div>
+                  <div className="col-span-3 text-right">Actions</div>
                 </div>
                 
                 {active.map((rec, idx) => (
@@ -597,84 +597,81 @@ function ActiveCard({
     >
       {/* LEFT SECTION - Avatar & Name */}
       <div className="flex items-center gap-4 lg:col-span-3 shrink-0">
-        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#bffff0]/40 flex items-center justify-center text-lg md:text-[22px] font-black text-[#00a877] shrink-0">
+        <div className="w-12 h-12 rounded-full bg-[#bffff0]/40 flex items-center justify-center text-lg font-black text-[#00a877] shrink-0">
           {initials(record.student?.name || '?')}
         </div>
         <div className="min-w-0">
-          <p className="text-lg md:text-xl font-bold text-slate-900 truncate">{record.student?.name}</p>
-          <p className="text-sm md:text-[15px] font-semibold text-slate-500 mt-0.5 truncate">
-            {record.student?.class} <span className="opacity-50 mx-1.5">•</span> ID #{record.student?.roll_number || 'N/A'}
+          <p className="text-base font-bold text-slate-900 truncate">{record.student?.name}</p>
+          <p className="text-[13px] font-medium text-slate-500 truncate">
+            {record.student?.class} <span className="opacity-30 mx-1">•</span> ID #{record.student?.roll_number || 'N/A'}
           </p>
         </div>
       </div>
 
       {/* MIDDLE SECTION - Illness Details */}
-      <div className="flex-1 min-w-0 lg:col-span-4 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0">
-         <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <p className="text-base md:text-[17px] font-bold text-slate-900">{record.illness_name}</p>
-            {record.went_to_doctor ? (
-              <span className="text-[10px] font-extrabold px-2.5 py-1 md:px-3 md:py-1.5 rounded-full bg-[#dcfce7] text-[#166534] uppercase tracking-wide">
-                DOCTOR VISIT
-              </span>
-            ) : (
-               <span className="text-[10px] font-extrabold px-2.5 py-1 md:px-3 md:py-1.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wide">
-                INFIRMARY OBSERVATION
-              </span>
-            )}
+      <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0">
+         <div className="flex flex-col gap-2">
+            <p className="text-[15px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
+            <div className="flex">
+              {record.went_to_doctor ? (
+                <span className="text-[9px] font-extrabold px-2 py-1 rounded bg-[#dcfce7] text-[#166534] uppercase tracking-wider">
+                  DOCTOR VISIT
+                </span>
+              ) : (
+                 <span className="text-[9px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 uppercase tracking-wider">
+                  INFIRMARY OBS.
+                </span>
+              )}
+            </div>
          </div>
          {record.notes && (
-           <p className="mt-2 text-xs md:text-[13px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100 line-clamp-2">
+           <p className="mt-2 text-[12px] text-slate-500 line-clamp-2" title={record.notes}>
              {record.notes}
            </p>
          )}
       </div>
       
       {/* METADATA SECTION */}
-      <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0 flex flex-col gap-2 md:gap-2.5">
-         <div className="flex items-start gap-2 md:gap-3 text-xs md:text-[13px] font-semibold text-slate-400">
-            <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0 flex flex-col gap-3">
+         <div className="flex items-start gap-2 text-[12px] text-slate-500">
+            <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" />
             <div className="flex flex-col">
-               <span className="text-slate-600 font-bold">{relativeTime(record.reported_at)}</span>
+               <span className="font-semibold text-slate-700">{relativeTime(record.reported_at)}</span>
                <span>{fmtTime(record.reported_at)}</span>
             </div>
          </div>
          {record.reported_by && (
-            <div className="flex items-start gap-2 md:gap-3 text-xs md:text-[13px] font-semibold text-slate-400">
-               <User className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 text-[12px] text-slate-500">
+               <User className="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" />
                <div className="flex flex-col">
                   <span>Reported by</span>
-                  <span className="text-slate-600 font-bold">{record.reported_by.name}</span>
+                  <span className="font-semibold text-slate-700 truncate">{record.reported_by.name}</span>
                </div>
             </div>
          )}
       </div>
 
       {/* RIGHT SECTION - Actions */}
-      <div className="flex flex-wrap items-center lg:justify-end gap-2 md:gap-3 lg:col-span-2 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0 shrink-0">
-        <span className="hidden xl:inline-flex px-4 py-2 rounded-full bg-rose-100/80 text-rose-700 text-xs font-bold mr-1">
-          Active
-        </span>
-        <div className="flex flex-1 lg:flex-none gap-2 md:gap-3">
-          <Button
-            id={`recover-${record.id}`}
-            size="sm"
-            disabled={loading}
-            onClick={onRecover}
-            className="flex-1 lg:flex-auto h-10 md:h-11 px-4 md:px-5 rounded-full bg-[#00865B] hover:bg-[#00704c] text-white text-xs md:text-sm font-bold"
-          >
-            Recovered
-          </Button>
-          <Button
-            id={`sent-home-${record.id}`}
-            size="sm"
-            disabled={loading}
-            onClick={onSentHome}
-            variant="outline"
-            className="flex-1 lg:flex-auto h-10 md:h-11 px-4 md:px-5 rounded-full border-2 border-blue-100 text-blue-600 hover:bg-blue-50 hover:text-blue-700 text-xs md:text-sm font-bold bg-white"
-          >
-            Sent Home
-          </Button>
-        </div>
+      <div className="flex items-center lg:justify-end gap-2 lg:col-span-3 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0 shrink-0">
+        <Button
+          id={`recover-${record.id}`}
+          size="sm"
+          disabled={loading}
+          onClick={onRecover}
+          className="flex-1 lg:flex-none h-9 px-4 rounded-lg bg-[#00865B] hover:bg-[#00704c] text-white text-[13px] font-bold shadow-sm"
+        >
+          Recovered
+        </Button>
+        <Button
+          id={`sent-home-${record.id}`}
+          size="sm"
+          disabled={loading}
+          onClick={onSentHome}
+          variant="outline"
+          className="flex-1 lg:flex-none h-9 px-4 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-[13px] font-bold bg-white"
+        >
+          Sent Home
+        </Button>
       </div>
     </div>
   );
