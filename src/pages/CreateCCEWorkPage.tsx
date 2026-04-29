@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import {
     BookOpen,
     Calendar,
@@ -47,6 +47,8 @@ interface Subject {
 
 export default function CreateCCEWorkPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const editId = searchParams.get('id');
     const { user } = useAuth();
 
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -63,12 +65,38 @@ export default function CreateCCEWorkPage() {
         submission_type: 'offline' as 'online' | 'offline'
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingEdit, setIsLoadingEdit] = useState(!!editId);
     const [showAllSubjects, setShowAllSubjects] = useState(false);
     const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
 
     useEffect(() => {
         loadSubjects();
-    }, []);
+        if (editId) {
+            loadExistingWork();
+        }
+    }, [editId]);
+
+    const loadExistingWork = async () => {
+        try {
+            const { data } = await api.get(`/cce/works/${editId}`);
+            setFormData({
+                subject_id: data.subject?.id || '',
+                level: data.level || '',
+                week: data.week || '',
+                title: data.title || '',
+                description: data.description || '',
+                tool_method: data.toolMethod || '',
+                issued_date: data.issuedDate || format(new Date(), 'yyyy-MM-dd'),
+                due_date: data.dueDate || format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+                max_marks: data.maxMarks?.toString() || '',
+                submission_type: data.submissionType || 'offline'
+            });
+        } catch (error) {
+            toast.error('Failed to load work details');
+        } finally {
+            setIsLoadingEdit(false);
+        }
+    };
 
     const loadSubjects = async () => {
         try {
@@ -87,18 +115,34 @@ export default function CreateCCEWorkPage() {
 
         setIsSubmitting(true);
         try {
-            await api.post('/cce/works', formData);
-            toast.success('CCE Work created successfully');
-            navigate('/cce/works');
+            if (editId) {
+                await api.put(`/cce/works/${editId}`, formData);
+                toast.success('CCE Work updated successfully');
+                navigate(`/cce/works/${editId}`);
+            } else {
+                await api.post('/cce/works', formData);
+                toast.success('CCE Work created successfully');
+                navigate('/cce/works');
+            }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to create CCE Work');
+            toast.error(error.response?.data?.message || `Failed to ${editId ? 'update' : 'create'} CCE Work`);
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    if (isLoadingEdit) {
+        return (
+            <AppLayout title="Edit CCE Work" showBack={false}>
+                <div className="flex items-center justify-center h-[50vh]">
+                    <div className="w-8 h-8 border-4 border-[#00a67e]/20 border-t-[#00a67e] rounded-full animate-spin" />
+                </div>
+            </AppLayout>
+        );
+    }
+
     return (
-        <AppLayout title="Create CCE Work" showBack={false}>
+        <AppLayout title={editId ? "Edit CCE Work" : "Create CCE Work"} showBack={false}>
             <div className="p-4 md:p-8 max-w-[1200px] mx-auto space-y-8 bg-slate-50/50">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -110,13 +154,13 @@ export default function CreateCCEWorkPage() {
                             <span className="text-slate-400 flex items-center gap-1">
                                 &larr; ASSESSMENTS <span className="text-slate-300">/</span>
                             </span>
-                            <span className="text-[#00a67e]">NEW ENTRY</span>
+                            <span className="text-[#00a67e]">{editId ? 'EDIT ENTRY' : 'NEW ENTRY'}</span>
                         </button>
                         <h1 className="text-3xl md:text-[32px] font-black text-slate-800 tracking-tight leading-none mb-3">
-                            Create New CCE Work
+                            {editId ? 'Edit CCE Work' : 'Create New CCE Work'}
                         </h1>
                         <p className="text-sm font-medium text-slate-500 max-w-xl leading-relaxed">
-                            Define a new Continuous and Comprehensive Evaluation task. Fill in the curriculum details, schedules, and instructional goals below.
+                            {editId ? 'Update the details for this Continuous and Comprehensive Evaluation task.' : 'Define a new Continuous and Comprehensive Evaluation task. Fill in the curriculum details, schedules, and instructional goals below.'}
                         </p>
                     </div>
 
@@ -126,14 +170,14 @@ export default function CreateCCEWorkPage() {
                             onClick={() => navigate(-1)}
                             className="h-[60px] px-6 rounded-full border border-slate-200 bg-white text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors shadow-sm leading-tight text-center"
                         >
-                            Discard<br />Draft
+                            Cancel<br />Changes
                         </button>
                         <button
                             onClick={handleSubmit}
                             disabled={isSubmitting}
                             className="h-[60px] px-6 rounded-full bg-[#00a67e] hover:bg-[#008f6c] text-white text-[13px] font-black transition-colors shadow-sm leading-tight text-center disabled:opacity-50"
                         >
-                            {isSubmitting ? 'Creating...' : <>Create<br />CCE Work</>}
+                            {isSubmitting ? 'Saving...' : <>{editId ? 'Save' : 'Create'}<br />CCE Work</>}
                         </button>
                     </div>
                 </div>
