@@ -544,301 +544,199 @@ export default function SubjectsPage() {
                     )}
                 </div>
 
-                {/* ── Create / Edit Subject Dialog ── */}
+                {/* Create Dialog */}
                 <Dialog open={showDialog} onOpenChange={setShowDialog}>
-                    <DialogContent
-                        className="
-                            w-full max-w-[95vw] sm:max-w-[720px]
-                            p-0 gap-0
-                            flex flex-col
-                            max-h-[92vh] sm:max-h-[88vh]
-                            overflow-hidden
-                            rounded-2xl
-                        "
-                    >
-                        {/* ── Modal Header ── */}
-                        <div className="px-6 py-4 border-b border-slate-100 shrink-0">
-                            <DialogTitle className="text-[15px] font-bold text-slate-900 leading-none">
-                                {editingId ? 'Edit Subject' : 'New Subject'}
-                            </DialogTitle>
-                            <p className="text-[12px] text-slate-500 mt-0.5">
-                                {editingId ? 'Update subject details and assignment.' : 'Define a new subject, assign faculty and students.'}
-                            </p>
-                        </div>
+                    <DialogContent className="max-w-md w-full max-h-[90vh] flex flex-col">
+                        <DialogHeader>
+                            <DialogTitle>{editingId ? 'Edit Subject' : 'Create Subject'}</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-3 overflow-y-auto flex-1 pr-1">
+                            <div className="space-y-2">
+                                <Label>Subject Name</Label>
+                                <Input
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    placeholder="e.g., Mathematics"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Subject Code</Label>
+                                <Input
+                                    value={formData.code}
+                                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                                    placeholder="e.g., MATH"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Class</Label>
+                                <Select
+                                    value={formData.class_id}
+                                    onValueChange={(value) => {
+                                        setFormData({ ...formData, class_id: value });
+                                        setSelectedStudentIds([]);
+                                        fetchClassStudents(value);
+                                    }}
+                                    required
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select class" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {classes.map((cls) => (
+                                            <SelectItem key={cls.id} value={cls.id.toString()}>
+                                                {cls.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Teacher</Label>
+                                <Select
+                                    value={formData.teacher_id}
+                                    onValueChange={(value) => setFormData({ ...formData, teacher_id: value })}
+                                    required
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select teacher" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {teachers.map((teacher) => (
+                                            <SelectItem key={teacher.id} value={teacher.id.toString()}>
+                                                {teacher.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Final Max Marks</Label>
+                                <Input
+                                    type="number"
+                                    value={formData.final_max_marks}
+                                    onChange={(e) => setFormData({ ...formData, final_max_marks: e.target.value })}
+                                    min="1"
+                                    max="100"
+                                    required
+                                />
+                            </div>
 
-                        {/* ── Scrollable Form Body ── */}
-                        <form
-                            id="subject-form"
-                            onSubmit={handleSubmit}
-                            className="flex-1 overflow-y-auto overscroll-contain"
-                        >
-                            <div className="px-6 py-5 space-y-7">
+                            {/* Assignment Scope */}
+                            <div className="space-y-2">
+                                <Label>Assignment Scope</Label>
+                                <Select
+                                    value={formData.assignment_scope}
+                                    onValueChange={(v) =>
+                                        setFormData({ ...formData, assignment_scope: v as 'full_class' | 'selected_students' })
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="full_class">Full Class (all students)</SelectItem>
+                                        <SelectItem value="selected_students">Selected Students only</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                                {/* ── Section: Basic Information ── */}
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
-                                        Basic Information
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[12px] font-semibold text-slate-600">
-                                                Subject Name <span className="text-rose-500">*</span>
-                                            </Label>
-                                            <Input
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                placeholder="e.g., Mathematics"
-                                                required
-                                                className="h-9 text-[13px] rounded-lg border-slate-200 bg-slate-50 focus:bg-white transition-colors"
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[12px] font-semibold text-slate-600">
-                                                Subject Code <span className="text-rose-500">*</span>
-                                            </Label>
-                                            <Input
-                                                value={formData.code}
-                                                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                                                placeholder="e.g., MTH101"
-                                                required
-                                                className="h-9 text-[13px] rounded-lg border-slate-200 bg-slate-50 focus:bg-white transition-colors"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* ── Section: Assignment ── */}
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
-                                        Assignment
-                                    </p>
-                                    <div className="space-y-3">
-
-                                        {/* Class */}
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[12px] font-semibold text-slate-600">
-                                                Class <span className="text-rose-500">*</span>
-                                            </Label>
-                                            <Select
-                                                value={formData.class_id}
-                                                onValueChange={(value) => {
-                                                    setFormData({ ...formData, class_id: value });
-                                                    setSelectedStudentIds([]);
-                                                    fetchClassStudents(value);
-                                                }}
-                                            >
-                                                <SelectTrigger className="h-9 text-[13px] rounded-lg border-slate-200 bg-slate-50">
-                                                    <SelectValue placeholder="Select a class…" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper" side="bottom" className="max-h-60 overflow-y-auto">
-                                                    {classes.map((cls) => (
-                                                        <SelectItem key={cls.id} value={cls.id.toString()} className="text-[13px]">
-                                                            {cls.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        {/* Teacher — native searchable select for performance */}
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[12px] font-semibold text-slate-600">
-                                                Teacher <span className="text-rose-500">*</span>
-                                            </Label>
-                                            <div className="relative">
-                                                <select
-                                                    required
-                                                    value={formData.teacher_id}
-                                                    onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })}
-                                                    className="
-                                                        w-full h-9 px-3 pr-8
-                                                        text-[13px] font-medium text-slate-700
-                                                        bg-slate-50 border border-slate-200 rounded-lg
-                                                        appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white
-                                                        transition-colors
-                                                    "
+                            {/* Student Picker — visible only when selected_students */}
+                            {formData.assignment_scope === 'selected_students' && (
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2">
+                                        <Users className="w-4 h-4" />
+                                        Select Students
+                                        {selectedStudentIds.length > 0 && (
+                                            <span className="ml-auto text-xs font-bold text-[#008f6c]">{selectedStudentIds.length} selected</span>
+                                        )}
+                                    </Label>
+                                    {!formData.class_id ? (
+                                        <p className="text-xs text-muted-foreground">Pick a class first.</p>
+                                    ) : loadingStudents ? (
+                                        <p className="text-xs text-muted-foreground animate-pulse">Loading students...</p>
+                                    ) : (
+                                        <div className="border rounded-lg overflow-hidden">
+                                            {/* Search + Select All bar */}
+                                            <div className="flex items-center gap-2 px-3 py-2 border-b bg-slate-50">
+                                                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search name or roll no..."
+                                                    value={studentSearch}
+                                                    onChange={e => setStudentSearch(e.target.value)}
+                                                    className="flex-1 text-[12px] bg-transparent outline-none placeholder:text-slate-400"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const filtered = classStudents.filter(s =>
+                                                            !studentSearch ||
+                                                            s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                                                            s.username.toLowerCase().includes(studentSearch.toLowerCase())
+                                                        );
+                                                        const filteredIds = filtered.map(s => s.id);
+                                                        const allSelected = filteredIds.every(id => selectedStudentIds.includes(id));
+                                                        if (allSelected) {
+                                                            setSelectedStudentIds(prev => prev.filter(id => !filteredIds.includes(id)));
+                                                        } else {
+                                                            setSelectedStudentIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+                                                        }
+                                                    }}
+                                                    className="text-[10px] font-black text-[#008f6c] uppercase tracking-wide shrink-0"
                                                 >
-                                                    <option value="">Select a teacher…</option>
-                                                    {teachers.map((t) => (
-                                                        <option key={t.id} value={t.id.toString()}>{t.name}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                                                    All
+                                                </button>
                                             </div>
-                                        </div>
-
-                                        {/* Scope toggle */}
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[12px] font-semibold text-slate-600">Assignment Scope</Label>
-                                            <div className="flex gap-2">
-                                                {(['full_class', 'selected_students'] as const).map((scope) => (
-                                                    <button
-                                                        key={scope}
-                                                        type="button"
-                                                        onClick={() => setFormData({ ...formData, assignment_scope: scope })}
-                                                        className={`
-                                                            flex-1 py-2 px-3 rounded-lg border text-[12px] font-semibold transition-all
-                                                            ${formData.assignment_scope === scope
-                                                                ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
-                                                                : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
-                                                            }
-                                                        `}
-                                                    >
-                                                        {scope === 'full_class' ? '⊞ Full Class' : '☑ Selected Students'}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Progressive: Student picker */}
-                                        {formData.assignment_scope === 'selected_students' && (
-                                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                <Label className="text-[12px] font-semibold text-slate-600 flex items-center gap-1.5">
-                                                    <Users className="w-3.5 h-3.5" />
-                                                    Students
-                                                    {selectedStudentIds.length > 0 && (
-                                                        <span className="ml-auto text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                                                            {selectedStudentIds.length} selected
-                                                        </span>
-                                                    )}
-                                                </Label>
-                                                {!formData.class_id ? (
-                                                    <p className="text-[12px] text-slate-400 bg-slate-50 rounded-lg px-3 py-2.5 border border-dashed border-slate-200">
-                                                        ↑ Select a class first to load students.
-                                                    </p>
-                                                ) : loadingStudents ? (
-                                                    <p className="text-[12px] text-slate-400 animate-pulse px-3 py-2">Loading students…</p>
-                                                ) : (
-                                                    <div className="border border-slate-200 rounded-lg overflow-hidden">
-                                                        {/* Search + All toggle */}
-                                                        <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-slate-50/80">
-                                                            <Search className="w-3 h-3 text-slate-400 shrink-0" />
+                                            {/* Student list */}
+                                            <div className="max-h-48 overflow-y-auto divide-y">
+                                                {classStudents
+                                                    .filter(s =>
+                                                        !studentSearch ||
+                                                        s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                                                        s.username.toLowerCase().includes(studentSearch.toLowerCase())
+                                                    )
+                                                    .map(s => (
+                                                        <label
+                                                            key={s.id}
+                                                            className={`flex items-center gap-3 px-3 py-2 cursor-pointer select-none transition-colors ${
+                                                                selectedStudentIds.includes(s.id) ? 'bg-emerald-50' : 'hover:bg-slate-50'
+                                                            }`}
+                                                        >
                                                             <input
-                                                                type="text"
-                                                                placeholder="Search by name or roll no…"
-                                                                value={studentSearch}
-                                                                onChange={e => setStudentSearch(e.target.value)}
-                                                                className="flex-1 text-[12px] bg-transparent outline-none placeholder:text-slate-400 text-slate-700"
+                                                                type="checkbox"
+                                                                className="accent-[#008f6c] w-4 h-4 shrink-0"
+                                                                checked={selectedStudentIds.includes(s.id)}
+                                                                onChange={() =>
+                                                                    setSelectedStudentIds(prev =>
+                                                                        prev.includes(s.id)
+                                                                            ? prev.filter(id => id !== s.id)
+                                                                            : [...prev, s.id]
+                                                                    )
+                                                                }
                                                             />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    const filtered = classStudents.filter(s =>
-                                                                        !studentSearch ||
-                                                                        s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-                                                                        s.username.toLowerCase().includes(studentSearch.toLowerCase())
-                                                                    );
-                                                                    const filteredIds = filtered.map(s => s.id);
-                                                                    const allSelected = filteredIds.every(id => selectedStudentIds.includes(id));
-                                                                    if (allSelected) {
-                                                                        setSelectedStudentIds(prev => prev.filter(id => !filteredIds.includes(id)));
-                                                                    } else {
-                                                                        setSelectedStudentIds(prev => Array.from(new Set([...prev, ...filteredIds])));
-                                                                    }
-                                                                }}
-                                                                className="text-[10px] font-black text-emerald-700 uppercase tracking-wide shrink-0 hover:text-emerald-800 transition-colors"
-                                                            >
-                                                                {(() => {
-                                                                    const filtered = classStudents.filter(s =>
-                                                                        !studentSearch ||
-                                                                        s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-                                                                        s.username.toLowerCase().includes(studentSearch.toLowerCase())
-                                                                    );
-                                                                    return filtered.every(s => selectedStudentIds.includes(s.id)) ? 'Deselect' : 'Select All';
-                                                                })()}
-                                                            </button>
-                                                        </div>
-                                                        {/* List */}
-                                                        <div className="max-h-44 overflow-y-auto divide-y divide-slate-50">
-                                                            {classStudents
-                                                                .filter(s =>
-                                                                    !studentSearch ||
-                                                                    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-                                                                    s.username.toLowerCase().includes(studentSearch.toLowerCase())
-                                                                )
-                                                                .map(s => {
-                                                                    const checked = selectedStudentIds.includes(s.id);
-                                                                    return (
-                                                                        <label
-                                                                            key={s.id}
-                                                                            className={`flex items-center gap-3 px-3 py-2 cursor-pointer select-none transition-colors ${checked ? 'bg-emerald-50/60' : 'hover:bg-slate-50'}`}
-                                                                        >
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="accent-[#008f6c] w-3.5 h-3.5 shrink-0 rounded"
-                                                                                checked={checked}
-                                                                                onChange={() =>
-                                                                                    setSelectedStudentIds(prev =>
-                                                                                        prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id]
-                                                                                    )
-                                                                                }
-                                                                            />
-                                                                            <span className="text-[12px] font-medium text-slate-700 truncate flex-1">{s.name}</span>
-                                                                            <span className="text-[11px] text-slate-400 font-mono shrink-0">#{s.username}</span>
-                                                                        </label>
-                                                                    );
-                                                                })
-                                                            }
-                                                            {classStudents.length === 0 && (
-                                                                <p className="text-center text-[12px] text-slate-400 py-5">No students in this class.</p>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                            <span className="text-[13px] font-medium text-slate-700 truncate flex-1">{s.name}</span>
+                                                            <span className="text-[11px] text-slate-400">#{s.username}</span>
+                                                        </label>
+                                                    ))
+                                                }
+                                                {classStudents.length === 0 && (
+                                                    <p className="text-center text-xs text-muted-foreground py-4">No students in this class.</p>
                                                 )}
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* ── Section: Evaluation ── */}
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
-                                        Evaluation
-                                    </p>
-                                    <div className="space-y-1.5 max-w-[160px]">
-                                        <Label className="text-[12px] font-semibold text-slate-600">
-                                            Final Max Marks <span className="text-rose-500">*</span>
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                type="number"
-                                                value={formData.final_max_marks}
-                                                onChange={(e) => setFormData({ ...formData, final_max_marks: e.target.value })}
-                                                min="1"
-                                                max="100"
-                                                required
-                                                className="h-9 text-[13px] rounded-lg border-slate-200 bg-slate-50 focus:bg-white pr-10 transition-colors"
-                                            />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 pointer-events-none">
-                                                / 100
-                                            </span>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
+                            )}
 
-                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit">{editingId ? 'Update Subject' : 'Create Subject'}</Button>
+                            </DialogFooter>
                         </form>
-
-                        {/* ── Sticky Footer ── */}
-                        <div className="shrink-0 px-6 py-3.5 border-t border-slate-100 bg-white flex items-center justify-end gap-2">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowDialog(false)}
-                                className="h-8 px-4 text-[13px] font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg"
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                form="subject-form"
-                                size="sm"
-                                className="h-8 px-5 text-[13px] font-bold bg-[#008f6c] hover:bg-[#007a5c] text-white rounded-lg shadow-sm"
-                            >
-                                {editingId ? 'Save Changes' : 'Create Subject'}
-                            </Button>
-                        </div>
                     </DialogContent>
                 </Dialog>
 
