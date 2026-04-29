@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import {
     BookOpen,
     Plus,
@@ -79,6 +80,17 @@ interface ImportRow {
 
 export default function SubjectsPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    // Access control: principal/manager always; teachers only with manage_cce
+    const isPrincipalOrManager = user?.role === 'principal' || user?.role === 'manager';
+    const canManage = isPrincipalOrManager ||
+        (user?.role === 'teacher' && user?.permissions?.some((p: any) => p.name === 'manage_cce'));
+
+    // Read-only teachers (no manage_cce) should not be on this page at all
+    // They can only reach it via direct URL — show a gate
+    const isReadOnly = user?.role === 'teacher' && !canManage;
+
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [classes, setClasses] = useState<ClassRoom[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -345,6 +357,30 @@ export default function SubjectsPage() {
         return acc;
     }, {} as Record<string, Subject[]>);
 
+    // Unauthorized teachers — show access denied
+    if (isReadOnly) {
+        return (
+            <AppLayout title="Subjects" showBack>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                        <BookOpen className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-800 mb-2">Access Restricted</h2>
+                    <p className="text-sm text-slate-500 max-w-xs">
+                        You don't have permission to manage subjects.
+                        Contact your principal to request <strong>manage_cce</strong> access.
+                    </p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="mt-6 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </AppLayout>
+        );
+    }
+
     return (
         <AppLayout title="Subjects" showBack>
             <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-8 pb-24">
@@ -354,6 +390,7 @@ export default function SubjectsPage() {
                         <h2 className="text-xl font-bold text-foreground">Subjects Directory</h2>
                         <p className="text-sm text-muted-foreground">Manage institutional syllabus structures</p>
                     </div>
+                    {canManage && (
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <Button
                             variant="outline"
@@ -383,6 +420,7 @@ export default function SubjectsPage() {
                             Create Subject
                         </Button>
                     </div>
+                    )}
                 </div>
 
                 {/* Grouped Subjects List */}
@@ -478,6 +516,7 @@ export default function SubjectsPage() {
                                                         </td>
                                                         <td className="py-4 px-4 text-right">
                                                             <div className="flex items-center justify-end gap-1">
+                                                                {canManage && (<>
                                                                 <button 
                                                                     onClick={() => handleEdit(subject)} 
                                                                     className="w-8 h-8 rounded-full hover:bg-blue-50 inline-flex items-center justify-center transition-colors shadow-sm bg-white"
@@ -490,6 +529,7 @@ export default function SubjectsPage() {
                                                                 >
                                                                     <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                                                                 </button>
+                                                                </>)}
                                                             </div>
                                                         </td>
                                                     </tr>

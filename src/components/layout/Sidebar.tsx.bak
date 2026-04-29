@@ -125,10 +125,6 @@ export function Sidebar() {
             extendedItems.push({ icon: Briefcase, label: 'Staff Management', path: '/teachers' });
         }
 
-        if (hasPermission('manage_cce')) {
-            extendedItems.push({ icon: BookOpen, label: 'Subjects', path: '/subjects' });
-        }
-
         if (hasPermission('manage_reports')) {
             extendedItems.push({ icon: FileText, label: 'Reports', path: '/reports' });
         }
