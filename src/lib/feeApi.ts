@@ -121,6 +121,12 @@ export const toggleReceipt = async (paymentId: number) => {
     return response.data;
 };
 
+// Delete payment
+export const deletePayment = async (paymentId: number) => {
+    const response = await api.delete(`/fees/payments/${paymentId}`);
+    return response.data;
+};
+
 // Set class fee for year
 export const setClassFee = async (data: {
     class_id: number;

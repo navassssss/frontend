@@ -27,6 +27,7 @@ import {
     FileSpreadsheet,
     Clock,
     ArrowLeft,
+    Trash2,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 import { cn } from '@/lib/utils';
@@ -753,6 +754,28 @@ const DailyCollectionReportSection: React.FC = () => {
         }
     };
 
+    const handleDeletePayment = async (paymentId: number) => {
+        if (!window.confirm('Are you sure you want to delete this payment? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            await feeApi.deletePayment(paymentId);
+            toast.success('Payment deleted successfully');
+            
+            if (report) {
+                const deletedPayment = report.payments.find(p => p.paymentId === paymentId);
+                setReport({
+                    ...report,
+                    totalAmount: report.totalAmount - (deletedPayment ? deletedPayment.amount : 0),
+                    payments: report.payments.filter(p => p.paymentId !== paymentId)
+                });
+            }
+        } catch (error) {
+            toast.error('Failed to delete payment');
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -873,20 +896,20 @@ const DailyCollectionReportSection: React.FC = () => {
                             {/* Desktop Table View - Hidden on Mobile */}
                             <div className="hidden md:block border rounded-lg overflow-x-auto">
                                 {/* Table Header */}
-                                <div className="grid grid-cols-[80px_1fr_80px_2fr_100px_80px] gap-4 p-3 bg-muted/30 border-b font-medium text-sm">
+                                <div className="grid grid-cols-[80px_1fr_80px_2fr_100px_120px] gap-4 p-3 bg-muted/30 border-b font-medium text-sm">
                                     <div>Time</div>
                                     <div>Student</div>
                                     <div>Class</div>
                                     <div>Allocations</div>
                                     <div className="text-right">Amount</div>
-                                    <div className="text-center">Receipt</div>
+                                    <div className="text-center">Actions</div>
                                 </div>
 
                                 {/* Table Body */}
                                 {report.payments.map((payment) => (
                                     <div 
                                         key={payment.paymentId}
-                                        className="grid grid-cols-[80px_1fr_80px_2fr_100px_80px] gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 items-center transition-colors bg-background"
+                                        className="grid grid-cols-[80px_1fr_80px_2fr_100px_120px] gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 items-center transition-colors bg-background"
                                     >
                                         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                             <Clock className="w-3.5 h-3.5" />
@@ -919,17 +942,27 @@ const DailyCollectionReportSection: React.FC = () => {
                                         <div className="text-right font-bold text-green-700 dark:text-green-400">
                                             {formatCurrency(payment.amount)}
                                         </div>
-                                        <div className="flex justify-center">
+                                        <div className="flex justify-center gap-1">
                                             <Button
                                                 variant="ghost"
-                                                size="sm"
+                                                size="icon"
+                                                onClick={() => handleDeletePayment(payment.paymentId)}
+                                                className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                title="Delete Payment"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 onClick={() => handleToggleReceipt(payment.paymentId)}
                                                 className={cn(
-                                                    "h-8 px-2",
+                                                    "h-8 w-8",
                                                     payment.receiptIssued 
                                                         ? 'text-green-700 hover:text-green-800 hover:bg-green-50' 
                                                         : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
                                                 )}
+                                                title={payment.receiptIssued ? "Receipt Issued" : "Issue Receipt"}
                                             >
                                                 {payment.receiptIssued ? (
                                                     <CheckCircle className="w-4 h-4" />
@@ -942,7 +975,7 @@ const DailyCollectionReportSection: React.FC = () => {
                                 ))}
 
                                 {/* Total Row */}
-                                <div className="grid grid-cols-[80px_1fr_80px_2fr_100px_80px] gap-4 p-3 border-t-2 bg-muted/20 font-semibold">
+                                <div className="grid grid-cols-[80px_1fr_80px_2fr_100px_120px] gap-4 p-3 border-t-2 bg-muted/20 font-semibold">
                                     <div className="col-span-4 text-right">Total:</div>
                                     <div className="text-right text-green-700 dark:text-green-400">
                                         {formatCurrency(calculateTotal())}
@@ -980,30 +1013,41 @@ const DailyCollectionReportSection: React.FC = () => {
                                                         <p className="text-sm">{payment.className}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs text-muted-foreground">Receipt</p>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => handleToggleReceipt(payment.paymentId)}
-                                                            className={cn(
-                                                                "mt-1 h-8 text-xs",
-                                                                payment.receiptIssued 
-                                                                    ? 'text-green-700 border-green-200 hover:bg-green-50' 
-                                                                    : 'text-gray-600 hover:bg-gray-50'
-                                                            )}
-                                                        >
-                                                            {payment.receiptIssued ? (
-                                                                <>
-                                                                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
-                                                                    Issued
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Receipt className="w-3.5 h-3.5 mr-1.5" />
-                                                                    Issue
-                                                                </>
-                                                            )}
-                                                        </Button>
+                                                        <p className="text-xs text-muted-foreground">Actions</p>
+                                                        <div className="flex gap-2 mt-1">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleDeletePayment(payment.paymentId)}
+                                                                className="h-8 px-2 text-xs text-red-500 border-red-200 hover:bg-red-50"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                                                Delete
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleToggleReceipt(payment.paymentId)}
+                                                                className={cn(
+                                                                    "h-8 px-2 text-xs flex-1",
+                                                                    payment.receiptIssued 
+                                                                        ? 'text-green-700 border-green-200 hover:bg-green-50' 
+                                                                        : 'text-gray-600 hover:bg-gray-50'
+                                                                )}
+                                                            >
+                                                                {payment.receiptIssued ? (
+                                                                    <>
+                                                                        <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                                                                        Issued
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Receipt className="w-3.5 h-3.5 mr-1" />
+                                                                        Issue
+                                                                    </>
+                                                                )}
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 </div>
 
