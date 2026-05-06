@@ -99,7 +99,7 @@ export default function DutyDetailPage() {
 
   return (
     <AppLayout title="Duty Details">
-      <div className="p-4 md:p-6 max-w-5xl mx-auto pb-28 space-y-6">
+      <div className="p-4 md:p-6 pb-28 space-y-6">
 
         {/* ── Breadcrumb + Back ── */}
         <div className="space-y-2">

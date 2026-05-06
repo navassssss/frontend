@@ -106,7 +106,7 @@ export default function StudentDetailPage() {
 
     return (
         <AppLayout title="Student Profile">
-            <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-5 pb-24 animate-fade-in min-h-screen">
+            <div className="p-4 md:p-6 space-y-5 pb-24 animate-fade-in min-h-screen">
                 
                 {/* Header Section */}
                 <div className="flex items-center gap-3 mb-4">

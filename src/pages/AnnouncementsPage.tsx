@@ -114,7 +114,7 @@ export default function AnnouncementsPage() {
 
     return (
         <AppLayout title={pageTitle}>
-            <div className="max-w-5xl mx-auto px-4 py-6 pb-24 space-y-8">
+            <div className="px-4 py-6 pb-24 space-y-8">
 
                 {/* ── Page Header ── */}
                 <div className="flex items-start justify-between gap-4">
