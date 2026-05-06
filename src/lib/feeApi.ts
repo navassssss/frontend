@@ -183,6 +183,12 @@ export const getDailyReport = async (date: string) => {
     return response.data;
 };
 
+// Get monthly student report
+export const getMonthlyReport = async (params: { month: number; year: number }) => {
+    const response = await api.get('/fees/reports/monthly', { params });
+    return response.data;
+};
+
 // Get available classes
 export const getClasses = async () => {
     const response = await api.get('/fees/classes');

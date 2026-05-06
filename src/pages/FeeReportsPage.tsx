@@ -382,14 +382,19 @@ const FeeReportsPage: React.FC = () => {
                     </Button>
                 </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="summary">Summary</TabsTrigger>
+                        <TabsTrigger value="monthly">Monthly</TabsTrigger>
                         <TabsTrigger value="class">Class-wise</TabsTrigger>
                         <TabsTrigger value="daily">Daily</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="summary" className="mt-4">
                         <OverallSummaryReport />
+                    </TabsContent>
+
+                    <TabsContent value="monthly" className="mt-4">
+                        <MonthlyReportSection />
                     </TabsContent>
 
                     <TabsContent value="class" className="mt-4">
@@ -1137,6 +1142,205 @@ const DailyCollectionReportSection: React.FC = () => {
             )
             }
         </div >
+    );
+};
+
+// ==================== Monthly Summary Report ====================
+interface MonthlyStudentReport {
+    year: number;
+    month: number;
+    total_expected: number;
+    total_paid: number;
+    total_pending: number;
+    students: {
+        student_id: number;
+        roll_number: string;
+        student_name: string;
+        class_name: string;
+        expected: number;
+        paid: number;
+        balance: number;
+        status: 'paid' | 'partial' | 'unpaid' | 'overpaid';
+    }[];
+}
+
+const MonthlyReportSection: React.FC = () => {
+    const [report, setReport] = useState<MonthlyStudentReport | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedMonth, setSelectedMonth] = useState<string>(new Date().getMonth() + 1 + '');
+    const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear() + '');
+
+    useEffect(() => {
+        loadReport();
+    }, [selectedMonth, selectedYear]);
+
+    const loadReport = async () => {
+        setLoading(true);
+        try {
+            const data = await feeApi.getMonthlyReport({
+                month: parseInt(selectedMonth),
+                year: parseInt(selectedYear)
+            });
+            setReport(data);
+        } catch (error) {
+            console.error('Error loading monthly report:', error);
+            toast.error('Failed to load monthly report');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0,
+        }).format(amount);
+    };
+
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+    const months = [
+        { value: '1', label: 'January' },
+        { value: '2', label: 'February' },
+        { value: '3', label: 'March' },
+        { value: '4', label: 'April' },
+        { value: '5', label: 'May' },
+        { value: '6', label: 'June' },
+        { value: '7', label: 'July' },
+        { value: '8', label: 'August' },
+        { value: '9', label: 'September' },
+        { value: '10', label: 'October' },
+        { value: '11', label: 'November' },
+        { value: '12', label: 'December' },
+    ];
+
+    if (loading && !report) {
+        return (
+            <div className="space-y-4 animate-pulse">
+                <Card><CardContent className="p-6"><div className="h-24 bg-muted rounded" /></CardContent></Card>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium">Monthly Allocation Report</h3>
+                <div className="flex gap-2">
+                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                        <SelectTrigger className="w-[140px] bg-white">
+                            <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {months.map(m => (
+                                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger className="w-[100px] bg-white">
+                            <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {years.map(y => (
+                                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {report && (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card>
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-muted-foreground">Expected (This Month)</p>
+                                        <p className="text-2xl font-bold">{formatCurrency(report.total_expected)}</p>
+                                    </div>
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <FileSpreadsheet className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-muted-foreground">Collected (For This Month)</p>
+                                        <p className="text-2xl font-bold text-green-600">{formatCurrency(report.total_paid)}</p>
+                                    </div>
+                                    <div className="p-2 bg-green-100 rounded-lg">
+                                        <IndianRupee className="w-5 h-5 text-green-600" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-muted-foreground">Pending (This Month)</p>
+                                        <p className="text-2xl font-bold text-orange-600">{formatCurrency(report.total_pending)}</p>
+                                    </div>
+                                    <div className="p-2 bg-orange-100 rounded-lg">
+                                        <TrendingDown className="w-5 h-5 text-orange-600" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Student Allocations for {months.find(m => m.value === selectedMonth)?.label} {selectedYear}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto border rounded-lg">
+                                <div className="grid grid-cols-[80px_1fr_120px_100px_100px_100px_100px] gap-4 p-3 bg-muted/30 border-b font-medium text-sm min-w-[700px]">
+                                    <div>Roll No</div>
+                                    <div>Student</div>
+                                    <div>Class</div>
+                                    <div className="text-right">Expected</div>
+                                    <div className="text-right">Allocated</div>
+                                    <div className="text-right">Balance</div>
+                                    <div className="text-center">Status</div>
+                                </div>
+                                <div className="divide-y min-w-[700px]">
+                                    {report.students.length === 0 ? (
+                                        <div className="p-8 text-center text-muted-foreground">No students found with allocations or expectations for this month.</div>
+                                    ) : (
+                                        report.students.map((s, idx) => (
+                                            <div key={idx} className="grid grid-cols-[80px_1fr_120px_100px_100px_100px_100px] gap-4 p-3 items-center hover:bg-muted/10 transition-colors text-sm bg-background">
+                                                <div className="text-muted-foreground">{s.roll_number}</div>
+                                                <div className="font-medium">{s.student_name}</div>
+                                                <div className="text-muted-foreground">{s.class_name}</div>
+                                                <div className="text-right">{formatCurrency(s.expected)}</div>
+                                                <div className="text-right font-medium text-green-600">{formatCurrency(s.paid)}</div>
+                                                <div className="text-right text-orange-600">{s.balance > 0 ? formatCurrency(s.balance) : '-'}</div>
+                                                <div className="text-center">
+                                                    {s.status === 'paid' || s.status === 'overpaid' ? (
+                                                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Paid</Badge>
+                                                    ) : s.status === 'partial' ? (
+                                                        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200">Partial</Badge>
+                                                    ) : (
+                                                        <Badge className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200">Unpaid</Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </>
+            )}
+        </div>
     );
 };
 
