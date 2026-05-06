@@ -50,7 +50,7 @@ import {
 export default function CCEMarksPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+    const isPrincipal = user?.role === 'principal';
 
     const [subjects, setSubjects] = useState(mockSubjects);
     const [selectedSubject, setSelectedSubject] = useState<string>('');

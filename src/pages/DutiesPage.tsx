@@ -80,7 +80,7 @@ export default function DutiesPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('mine');
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+  const isPrincipal = user?.role === 'principal';
 
   useEffect(() => {
     api.get('/duties')

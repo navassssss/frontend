@@ -67,7 +67,7 @@ export default function CreateCCEWorkPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoadingEdit, setIsLoadingEdit] = useState(!!editId);
     const [showAllSubjects, setShowAllSubjects] = useState(false);
-    const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+    const isPrincipal = user?.role === 'principal';
 
     useEffect(() => {
         loadSubjects();

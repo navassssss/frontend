@@ -69,7 +69,7 @@ const getTypeStyle = (type: string) => {
 export default function CCEWorksPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+    const isPrincipal = user?.role === 'principal';
 
     const [subjectsSummary, setSubjectsSummary] = useState<SubjectSummary[]>([]);
     const [works, setWorks] = useState<CCEWork[]>([]);

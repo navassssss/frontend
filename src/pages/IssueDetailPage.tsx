@@ -242,7 +242,7 @@ export default function IssueDetailPage() {
         )}
 
         {/* Actions */}
-        {(user?.role === "principal" || user?.role === "manager") && (
+        {(user?.role === "principal") && (
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={handleForward}>
               <Forward className="w-4 h-4 mr-2" />

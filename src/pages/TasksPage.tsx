@@ -55,7 +55,7 @@ export default function TasksPage() {
 
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+  const isPrincipal = user?.role === 'principal';
 
   useEffect(() => {
     api.get('/tasks')

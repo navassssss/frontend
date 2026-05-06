@@ -493,7 +493,7 @@ export default function OutpassesPage() {
     const [filterDate, setFilterDate] = useState('');
     const [searchStudent, setSearchStudent] = useState('');
 
-    const canCreate = user?.role === 'principal' || user?.role === 'manager'
+    const canCreate = user?.role === 'principal'
         || (user?.role === 'teacher' && user?.is_vice_principal)
         || user?.permissions?.some((p: any) => p.name === 'manage_outpasses');
 

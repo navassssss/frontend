@@ -39,7 +39,7 @@ export default function DutyDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+  const isPrincipal = user?.role === 'principal';
 
   const [duty, setDuty] = useState<Duty | null>(null);
   const [reports, setReports] = useState<any[]>([]);

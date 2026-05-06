@@ -31,14 +31,13 @@ const principalNavItems: NavItem[] = [
 const managerNavItems: NavItem[] = [
   { icon: Home, label: 'Home', path: '/dashboard' },
   { icon: IndianRupee, label: 'Donations', path: '/fees' },
-  { icon: ClipboardList, label: 'Duties', path: '/duties' },
-  { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
+  { icon: AlertCircle, label: 'Issues', path: '/issues', showBadge: true },
   { icon: User, label: 'Profile', path: '/profile' },
 ];
 
 export function BottomNav() {
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal' || user?.role === 'manager' || (user?.role === 'teacher' && user?.is_vice_principal);
+  const isPrincipal = user?.role === 'principal' || (user?.role === 'teacher' && user?.is_vice_principal);
   const isManager = user?.role === 'manager';
   const [openIssuesCount, setOpenIssuesCount] = useState(0);
 

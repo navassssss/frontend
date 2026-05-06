@@ -64,6 +64,11 @@ const principalQuickActions = [
   { title: 'Review Reports', description: 'Pending reviews', icon: FileText, path: '/reports', color: 'text-violet-500', bg: 'bg-violet-50' },
 ];
 
+const managerQuickActions = [
+  { title: 'Donations', description: 'Manage fees', icon: TrendingUp, path: '/fees', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { title: 'All Issues', description: 'Open issues', icon: AlertCircle, path: '/issues', color: 'text-red-500', bg: 'bg-red-50' },
+];
+
 const getIcon = (iconName: string) => {
   const icons: any = { Users, CheckSquare, AlertTriangle, Clock, ClipboardList, TrendingUp, Calendar, GraduationCap, FileText, Trophy, BookOpen };
   return icons[iconName] || TrendingUp;
@@ -72,7 +77,8 @@ const getIcon = (iconName: string) => {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+  const isPrincipal = user?.role === 'principal';
+  const isManager = false;
 
   const [stats, setStats] = useState<any[]>([]);
   const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
@@ -87,7 +93,7 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  let quickActions = isPrincipal ? principalQuickActions : teacherQuickActions;
+  let quickActions = isPrincipal ? principalQuickActions : isManager ? managerQuickActions : teacherQuickActions;
 
   if (!isPrincipal && user?.permissions?.some(p => p.name === 'review_achievements')) {
     quickActions = [

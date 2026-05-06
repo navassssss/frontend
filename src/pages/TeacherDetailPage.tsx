@@ -14,7 +14,7 @@ export default function TeacherDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
-  const isPrincipal = user?.role === "principal" || user?.role === "manager";
+  const isPrincipal = user?.role === "principal";
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
 
   const [teacher, setTeacher] = useState<any>(null);

@@ -38,7 +38,7 @@ const toTitleCase = (str: string) => {
 
 export default function ReportsPage() {
   const { user } = useAuth();
-  const isPrincipal = user?.role === 'principal' || user?.role === 'manager';
+  const isPrincipal = user?.role === 'principal';
   const [reports, setReports] = useState<ApiReport[]>([]);
   const [activeFilter, setActiveFilter] = useState<ReportFilter>("all");
   const [showFilterModal, setShowFilterModal] = useState(false);

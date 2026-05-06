@@ -135,7 +135,7 @@ export default function CCEWorkDetailPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const { user } = useAuth();
-    const canManage = user?.role === 'principal' || user?.role === 'manager' || (user as any)?.permissions?.some((p: any) => p.name === 'manage_cce');
+    const canManage = user?.role === 'principal' || (user as any)?.permissions?.some((p: any) => p.name === 'manage_cce');
 
     // Filter & Sort State
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'evaluated'>('all');

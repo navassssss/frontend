@@ -83,7 +83,7 @@ export default function SubjectsPage() {
     const { user } = useAuth();
 
     // Access control: principal/manager always; teachers only with manage_cce
-    const isPrincipalOrManager = user?.role === 'principal' || user?.role === 'manager';
+    const isPrincipalOrManager = user?.role === 'principal';
     const canManage = isPrincipalOrManager ||
         (user?.role === 'teacher' && user?.permissions?.some((p: any) => p.name === 'manage_cce'));
 

@@ -75,7 +75,7 @@ const statusCfg = {
 export default function MedicalPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const canAccess = user?.role === 'principal' || user?.role === 'manager' ||
+  const canAccess = user?.role === 'principal' ||
     (user as any)?.permissions?.some((p: any) => p.name === 'manage_medical');
 
   /* data */
