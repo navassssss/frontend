@@ -162,8 +162,12 @@ export const updateStudentMonthlyFee = async (studentId: number, monthly_fee: nu
 };
 
 // Get overall summary
-export const getOverallSummary = async () => {
-    const response = await api.get('/fees/reports/summary');
+export const getOverallSummary = async (params?: { month?: number; year?: number }) => {
+    const queryParams: any = {};
+    if (params?.month) queryParams.month = params.month;
+    if (params?.year) queryParams.year = params.year;
+    
+    const response = await api.get('/fees/reports/summary', { params: queryParams });
     return response.data;
 };
 

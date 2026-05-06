@@ -413,15 +413,20 @@ interface OverallSummaryReportProps {
 const OverallSummaryReport: React.FC = () => {
     const [summary, setSummary] = useState<OverallFinancialSummary | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedMonth, setSelectedMonth] = useState<string>(new Date().getMonth() + 1 + '');
+    const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear() + '');
 
     useEffect(() => {
         loadSummary();
-    }, []);
+    }, [selectedMonth, selectedYear]);
 
     const loadSummary = async () => {
         setLoading(true);
         try {
-            const data = await feeApi.getOverallSummary();
+            const data = await feeApi.getOverallSummary({
+                month: parseInt(selectedMonth),
+                year: parseInt(selectedYear)
+            });
             setSummary(data);
         } catch (error) {
             console.error('Error loading summary:', error);
@@ -462,20 +467,59 @@ const OverallSummaryReport: React.FC = () => {
         );
     }
 
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+    const months = [
+        { value: '1', label: 'January' },
+        { value: '2', label: 'February' },
+        { value: '3', label: 'March' },
+        { value: '4', label: 'April' },
+        { value: '5', label: 'May' },
+        { value: '6', label: 'June' },
+        { value: '7', label: 'July' },
+        { value: '8', label: 'August' },
+        { value: '9', label: 'September' },
+        { value: '10', label: 'October' },
+        { value: '11', label: 'November' },
+        { value: '12', label: 'December' },
+    ];
+
     return (
         <div className="space-y-4">
+            <div className="flex justify-end gap-2 mb-2">
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                    <SelectTrigger className="w-[140px] bg-white">
+                        <SelectValue placeholder="Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {months.map(m => (
+                            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="w-[100px] bg-white">
+                        <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {years.map(y => (
+                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-primary" />
-                        Financial Summary (Till Today)
+                        Financial Summary (Pending Until {months.find(m => m.value === selectedMonth)?.label} {selectedYear})
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="text-center">
                         <p className="text-sm text-muted-foreground">Collection Rate</p>
                         <p className="text-4xl font-bold text-primary">{collectionPercentage}%</p>
-                        <p className="text-xs text-muted-foreground">Till today</p>
                     </div>
 
                     <Separator />
