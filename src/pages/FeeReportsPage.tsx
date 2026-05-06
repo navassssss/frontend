@@ -518,7 +518,7 @@ const OverallSummaryReport: React.FC = () => {
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-primary" />
-                        Financial Summary (Pending Until {months.find(m => m.value === selectedMonth)?.label} {selectedYear})
+                        Financial Summary (Including {months.find(m => m.value === selectedMonth)?.label} {selectedYear})
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1160,7 +1160,7 @@ interface MonthlyStudentReport {
         expected: number;
         paid: number;
         balance: number;
-        status: 'paid' | 'partial' | 'unpaid' | 'overpaid';
+        status: 'paid' | 'partial' | 'unpaid' | 'overpaid' | 'exempt';
     }[];
 }
 
@@ -1327,6 +1327,8 @@ const MonthlyReportSection: React.FC = () => {
                                                         <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Paid</Badge>
                                                     ) : s.status === 'partial' ? (
                                                         <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200">Partial</Badge>
+                                                    ) : s.status === 'exempt' ? (
+                                                        <Badge className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-slate-200">N/A</Badge>
                                                     ) : (
                                                         <Badge className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200">Unpaid</Badge>
                                                     )}
