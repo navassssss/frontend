@@ -821,14 +821,20 @@ const DailyCollectionReportSection: React.FC = () => {
     }, [selectedDate]);
 
     const loadReport = async () => {
+        if (!selectedDate) {
+            setReport(null);
+            return;
+        }
+        
         setLoading(true);
         try {
             const data = await feeApi.getDailyReport(selectedDate);
-            // Map backend response to component format
+            // Map backend response to component format safely
             const mappedData: DailyCollectionSummary = {
                 ...data,
-                totalStudents: data.total_students,
-                totalAmount: data.total_amount,
+                totalStudents: data?.total_students || 0,
+                totalAmount: data?.total_amount || 0,
+                payments: data?.payments || [],
             };
             setReport(mappedData);
         } catch (error) {
