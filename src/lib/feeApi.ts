@@ -172,8 +172,12 @@ export const getOverallSummary = async (params?: { month?: number; year?: number
 };
 
 // Get class-wise report
-export const getClassReport = async (classId: number) => {
-    const response = await api.get(`/fees/reports/class/${classId}`);
+export const getClassReport = async (classId: number, params?: { month?: number; year?: number }) => {
+    const queryParams: any = {};
+    if (params?.month) queryParams.month = params.month;
+    if (params?.year) queryParams.year = params.year;
+    
+    const response = await api.get(`/fees/reports/class/${classId}`, { params: queryParams });
     return response.data;
 };
 

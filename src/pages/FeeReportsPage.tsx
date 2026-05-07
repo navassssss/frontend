@@ -573,6 +573,8 @@ const OverallSummaryReport: React.FC = () => {
 const ClassWiseReportSection: React.FC = () => {
     const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
     const [selectedClass, setSelectedClass] = useState<string>('');
+    const [selectedMonth, setSelectedMonth] = useState<string>(new Date().getMonth() + 1 + '');
+    const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear() + '');
     const [report, setReport] = useState<ClassWiseSummary | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -584,7 +586,7 @@ const ClassWiseReportSection: React.FC = () => {
         if (selectedClass) {
             loadReport();
         }
-    }, [selectedClass]);
+    }, [selectedClass, selectedMonth, selectedYear]);
 
     const loadClasses = async () => {
         const classList = await feeApi.getClasses();
@@ -595,7 +597,10 @@ const ClassWiseReportSection: React.FC = () => {
         if (!selectedClass) return;
         setLoading(true);
         try {
-            const data = await feeApi.getClassReport(parseInt(selectedClass));
+            const data = await feeApi.getClassReport(parseInt(selectedClass), {
+                month: parseInt(selectedMonth),
+                year: parseInt(selectedYear)
+            });
             // Map backend response to component format
             const mappedData: ClassWiseSummary = {
                 ...data,
@@ -628,26 +633,77 @@ const ClassWiseReportSection: React.FC = () => {
         }).format(amount);
     };
 
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+    const months = [
+        { value: '1', label: 'January' },
+        { value: '2', label: 'February' },
+        { value: '3', label: 'March' },
+        { value: '4', label: 'April' },
+        { value: '5', label: 'May' },
+        { value: '6', label: 'June' },
+        { value: '7', label: 'July' },
+        { value: '8', label: 'August' },
+        { value: '9', label: 'September' },
+        { value: '10', label: 'October' },
+        { value: '11', label: 'November' },
+        { value: '12', label: 'December' },
+    ];
+
     return (
         <div className="space-y-4">
             <Card>
                 <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Building2 className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">Select Class</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <Building2 className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">Select Class</span>
+                            </div>
+                            <Select value={selectedClass} onValueChange={setSelectedClass}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choose a class to view report" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {classes.map((c) => (
+                                        <SelectItem key={c.id} value={c.id}>
+                                            {c.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-sm font-medium">Limit Month</span>
+                            </div>
+                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                <SelectTrigger className="w-full bg-white">
+                                    <SelectValue placeholder="Month" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {months.map(m => (
+                                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-sm font-medium">Limit Year</span>
+                            </div>
+                            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                                <SelectTrigger className="w-full bg-white">
+                                    <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {years.map(y => (
+                                        <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <Select value={selectedClass} onValueChange={setSelectedClass}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Choose a class to view report" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classes.map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                    {c.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
                 </CardContent>
             </Card>
 
@@ -686,7 +742,7 @@ const ClassWiseReportSection: React.FC = () => {
                     {/* Class Summary */}
                     <Card className="bg-gradient-to-br from-secondary/50 to-secondary/20">
                         <CardContent className="p-4">
-                            <h3 className="font-semibold mb-3">{report.className} Summary</h3>
+                            <h3 className="font-semibold mb-3">{report.className} Summary (Including {months.find(m => m.value === selectedMonth)?.label} {selectedYear})</h3>
                             <div className="grid grid-cols-3 gap-2 text-center">
                                 <div className="p-2 bg-background/80 rounded-lg">
                                     <p className="text-xs text-muted-foreground">Expected</p>
