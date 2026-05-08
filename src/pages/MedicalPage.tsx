@@ -59,7 +59,7 @@ const relativeTime = (iso: string) => {
 };
 
 const fmtTime = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -146,7 +146,7 @@ export default function MedicalPage() {
       const { data } = await api.post('/medical', {
         student_id:     selectedStudent.id,
         illness_name:   illnessName.trim(),
-        reported_at:    reportedAt,
+        reported_at:    new Date(reportedAt).toISOString(),
         went_to_doctor: wentToDoctor,
         notes:          notes.trim() || undefined,
       });
@@ -167,7 +167,8 @@ export default function MedicalPage() {
     setIllnessName('');
     setWentToDoctor(false);
     setNotes('');
-    setReportedAt(new Date().toISOString().slice(0, 16));
+    const now = new Date();
+    setReportedAt(new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
   };
 
   /* ── Mark recovered ── */
@@ -378,48 +379,65 @@ export default function MedicalPage() {
             ) : (
               <div className="flex flex-col space-y-4">
                 {/* Desktop History Headers */}
-                <div className="hidden lg:grid grid-cols-12 gap-6 px-6 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  <div className="col-span-4">Student / ID</div>
-                  <div className="col-span-5">Condition & Status</div>
-                  <div className="col-span-3">Date & Time</div>
+                <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="col-span-3">Student / ID</div>
+                  <div className="col-span-4">Condition & Status</div>
+                  <div className="col-span-5">Timestamps</div>
                 </div>
                 
                 {history.map((rec, idx) => (
                   <div 
                     key={rec.id} 
-                    className="bg-white rounded-3xl p-5 lg:px-6 lg:py-5 shadow-sm border border-slate-100 flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-5 lg:gap-6 hover:shadow-md transition-shadow"
+                    className="bg-white rounded-[1.25rem] p-4 lg:px-5 lg:py-4 shadow-sm border border-slate-100 flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-4 hover:shadow-md transition-all animate-slide-up"
+                    style={{ animationDelay: `${idx * 0.04}s`, animationFillMode: 'backwards' }}
                   >
-                    <div className="flex items-center gap-4 lg:col-span-4 shrink-0">
-                      <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-lg font-black text-slate-700 shrink-0">
+                    <div className="flex items-center gap-3.5 lg:col-span-3 shrink-0">
+                      <div className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center text-[15px] font-black text-slate-600 shrink-0">
                         {initials(rec.student?.name || '?')}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-lg font-bold text-slate-900 truncate">{rec.student?.name}</p>
-                        <p className="text-sm font-medium text-slate-500 mt-0.5 truncate">
-                          {rec.student?.class} <span className="opacity-50 mx-1.5">•</span> ID #{rec.student?.roll_number || 'N/A'}
+                        <p className="text-[14px] font-bold text-slate-900 truncate">{rec.student?.name}</p>
+                        <p className="text-[12px] font-medium text-slate-500 truncate mt-0.5">
+                          {rec.student?.class} <span className="opacity-30 mx-1">•</span> ID #{rec.student?.roll_number || 'N/A'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0">
-                       <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                          <p className="text-base md:text-[17px] font-bold text-slate-900">{rec.illness_name}</p>
-                          <span className={`text-[10px] font-bold px-2.5 py-1 md:px-3 md:py-1.5 rounded-full uppercase tracking-wider ${
-                            rec.status === 'recovered' 
-                              ? 'bg-emerald-100 text-emerald-800' 
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}
-                          </span>
+                    <div className="flex-1 min-w-0 lg:col-span-4 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+                       <div className="flex flex-col gap-2">
+                          <p className="text-[14px] font-bold text-slate-900 truncate" title={rec.illness_name}>{rec.illness_name}</p>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] font-extrabold px-2 py-1 rounded-md uppercase tracking-widest ${
+                              rec.status === 'recovered' 
+                                ? 'bg-emerald-50 text-emerald-600' 
+                                : 'bg-blue-50 text-blue-600'
+                            }`}>
+                              {rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}
+                            </span>
+                            <div className={`flex items-center gap-1.5 w-fit pl-1.5 pr-2.5 py-1 rounded-md border transition-colors ${rec.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
+                              <span className={`text-[9px] font-extrabold uppercase tracking-widest ${rec.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
+                                {rec.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
+                              </span>
+                            </div>
+                          </div>
                        </div>
                     </div>
                     
-                    <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-100 pt-4 lg:pt-0">
-                       <div className="flex items-start gap-2 md:gap-3 text-xs md:text-[13px] font-semibold text-slate-400">
-                          <Clock className="w-4 h-4 shrink-0 mt-0.5" />
-                          <div className="flex flex-col">
-                            <span className="text-slate-600 font-bold">{fmtDate(rec.reported_at)}</span>
-                            <span>{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                    <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8">
+                       <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                          <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
+                          <div className="flex flex-col leading-[1.3]">
+                             <span className="text-slate-400">Reported</span>
+                             <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.reported_at)}</span>
+                             <span>{fmtTime(rec.reported_at)}</span>
+                          </div>
+                       </div>
+                       <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                          <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-[1px] ${rec.status === 'recovered' ? 'text-emerald-500' : 'text-blue-500'}`} />
+                          <div className="flex flex-col leading-[1.3]">
+                             <span className="text-slate-400">{rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}</span>
+                             <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                             <span>{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
                           </div>
                        </div>
                     </div>
