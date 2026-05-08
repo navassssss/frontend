@@ -146,7 +146,7 @@ export default function MedicalPage() {
       const { data } = await api.post('/medical', {
         student_id:     selectedStudent.id,
         illness_name:   illnessName.trim(),
-        reported_at:    new Date(reportedAt).toISOString(),
+        reported_at:    reportedAt,
         went_to_doctor: wentToDoctor,
         notes:          notes.trim() || undefined,
       });
