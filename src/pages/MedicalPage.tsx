@@ -508,8 +508,8 @@ export default function MedicalPage() {
 
       {/* ════════════ ADD RECORD MODAL ════════════ */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 pb-24 sm:pb-6 animate-fade-in">
+          <div className="w-full max-w-md max-h-[calc(100vh-7rem)] sm:max-h-[85vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in">
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
               <h2 className="text-lg font-black text-slate-900">New Medical Record</h2>
               <button
@@ -680,16 +680,16 @@ function ActiveCard({
 }) {
   return (
     <div
-      className="bg-white rounded-[1.25rem] p-4 lg:px-5 lg:py-4 shadow-sm border border-slate-100 flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-4 hover:shadow-md transition-all animate-slide-up"
+      className="bg-white rounded-[1.25rem] p-4 lg:p-5 shadow-sm border border-slate-100 flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-4 hover:shadow-md transition-all animate-slide-up"
       style={{ animationDelay: `${delay}s`, animationFillMode: 'backwards' }}
     >
       {/* LEFT SECTION - Avatar & Name */}
       <div className="flex items-center gap-3.5 lg:col-span-3 shrink-0">
-        <div className="w-11 h-11 rounded-full bg-[#bffff0]/40 flex items-center justify-center text-[15px] font-black text-[#00a877] shrink-0">
+        <div className="w-12 h-12 rounded-full bg-[#bffff0]/40 flex items-center justify-center text-[15px] font-black text-[#00a877] shrink-0">
           {initials(record.student?.name || '?')}
         </div>
         <div className="min-w-0">
-          <p className="text-[14px] font-bold text-slate-900 truncate">{record.student?.name}</p>
+          <p className="text-[15px] font-bold text-slate-900 truncate">{record.student?.name}</p>
           <p className="text-[12px] font-medium text-slate-500 truncate mt-0.5">
             {record.student?.class} <span className="opacity-30 mx-1">•</span> ID #{record.student?.roll_number || 'N/A'}
           </p>
@@ -697,56 +697,54 @@ function ActiveCard({
       </div>
 
       {/* MIDDLE SECTION - Illness Details */}
-      <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
-         <div className="flex flex-col gap-2">
-            <p className="text-[14px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
-            <div className={`flex items-center gap-1.5 w-fit pl-1.5 pr-2.5 py-1 rounded-md border transition-colors ${record.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
-              <Switch 
-                checked={record.went_to_doctor} 
-                onCheckedChange={onToggleDoctor}
-                disabled={loading}
-                className="scale-[0.7] origin-left data-[state=checked]:bg-[#00865B] shadow-sm -ml-0.5"
-              />
-              <span className={`text-[9px] font-extrabold uppercase tracking-widest ${record.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
-                {record.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
-              </span>
-            </div>
+      <div className="flex-1 min-w-0 lg:col-span-3 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+         <p className="text-[14px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
+         <div className={`flex items-center gap-1.5 w-fit pl-2 pr-3 py-1.5 rounded-lg border transition-colors ${record.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
+           <Switch 
+             checked={record.went_to_doctor} 
+             onCheckedChange={onToggleDoctor}
+             disabled={loading}
+             className="scale-[0.8] origin-left data-[state=checked]:bg-[#00865B] shadow-sm -ml-0.5"
+           />
+           <span className={`text-[10px] font-extrabold uppercase tracking-widest ${record.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
+             {record.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
+           </span>
          </div>
          {record.notes && (
-           <p className="mt-1.5 text-[11px] text-slate-500 line-clamp-2" title={record.notes}>
+           <p className="mt-0.5 text-[12px] text-slate-500 line-clamp-2" title={record.notes}>
              {record.notes}
            </p>
          )}
       </div>
       
       {/* METADATA SECTION */}
-      <div className="flex-1 min-w-0 lg:col-span-3 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex flex-col gap-2.5">
-         <div className="flex items-start gap-2 text-[11px] text-slate-500">
-            <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
+      <div className="flex-1 min-w-0 lg:col-span-3 flex flex-row lg:flex-col gap-4 lg:gap-2.5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+         <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1">
+            <Clock className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
             <div className="flex flex-col leading-[1.3]">
                <span className="font-bold text-slate-700">{relativeTime(record.reported_at)}</span>
                <span>{fmtTime(record.reported_at)}</span>
             </div>
          </div>
          {record.reported_by && (
-            <div className="flex items-start gap-2 text-[11px] text-slate-500">
-               <User className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
-               <div className="flex flex-col leading-[1.3]">
+            <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1 min-w-0">
+               <User className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+               <div className="flex flex-col leading-[1.3] min-w-0 w-full">
                   <span>Reported by</span>
-                  <span className="font-bold text-slate-700 truncate">{record.reported_by.name}</span>
+                  <span className="font-bold text-slate-700 truncate block w-full">{record.reported_by.name}</span>
                </div>
             </div>
          )}
       </div>
 
       {/* RIGHT SECTION - Actions */}
-      <div className="flex items-center lg:justify-end gap-2 lg:col-span-3 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 shrink-0">
+      <div className="flex items-center gap-3 lg:col-span-3 border-t lg:border-t-0 border-slate-50 pt-4 lg:pt-0 shrink-0">
         <Button
           id={`recover-${record.id}`}
           size="sm"
           disabled={loading}
           onClick={onRecover}
-          className="flex-1 lg:flex-none h-8 px-4 rounded-lg bg-[#00865B] hover:bg-[#00704c] text-white text-[12px] font-bold shadow-sm"
+          className="flex-1 lg:flex-none h-10 px-4 rounded-xl bg-[#00865B] hover:bg-[#00704c] text-white text-[13px] font-bold shadow-sm"
         >
           Recovered
         </Button>
@@ -756,7 +754,7 @@ function ActiveCard({
           disabled={loading}
           onClick={onSentHome}
           variant="outline"
-          className="flex-1 lg:flex-none h-8 px-4 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-[12px] font-bold bg-white"
+          className="flex-1 lg:flex-none h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-[13px] font-bold bg-white"
         >
           Sent Home
         </Button>
