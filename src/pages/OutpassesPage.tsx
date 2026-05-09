@@ -49,19 +49,6 @@ function fSmartDateTime(dateStr: string): string {
     return `${day}, ${time}`;
 }
 
-function formatDurationExact(dateStr: string): string {
-    const ms = Date.now() - new Date(dateStr).getTime();
-    if (ms < 0) return '0m';
-    const totalMins = Math.floor(ms / 60000);
-    if (totalMins < 60) return `${totalMins}m`;
-    const hours = Math.floor(totalMins / 60);
-    const mins = totalMins % 60;
-    if (hours < 24) return `${hours}h ${mins}m`;
-    const days = Math.floor(hours / 24);
-    const rh = hours % 24;
-    return `${days}d ${rh}h ${mins}m`;
-}
-
 const initials = (name: string) =>
   name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -348,7 +335,7 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
                         {outpass.student?.user?.name || '—'}
                     </p>
                     <p className="text-[12px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">
-                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-bold">Class {outpass.student?.classRoom?.name}</span>
+                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-bold">{outpass.student?.classRoom?.name}</span>
                         <span className="opacity-40 mx-0.5">•</span> 
                         <span>ID #{outpass.student?.roll_number || 'N/A'}</span>
                     </p>
@@ -364,11 +351,6 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
                             Overdue
                         </span>
                     )}
-                    {outpass.status !== 'returned' && (
-                        <span className={`text-[10px] font-bold ${outpass.status === 'overdue' ? 'text-red-500' : 'text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md uppercase tracking-widest'}`}>
-                            ⏱ {formatDurationExact(outpass.out_time)} elapsed
-                        </span>
-                    )}
                  </div>
                  {outpass.notes && (
                      <p className="mt-0.5 text-[12px] text-slate-500 line-clamp-2" title={outpass.notes}>
@@ -379,30 +361,49 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
 
             {/* METADATA SECTION */}
             <div className="flex-1 min-w-0 lg:col-span-4 flex flex-row lg:flex-col gap-4 lg:gap-2.5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
-                 <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1">
-                    <LogOut className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
-                    <div className="flex flex-col leading-[1.3]">
-                       <span className="font-bold text-slate-700">{formatIST(outpass.out_time, { day: 'numeric', month: 'short' })}</span>
-                       <span>{fTime(outpass.out_time)}</span>
-                    </div>
-                 </div>
-                 <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1 min-w-0">
-                    <LogIn className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
-                    <div className="flex flex-col leading-[1.3] min-w-0 w-full">
-                       <span className={`font-bold ${outpass.status === 'overdue' ? 'text-red-600' : 'text-slate-700'} truncate block w-full`}>
-                           {outpass.status === 'returned' && outpass.actual_in_time
-                              ? formatIST(outpass.actual_in_time, { day: 'numeric', month: 'short' })
-                              : formatIST(outpass.expected_in_time, { day: 'numeric', month: 'short' })
-                           }
-                       </span>
-                       <span className={outpass.status === 'overdue' ? 'text-red-500' : ''}>
-                           {outpass.status === 'returned' && outpass.actual_in_time
-                              ? fTime(outpass.actual_in_time)
-                              : fTime(outpass.expected_in_time)
-                           }
-                       </span>
-                    </div>
-                 </div>
+                 {tab === 'history' ? (
+                     <>
+                        <div className="flex items-start gap-2 text-[11px] text-slate-500 flex-1">
+                            <Clock className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+                            <div className="flex flex-col leading-[1.3]">
+                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Expected Return</span>
+                                <span className="font-bold text-slate-700 mt-0.5">
+                                    {formatIST(outpass.expected_in_time, { day: 'numeric', month: 'short' })} <span className="opacity-50">•</span> {fTime(outpass.expected_in_time)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-2 text-[11px] text-slate-500 flex-1">
+                            <CheckCircle2 className="w-4 h-4 shrink-0 mt-[1px] text-emerald-500" />
+                            <div className="flex flex-col leading-[1.3]">
+                                <span className="text-[10px] uppercase tracking-widest text-emerald-600/70 font-bold">Actual Return</span>
+                                <span className="font-bold text-emerald-700 mt-0.5">
+                                    {formatIST(outpass.actual_in_time!, { day: 'numeric', month: 'short' })} <span className="opacity-50">•</span> {fTime(outpass.actual_in_time!)}
+                                </span>
+                            </div>
+                        </div>
+                     </>
+                 ) : (
+                     <>
+                         <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1">
+                            <LogOut className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+                            <div className="flex flex-col leading-[1.3]">
+                               <span className="font-bold text-slate-700">{formatIST(outpass.out_time, { day: 'numeric', month: 'short' })}</span>
+                               <span>{fTime(outpass.out_time)}</span>
+                            </div>
+                         </div>
+                         <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1 min-w-0">
+                            <LogIn className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+                            <div className="flex flex-col leading-[1.3] min-w-0 w-full">
+                               <span className={`font-bold ${outpass.status === 'overdue' ? 'text-red-600' : 'text-slate-700'} truncate block w-full`}>
+                                   {formatIST(outpass.expected_in_time, { day: 'numeric', month: 'short' })}
+                               </span>
+                               <span className={outpass.status === 'overdue' ? 'text-red-500' : ''}>
+                                   {fTime(outpass.expected_in_time)}
+                               </span>
+                            </div>
+                         </div>
+                     </>
+                 )}
             </div>
 
             {/* RIGHT SECTION - Actions */}
@@ -718,7 +719,7 @@ export default function OutpassesPage() {
                             <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                                 <div className="col-span-3">Student / ID</div>
                                 <div className="col-span-3">Reason & Status</div>
-                                <div className="col-span-4">Out & Return Time</div>
+                                <div className="col-span-4">{tab === 'history' ? 'Expected vs Actual Return' : 'Out & Return Time'}</div>
                                 <div className="col-span-2 text-right">Actions</div>
                             </div>
                             
