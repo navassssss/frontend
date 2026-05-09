@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Search, Heart, Home, CheckCircle2, Clock, RefreshCw,
   ChevronRight, Stethoscope, History, AlertTriangle, X, User,
-  Calendar, FileText, Thermometer, Filter, Shield, Briefcase, Trash2
+  Calendar, FileText, Thermometer, Filter, Shield, Briefcase, Trash2, ChevronDown
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -389,24 +389,30 @@ export default function MedicalPage() {
                   className="pl-14 h-14 bg-white border-0 rounded-2xl shadow-sm text-base font-medium focus-visible:ring-[#00865B]/20"
                 />
               </div>
-              <div className="flex gap-2">
-                <select 
-                  value={historyFilter} 
-                  onChange={e => setHistoryFilter(e.target.value as any)}
-                  className="h-14 px-4 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-600 outline-none hover:bg-slate-50 transition-colors"
-                >
-                  <option value="all">All Statuses</option>
-                  <option value="recovered">Recovered Only</option>
-                  <option value="sent_home">Sent Home Only</option>
-                </select>
-                <select 
-                  value={historySort} 
-                  onChange={e => setHistorySort(e.target.value as any)}
-                  className="h-14 px-4 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-600 outline-none hover:bg-slate-50 transition-colors"
-                >
-                  <option value="reported">Sort by Reported Time</option>
-                  <option value="resolved">Sort by Resolved Time</option>
-                </select>
+              <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0">
+                <div className="relative min-w-[130px] flex-1 sm:flex-none">
+                  <select 
+                    value={historyFilter} 
+                    onChange={e => setHistoryFilter(e.target.value as any)}
+                    className="w-full h-14 pl-4 pr-10 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-700 outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="all">All Cases</option>
+                    <option value="recovered">Recovered</option>
+                    <option value="sent_home">Sent Home</option>
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+                <div className="relative min-w-[140px] flex-1 sm:flex-none">
+                  <select 
+                    value={historySort} 
+                    onChange={e => setHistorySort(e.target.value as any)}
+                    className="w-full h-14 pl-4 pr-10 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-700 outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="reported">Reported Time</option>
+                    <option value="resolved">Resolved Time</option>
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
             </div>
 
@@ -462,9 +468,9 @@ export default function MedicalPage() {
                        </div>
                     </div>
                     
-                    <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 lg:gap-8">
-                      <div className="flex gap-4 sm:gap-6 lg:gap-8">
-                         <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                    <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex items-center justify-between gap-4">
+                      <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-6 lg:gap-8">
+                         <div className="flex items-start gap-2 text-[11px] text-slate-500 min-w-[110px]">
                             <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
                             <div className="flex flex-col leading-[1.3]">
                                <span className="text-slate-400">Reported</span>
@@ -472,7 +478,7 @@ export default function MedicalPage() {
                                <span>{fmtTime(rec.reported_at)}</span>
                             </div>
                          </div>
-                         <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                         <div className="flex items-start gap-2 text-[11px] text-slate-500 min-w-[110px]">
                             <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-[1px] ${rec.status === 'recovered' ? 'text-emerald-500' : 'text-blue-500'}`} />
                             <div className="flex flex-col leading-[1.3]">
                                <span className="text-slate-400">{rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}</span>
@@ -486,10 +492,10 @@ export default function MedicalPage() {
                         size="icon"
                         onClick={() => handleDeleteHistory(rec.id)}
                         disabled={actionId === rec.id}
-                        className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0"
+                        className="h-10 w-10 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-xl shrink-0 transition-colors ml-auto"
                         title="Delete Record"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
