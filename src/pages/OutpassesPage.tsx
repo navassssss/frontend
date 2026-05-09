@@ -343,7 +343,7 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
             </div>
 
             {/* MIDDLE SECTION - Reason Details */}
-            <div className="flex-1 min-w-0 lg:col-span-3 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+            <div className="flex-1 min-w-0 lg:col-span-2 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
                  <p className="text-[14px] font-bold text-slate-900 truncate" title={outpass.reason}>{outpass.reason}</p>
                  <div className="flex items-center gap-2">
                     {outpass.status === 'overdue' && (
@@ -360,13 +360,22 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
             </div>
 
             {/* METADATA SECTION */}
-            <div className="flex-1 min-w-0 lg:col-span-4 flex flex-row lg:flex-col gap-4 lg:gap-2.5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+            <div className="flex-1 min-w-0 lg:col-span-5 flex flex-row lg:flex-col gap-4 lg:gap-2.5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
                  {tab === 'history' ? (
                      <>
                         <div className="flex items-start gap-2 text-[11px] text-slate-500 flex-1">
+                            <LogOut className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+                            <div className="flex flex-col leading-[1.3]">
+                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Out</span>
+                                <span className="font-bold text-slate-700 mt-0.5">
+                                    {formatIST(outpass.out_time, { day: 'numeric', month: 'short' })} <span className="opacity-50">•</span> {fTime(outpass.out_time)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-2 text-[11px] text-slate-500 flex-1">
                             <Clock className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
                             <div className="flex flex-col leading-[1.3]">
-                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Expected Return</span>
+                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Expected</span>
                                 <span className="font-bold text-slate-700 mt-0.5">
                                     {formatIST(outpass.expected_in_time, { day: 'numeric', month: 'short' })} <span className="opacity-50">•</span> {fTime(outpass.expected_in_time)}
                                 </span>
@@ -375,7 +384,7 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
                         <div className="flex items-start gap-2 text-[11px] text-slate-500 flex-1">
                             <CheckCircle2 className="w-4 h-4 shrink-0 mt-[1px] text-emerald-500" />
                             <div className="flex flex-col leading-[1.3]">
-                                <span className="text-[10px] uppercase tracking-widest text-emerald-600/70 font-bold">Actual Return</span>
+                                <span className="text-[10px] uppercase tracking-widest text-emerald-600/70 font-bold">Actual</span>
                                 <span className="font-bold text-emerald-700 mt-0.5">
                                     {formatIST(outpass.actual_in_time!, { day: 'numeric', month: 'short' })} <span className="opacity-50">•</span> {fTime(outpass.actual_in_time!)}
                                 </span>
@@ -718,8 +727,8 @@ export default function OutpassesPage() {
                             {/* Desktop Table Headers */}
                             <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                                 <div className="col-span-3">Student / ID</div>
-                                <div className="col-span-3">Reason & Status</div>
-                                <div className="col-span-4">{tab === 'history' ? 'Expected vs Actual Return' : 'Out & Return Time'}</div>
+                                <div className="col-span-2">Reason & Status</div>
+                                <div className="col-span-5">{tab === 'history' ? 'Out / Expected / Actual' : 'Out & Return Time'}</div>
                                 <div className="col-span-2 text-right">Actions</div>
                             </div>
                             
