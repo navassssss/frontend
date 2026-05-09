@@ -13,7 +13,9 @@ import {
     RefreshCw,
     ChevronDown,
     ChevronRight,
-    User
+    User,
+    Trash2,
+    Undo2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +23,6 @@ import { Label } from '@/components/ui/label';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
 import api from '@/lib/api';
 
 // ── IST Time Formatter ─────────────────────────────────────────────────────
@@ -36,7 +37,6 @@ function fTime(dateStr: string): string {
     return formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase();
 }
 
-// Smart label: "Today 5:30 PM", "Yesterday 3:15 PM", "22 Apr 4:00 PM"
 function fSmartDateTime(dateStr: string): string {
     const date = new Date(dateStr);
     const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date());
@@ -49,74 +49,21 @@ function fSmartDateTime(dateStr: string): string {
     return `${day}, ${time}`;
 }
 
-function todayIST(): string {
-    return new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date());
-}
-
-function istOffsetISO(offsetHours = 0): string {
-    const d = new Date(Date.now() + offsetHours * 3600000);
-    const ist = new Date(d.toLocaleString('en-US', { timeZone: IST }));
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${ist.getFullYear()}-${pad(ist.getMonth()+1)}-${pad(ist.getDate())}T${pad(ist.getHours())}:${pad(ist.getMinutes())}`;
+function formatDurationExact(dateStr: string): string {
+    const ms = Date.now() - new Date(dateStr).getTime();
+    if (ms < 0) return '0m';
+    const totalMins = Math.floor(ms / 60000);
+    if (totalMins < 60) return `${totalMins}m`;
+    const hours = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    if (hours < 24) return `${hours}h ${mins}m`;
+    const days = Math.floor(hours / 24);
+    const rh = hours % 24;
+    return `${days}d ${rh}h ${mins}m`;
 }
 
 const initials = (name: string) =>
   name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-// 12-hr time picker component
-function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-    // value format: HH:MM (24hr from datetime-local)
-    const toH12 = (h24: number) => h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24;
-    const [h24, setH24] = useState(() => parseInt(value.split('T')[1]?.split(':')[0] ?? '8'));
-    const [min, setMin] = useState(() => parseInt(value.split('T')[1]?.split(':')[1] ?? '0'));
-    const [ampm, setAmpm] = useState<'AM'|'PM'>(() => parseInt(value.split('T')[1]?.split(':')[0] ?? '8') < 12 ? 'AM' : 'PM');
-    const datepart = value.split('T')[0] ?? todayIST();
-
-    const emit = (newH24: number, newMin: number) => {
-        const pad = (n: number) => String(n).padStart(2, '0');
-        onChange(`${datepart}T${pad(newH24)}:${pad(newMin)}`);
-    };
-
-    const setHour = (h12: number) => {
-        let h24new = ampm === 'PM' ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
-        setH24(h24new); emit(h24new, min);
-    };
-    const setMinute = (m: number) => { setMin(m); emit(h24, m); };
-    const toggleAmPm = (ap: 'AM'|'PM') => {
-        let newH = ap === 'PM' ? (h24 < 12 ? h24 + 12 : h24) : (h24 >= 12 ? h24 - 12 : h24);
-        setAmpm(ap); setH24(newH); emit(newH, min);
-    };
-
-    return (
-        <div className="flex items-center gap-1.5">
-            <select
-                className="border-0 bg-slate-50 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-600/20"
-                value={toH12(h24)}
-                onChange={e => setHour(parseInt(e.target.value))}
-            >
-                {Array.from({length:12},(_,i)=>i+1).map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
-            </select>
-            <span className="text-slate-400 font-bold">:</span>
-            <select
-                className="border-0 bg-slate-50 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-600/20"
-                value={min}
-                onChange={e => setMinute(parseInt(e.target.value))}
-            >
-                {Array.from({length:12},(_,i)=>i*5).map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
-            </select>
-            <div className="flex rounded-xl overflow-hidden border border-slate-100 ml-1">
-                {(['AM','PM'] as const).map(ap => (
-                    <button key={ap} type="button"
-                        className={`px-3 py-2.5 text-[11px] font-bold transition-colors uppercase tracking-widest ${
-                            ampm === ap ? 'bg-amber-100 text-amber-800' : 'bg-white text-slate-500 hover:bg-slate-50'
-                        }`}
-                        onClick={() => toggleAmPm(ap)}
-                    >{ap}</button>
-                ))}
-            </div>
-        </div>
-    );
-}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -172,10 +119,18 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
     const [selectedStudent, setSelectedStudent] = useState<StudentOption | null>(null);
     const [reason, setReason] = useState('');
     const [notes, setNotes] = useState('');
-    const [outDate, setOutDate] = useState(todayIST());
-    const [outTime, setOutTime] = useState(istOffsetISO(0));
-    const [expectedDate, setExpectedDate] = useState(todayIST());
-    const [expectedInTime, setExpectedInTime] = useState(istOffsetISO(2));
+    
+    // Default to current time for out_time, and tomorrow same time for expected_in_time
+    const [outTime, setOutTime] = useState(() => {
+        const now = new Date();
+        return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    });
+    const [expectedInTime, setExpectedInTime] = useState(() => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    });
+    
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -204,14 +159,12 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
 
         setSubmitting(true);
         try {
-            const fullOutTime = `${outDate}T${outTime.split('T')[1]}`;
-            const fullExpected = `${expectedDate}T${expectedInTime.split('T')[1]}`;
             await api.post('/outpasses', {
                 student_id: selectedStudent.id,
                 reason: reason.trim(),
                 notes: notes.trim() || undefined,
-                out_time: fullOutTime,
-                expected_in_time: fullExpected,
+                out_time: outTime,
+                expected_in_time: expectedInTime,
             });
             toast.success(`Outpass created for ${selectedStudent.name}`);
             onSuccess();
@@ -309,28 +262,22 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
                     {/* Out Time */}
                     <div className="space-y-1.5">
                         <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Out Date & Time</label>
-                        <div className="flex gap-2 flex-wrap items-center">
-                            <Input
-                                type="date"
-                                className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium w-auto flex-1 min-w-[130px]"
-                                value={outDate}
-                                onChange={e => setOutDate(e.target.value)}
-                            />
-                            <TimePicker value={outTime} onChange={setOutTime} />
-                        </div>
+                        <Input
+                            type="datetime-local"
+                            className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium"
+                            value={outTime}
+                            onChange={e => setOutTime(e.target.value)}
+                        />
                     </div>
                     {/* Expected Return */}
                     <div className="space-y-1.5">
                         <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Expected Return</label>
-                        <div className="flex gap-2 flex-wrap items-center">
-                            <Input
-                                type="date"
-                                className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium w-auto flex-1 min-w-[130px]"
-                                value={expectedDate}
-                                onChange={e => setExpectedDate(e.target.value)}
-                            />
-                            <TimePicker value={expectedInTime} onChange={setExpectedInTime} />
-                        </div>
+                        <Input
+                            type="datetime-local"
+                            className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium"
+                            value={expectedInTime}
+                            onChange={e => setExpectedInTime(e.target.value)}
+                        />
                     </div>
 
                     {/* Notes */}
@@ -370,12 +317,16 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
 interface OutpassCardProps {
     outpass: Outpass;
     onCheckin: (id: number) => void;
-    checkingIn: boolean;
+    onRevert: (id: number) => void;
+    onDelete: (id: number) => void;
+    loadingActionId: number | null;
     delay: number;
+    tab: 'active' | 'history';
 }
 
-function OutpassCard({ outpass, onCheckin, checkingIn, delay }: OutpassCardProps) {
+function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, delay, tab }: OutpassCardProps) {
     const isActionable = outpass.status !== 'returned';
+    const isProcessing = loadingActionId === outpass.id;
 
     return (
         <div
@@ -392,9 +343,14 @@ function OutpassCard({ outpass, onCheckin, checkingIn, delay }: OutpassCardProps
                     {initials(outpass.student?.user?.name || '?')}
                 </div>
                 <div className="min-w-0">
-                    <p className="text-[15px] font-bold text-slate-900 truncate">{outpass.student?.user?.name || '—'}</p>
-                    <p className="text-[12px] font-medium text-slate-500 truncate mt-0.5">
-                        {outpass.student?.classRoom?.name} <span className="opacity-30 mx-1">•</span> ID #{outpass.student?.roll_number || 'N/A'}
+                    {/* Full name on large screens, break-words to avoid hidden overflow if extremely long */}
+                    <p className="text-[15px] font-bold text-slate-900 break-words lg:break-normal lg:whitespace-normal">
+                        {outpass.student?.user?.name || '—'}
+                    </p>
+                    <p className="text-[12px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">
+                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-bold">Class {outpass.student?.classRoom?.name}</span>
+                        <span className="opacity-40 mx-0.5">•</span> 
+                        <span>ID #{outpass.student?.roll_number || 'N/A'}</span>
                     </p>
                 </div>
             </div>
@@ -403,16 +359,14 @@ function OutpassCard({ outpass, onCheckin, checkingIn, delay }: OutpassCardProps
             <div className="flex-1 min-w-0 lg:col-span-3 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
                  <p className="text-[14px] font-bold text-slate-900 truncate" title={outpass.reason}>{outpass.reason}</p>
                  <div className="flex items-center gap-2">
-                    <span className={`text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-widest ${
-                        outpass.status === 'overdue' ? 'bg-red-50 text-red-600'
-                        : outpass.status === 'returned' ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-amber-50 text-amber-600'
-                    }`}>
-                        {outpass.status === 'returned' ? 'Returned' : outpass.status === 'overdue' ? 'Overdue' : 'Outside'}
-                    </span>
+                    {outpass.status === 'overdue' && (
+                        <span className="text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-widest bg-red-50 text-red-600">
+                            Overdue
+                        </span>
+                    )}
                     {outpass.status !== 'returned' && (
-                        <span className={`text-[10px] font-bold ${outpass.status === 'overdue' ? 'text-red-500' : 'text-amber-500'}`}>
-                            ⏱ {formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })}
+                        <span className={`text-[10px] font-bold ${outpass.status === 'overdue' ? 'text-red-500' : 'text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md uppercase tracking-widest'}`}>
+                            ⏱ {formatDurationExact(outpass.out_time)} elapsed
                         </span>
                     )}
                  </div>
@@ -452,22 +406,39 @@ function OutpassCard({ outpass, onCheckin, checkingIn, delay }: OutpassCardProps
             </div>
 
             {/* RIGHT SECTION - Actions */}
-            <div className="flex items-center justify-end gap-3 lg:col-span-2 border-t lg:border-t-0 border-slate-50 pt-4 lg:pt-0 shrink-0">
+            <div className="flex items-center justify-end gap-2 lg:col-span-2 border-t lg:border-t-0 border-slate-50 pt-4 lg:pt-0 shrink-0">
                 {isActionable ? (
                     <Button
                         size="sm"
-                        disabled={checkingIn}
+                        disabled={isProcessing}
                         onClick={() => onCheckin(outpass.id)}
                         className="w-full lg:w-auto h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold shadow-sm"
                     >
                         <LogIn className="w-4 h-4 mr-2" />
-                        {checkingIn ? 'Saving...' : 'Return'}
+                        {isProcessing ? 'Saving...' : 'Return'}
                     </Button>
                 ) : (
-                    <div className="w-full text-center lg:text-right">
-                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 flex items-center justify-center lg:justify-end gap-1.5">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Returned
-                        </span>
+                    <div className="flex items-center justify-end gap-2 w-full">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            title="Revert to Active"
+                            disabled={isProcessing}
+                            onClick={() => onRevert(outpass.id)}
+                            className="h-10 w-10 text-amber-600 bg-amber-50 hover:bg-amber-100 hover:text-amber-700 border-0 rounded-xl shrink-0 transition-colors"
+                        >
+                            <Undo2 className="w-5 h-5" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete Record"
+                            disabled={isProcessing}
+                            onClick={() => onDelete(outpass.id)}
+                            className="h-10 w-10 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-xl shrink-0 transition-colors"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </Button>
                     </div>
                 )}
             </div>
@@ -483,7 +454,7 @@ export default function OutpassesPage() {
     const [outpasses, setOutpasses] = useState<Outpass[]>([]);
     const [classes, setClasses] = useState<ClassOption[]>([]);
     const [loading, setLoading] = useState(true);
-    const [checkingInId, setCheckingInId] = useState<number | null>(null);
+    const [loadingActionId, setLoadingActionId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
 
     // Tab & Filters
@@ -512,11 +483,18 @@ export default function OutpassesPage() {
             setStats(statsRes.data);
             const raw: Outpass[] = listRes.data.data ?? listRes.data;
             const order = { overdue: 0, outside: 1, returned: 2 };
-            raw.sort((a, b) =>
-                order[a.status] !== order[b.status]
-                    ? order[a.status] - order[b.status]
-                    : new Date(a.out_time).getTime() - new Date(b.out_time).getTime()
-            );
+            raw.sort((a, b) => {
+                // Active cases come first when mixed
+                if (order[a.status] !== order[b.status]) {
+                    return order[a.status] - order[b.status];
+                }
+                // If both are returned, sort by actual_in_time DESC (latest first)
+                if (a.status === 'returned') {
+                    return new Date(b.actual_in_time!).getTime() - new Date(a.actual_in_time!).getTime();
+                }
+                // If active, oldest out_time first
+                return new Date(a.out_time).getTime() - new Date(b.out_time).getTime();
+            });
             setOutpasses(raw);
             setClasses(classesRes.data);
         } catch {
@@ -535,7 +513,7 @@ export default function OutpassesPage() {
 
     const handleCheckin = async (id: number) => {
         if (!window.confirm('Mark this student as returned?')) return;
-        setCheckingInId(id);
+        setLoadingActionId(id);
         try {
             await api.put(`/outpasses/${id}/checkin`);
             toast.success('Student marked as returned');
@@ -543,7 +521,35 @@ export default function OutpassesPage() {
         } catch {
             toast.error('Failed to check in student');
         } finally {
-            setCheckingInId(null);
+            setLoadingActionId(null);
+        }
+    };
+
+    const handleRevert = async (id: number) => {
+        if (!window.confirm('Revert status back to Active (Outside)?')) return;
+        setLoadingActionId(id);
+        try {
+            await api.put(`/outpasses/${id}/revert`);
+            toast.success('Check-in reverted successfully');
+            loadData();
+        } catch {
+            toast.error('Failed to revert status');
+        } finally {
+            setLoadingActionId(null);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Permanently delete this outpass record?')) return;
+        setLoadingActionId(id);
+        try {
+            await api.delete(`/outpasses/${id}`);
+            toast.success('Outpass deleted successfully');
+            loadData();
+        } catch {
+            toast.error('Failed to delete outpass');
+        } finally {
+            setLoadingActionId(null);
         }
     };
 
@@ -720,8 +726,11 @@ export default function OutpassesPage() {
                                 <OutpassCard
                                     key={rec.id}
                                     outpass={rec}
-                                    checkingIn={checkingInId === rec.id}
+                                    tab={tab}
+                                    loadingActionId={loadingActionId}
                                     onCheckin={handleCheckin}
+                                    onRevert={handleRevert}
+                                    onDelete={handleDelete}
                                     delay={idx * 0.04}
                                 />
                             ))}
