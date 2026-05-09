@@ -629,7 +629,7 @@ const router = createBrowserRouter([
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Sonner />
+      <Sonner duration={2000} />
 
       <PWAPrompt />
       <RouterProvider router={router} />

@@ -49,12 +49,12 @@ const initials = (name: string) =>
 
 const relativeTime = (iso: string) => {
   const diff = Date.now() - new Date(iso).getTime();
-  const mins  = Math.floor(diff / 60000);
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(mins / 60);
-  const days  = Math.floor(hours / 24);
-  if (mins < 2)  return 'just now';
+  const days = Math.floor(hours / 24);
+  if (mins < 2) return 'just now';
   if (mins < 60) return `${mins} min ago`;
-  if (hours < 24)return `${hours} hours ago`;
+  if (hours < 24) return `${hours} hours ago`;
   return `${days} days ago`;
 };
 
@@ -66,9 +66,9 @@ const fmtDate = (iso: string) =>
 
 /* ─────────────────────── status config ─────────────────────── */
 const statusCfg = {
-  active:    { label: 'Active',     dot: 'bg-rose-500' },
-  recovered: { label: 'Recovered',  dot: 'bg-[#00865B]' },
-  sent_home: { label: 'Sent Home',  dot: 'bg-blue-500' },
+  active: { label: 'Active', dot: 'bg-rose-500' },
+  recovered: { label: 'Recovered', dot: 'bg-[#00865B]' },
+  sent_home: { label: 'Sent Home', dot: 'bg-blue-500' },
 };
 
 /* ═══════════════════════ MAIN PAGE ═══════════════════════ */
@@ -79,25 +79,25 @@ export default function MedicalPage() {
     (user as any)?.permissions?.some((p: any) => p.name === 'manage_medical');
 
   /* data */
-  const [active,   setActive]   = useState<MedicalRecord[]>([]);
-  const [history,  setHistory]  = useState<MedicalRecord[]>([]);
+  const [active, setActive] = useState<MedicalRecord[]>([]);
+  const [history, setHistory] = useState<MedicalRecord[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [tab,      setTab]      = useState<'active' | 'history'>('active');
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<'active' | 'history'>('active');
 
   /* add form */
-  const [showForm,      setShowForm]      = useState(false);
-  const [submitting,    setSubmitting]    = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [studentSearch, setStudentSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [illnessName,   setIllnessName]   = useState('');
-  const [reportedAt,    setReportedAt]    = useState(() => {
+  const [illnessName, setIllnessName] = useState('');
+  const [reportedAt, setReportedAt] = useState(() => {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
     return new Date(now.getTime() - offset).toISOString().slice(0, 16);
   });
-  const [wentToDoctor,  setWentToDoctor]  = useState(false);
-  const [notes,         setNotes]         = useState('');
+  const [wentToDoctor, setWentToDoctor] = useState(false);
+  const [notes, setNotes] = useState('');
 
   /* history search */
   const [histSearch, setHistSearch] = useState('');
@@ -112,12 +112,12 @@ export default function MedicalPage() {
     api.get('/medical/active').then(r => setActive(r.data)), []);
 
   const loadHistory = useCallback(() =>
-    api.get('/medical/history', { 
-      params: { 
+    api.get('/medical/history', {
+      params: {
         search: histSearch || undefined,
         sort: historySort === 'resolved' ? 'resolved_at' : undefined,
         status_filter: historyFilter !== 'all' ? historyFilter : undefined
-      } 
+      }
     }).then(r => setHistory(Array.isArray(r.data) ? r.data : (r.data?.data ?? []))), [histSearch, historySort, historyFilter]);
 
   useEffect(() => {
@@ -151,11 +151,11 @@ export default function MedicalPage() {
     setSubmitting(true);
     try {
       const { data } = await api.post('/medical', {
-        student_id:     selectedStudent.id,
-        illness_name:   illnessName.trim(),
-        reported_at:    reportedAt,
+        student_id: selectedStudent.id,
+        illness_name: illnessName.trim(),
+        reported_at: reportedAt,
         went_to_doctor: wentToDoctor,
-        notes:          notes.trim() || undefined,
+        notes: notes.trim() || undefined,
       });
       setActive(prev => [data, ...prev]);
       toast.success('Medical record added');
@@ -298,7 +298,7 @@ export default function MedicalPage() {
 
           {/* Sent Home Card */}
           <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-[#ebf3ff]/80 w-full relative overflow-hidden transition-all hover:bg-[#ebf3ff] group">
-             <div className="bg-[#d1e4fb] rounded-xl p-3 shrink-0 text-blue-600 transition-colors group-hover:bg-[#d1e4fb]">
+            <div className="bg-[#d1e4fb] rounded-xl p-3 shrink-0 text-blue-600 transition-colors group-hover:bg-[#d1e4fb]">
               <Home className="w-6 h-6" />
             </div>
             <div className="flex flex-col">
@@ -315,11 +315,10 @@ export default function MedicalPage() {
               key={t}
               id={`tab-${t}`}
               onClick={() => setTab(t)}
-              className={`flex items-center px-6 py-2.5 rounded-full text-base font-bold transition-all ${
-                tab === t 
-                  ? 'bg-white shadow-sm text-[#00865B]' 
+              className={`flex items-center px-6 py-2.5 rounded-full text-base font-bold transition-all ${tab === t
+                  ? 'bg-white shadow-sm text-[#00865B]'
                   : 'text-slate-500 hover:text-slate-800'
-              }`}
+                }`}
             >
               {t === 'active' ? 'Active Cases' : 'History'}
             </button>
@@ -331,7 +330,7 @@ export default function MedicalPage() {
           <div className="animate-slide-up space-y-4">
             {loading ? (
               <div className="space-y-4">
-                {[1,2,3].map(i => <div key={i} className="h-28 rounded-3xl bg-slate-200/50 animate-pulse" />)}
+                {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-3xl bg-slate-200/50 animate-pulse" />)}
               </div>
             ) : active.length === 0 ? (
               <div className="py-20 flex flex-col items-center text-center gap-4 bg-white rounded-[2rem] shadow-sm">
@@ -347,12 +346,12 @@ export default function MedicalPage() {
               <div className="flex flex-col space-y-4">
                 {/* Desktop Table Headers */}
                 <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  <div className="col-span-3">Student / ID</div>
-                  <div className="col-span-3">Condition & Protocol</div>
-                  <div className="col-span-3">Reporting Metadata</div>
+                  <div className="col-span-3">Student</div>
+                  <div className="col-span-3">Condition</div>
+                  <div className="col-span-3">Details</div>
                   <div className="col-span-3 text-right">Actions</div>
                 </div>
-                
+
                 {active.map((rec, idx) => (
                   <ActiveCard
                     key={rec.id}
@@ -364,7 +363,7 @@ export default function MedicalPage() {
                     delay={idx * 0.04}
                   />
                 ))}
-                
+
                 <div className="pt-8 pb-4 text-center">
                   <span className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">
                     End of current medical queue
@@ -391,8 +390,8 @@ export default function MedicalPage() {
               </div>
               <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0">
                 <div className="relative min-w-[130px] flex-1 sm:flex-none">
-                  <select 
-                    value={historyFilter} 
+                  <select
+                    value={historyFilter}
                     onChange={e => setHistoryFilter(e.target.value as any)}
                     className="w-full h-14 pl-4 pr-10 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-700 outline-none appearance-none cursor-pointer"
                   >
@@ -403,8 +402,8 @@ export default function MedicalPage() {
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
                 <div className="relative min-w-[140px] flex-1 sm:flex-none">
-                  <select 
-                    value={historySort} 
+                  <select
+                    value={historySort}
                     onChange={e => setHistorySort(e.target.value as any)}
                     className="w-full h-14 pl-4 pr-10 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-700 outline-none appearance-none cursor-pointer"
                   >
@@ -429,10 +428,10 @@ export default function MedicalPage() {
                   <div className="col-span-4">Condition & Status</div>
                   <div className="col-span-5">Timestamps</div>
                 </div>
-                
+
                 {history.map((rec, idx) => (
-                  <div 
-                    key={rec.id} 
+                  <div
+                    key={rec.id}
                     className="bg-white rounded-[1.25rem] p-4 lg:px-5 lg:py-4 shadow-sm border border-slate-100 flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-4 hover:shadow-md transition-all animate-slide-up"
                     style={{ animationDelay: `${idx * 0.04}s`, animationFillMode: 'backwards' }}
                   >
@@ -449,43 +448,42 @@ export default function MedicalPage() {
                     </div>
 
                     <div className="flex-1 min-w-0 lg:col-span-4 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
-                       <div className="flex flex-col gap-2">
-                          <p className="text-[14px] font-bold text-slate-900 truncate" title={rec.illness_name}>{rec.illness_name}</p>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[9px] font-extrabold px-2 py-1 rounded-md uppercase tracking-widest ${
-                              rec.status === 'recovered' 
-                                ? 'bg-emerald-50 text-emerald-600' 
-                                : 'bg-blue-50 text-blue-600'
+                      <div className="flex flex-col gap-2">
+                        <p className="text-[14px] font-bold text-slate-900 truncate" title={rec.illness_name}>{rec.illness_name}</p>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-extrabold px-2 py-1 rounded-md uppercase tracking-widest ${rec.status === 'recovered'
+                              ? 'bg-emerald-50 text-emerald-600'
+                              : 'bg-blue-50 text-blue-600'
                             }`}>
-                              {rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}
+                            {rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}
+                          </span>
+                          <div className={`flex items-center gap-1.5 w-fit pl-1.5 pr-2.5 py-1 rounded-md border transition-colors ${rec.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
+                            <span className={`text-[9px] font-extrabold uppercase tracking-widest ${rec.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
+                              {rec.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
                             </span>
-                            <div className={`flex items-center gap-1.5 w-fit pl-1.5 pr-2.5 py-1 rounded-md border transition-colors ${rec.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
-                              <span className={`text-[9px] font-extrabold uppercase tracking-widest ${rec.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
-                                {rec.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
-                              </span>
-                            </div>
                           </div>
-                       </div>
+                        </div>
+                      </div>
                     </div>
-                    
+
                     <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex items-center justify-between gap-4">
                       <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-6 lg:gap-8">
-                         <div className="flex items-start gap-2 text-[11px] text-slate-500 min-w-[110px]">
-                            <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
-                            <div className="flex flex-col leading-[1.3]">
-                               <span className="text-slate-400">Reported</span>
-                               <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.reported_at)}</span>
-                               <span>{fmtTime(rec.reported_at)}</span>
-                            </div>
-                         </div>
-                         <div className="flex items-start gap-2 text-[11px] text-slate-500 min-w-[110px]">
-                            <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-[1px] ${rec.status === 'recovered' ? 'text-emerald-500' : 'text-blue-500'}`} />
-                            <div className="flex flex-col leading-[1.3]">
-                               <span className="text-slate-400">{rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}</span>
-                               <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
-                               <span>{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
-                            </div>
-                         </div>
+                        <div className="flex items-start gap-2 text-[11px] text-slate-500 min-w-[110px]">
+                          <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
+                          <div className="flex flex-col leading-[1.3]">
+                            <span className="text-slate-400">Reported</span>
+                            <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.reported_at)}</span>
+                            <span>{fmtTime(rec.reported_at)}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2 text-[11px] text-slate-500 min-w-[110px]">
+                          <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-[1px] ${rec.status === 'recovered' ? 'text-emerald-500' : 'text-blue-500'}`} />
+                          <div className="flex flex-col leading-[1.3]">
+                            <span className="text-slate-400">{rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}</span>
+                            <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                            <span>{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                          </div>
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
@@ -589,14 +587,14 @@ export default function MedicalPage() {
                   className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-[#00865B]/20 font-bold"
                 />
                 <datalist id="common-illnesses">
-                   <option value="Fever / High Temperature" />
-                   <option value="Common Cold / Flu" />
-                   <option value="Headache / Migraine" />
-                   <option value="Stomach Ache / Pain" />
-                   <option value="Food Issue / Indigestion" />
-                   <option value="Sprained Ankle / Muscle" />
-                   <option value="Allergic Reaction" />
-                   <option value="Cough / Sore Throat" />
+                  <option value="Fever / High Temperature" />
+                  <option value="Common Cold / Flu" />
+                  <option value="Headache / Migraine" />
+                  <option value="Stomach Ache / Pain" />
+                  <option value="Food Issue / Indigestion" />
+                  <option value="Sprained Ankle / Muscle" />
+                  <option value="Allergic Reaction" />
+                  <option value="Cough / Sore Throat" />
                 </datalist>
               </div>
 
@@ -615,9 +613,8 @@ export default function MedicalPage() {
                 <button
                   id="toggle-doctor"
                   onClick={() => setWentToDoctor(v => !v)}
-                  className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all border ${
-                    wentToDoctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'
-                  }`}
+                  className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all border ${wentToDoctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'
+                    }`}
                 >
                   <span className={`text-[13px] font-black flex items-center gap-3 ${wentToDoctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
                     <div className={`p-2 rounded-lg transition-colors ${wentToDoctor ? 'bg-[#00865B]/10' : 'bg-slate-100'}`}>
@@ -625,12 +622,10 @@ export default function MedicalPage() {
                     </div>
                     Consulted Doctor
                   </span>
-                  <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 ${
-                    wentToDoctor ? 'bg-[#00865B]' : 'bg-slate-200'
-                  }`}>
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                      wentToDoctor ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
+                  <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 ${wentToDoctor ? 'bg-[#00865B]' : 'bg-slate-200'
+                    }`}>
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${wentToDoctor ? 'translate-x-4' : 'translate-x-0'
+                      }`} />
                   </div>
                 </button>
               </div>
@@ -698,43 +693,43 @@ function ActiveCard({
 
       {/* MIDDLE SECTION - Illness Details */}
       <div className="flex-1 min-w-0 lg:col-span-3 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
-         <p className="text-[14px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
-         <div className={`flex items-center gap-1.5 w-fit pl-2 pr-3 py-1.5 rounded-lg border transition-colors ${record.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
-           <Switch 
-             checked={record.went_to_doctor} 
-             onCheckedChange={onToggleDoctor}
-             disabled={loading}
-             className="scale-[0.8] origin-left data-[state=checked]:bg-[#00865B] shadow-sm -ml-0.5"
-           />
-           <span className={`text-[10px] font-extrabold uppercase tracking-widest ${record.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
-             {record.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
-           </span>
-         </div>
-         {record.notes && (
-           <p className="mt-0.5 text-[12px] text-slate-500 line-clamp-2" title={record.notes}>
-             {record.notes}
-           </p>
-         )}
+        <p className="text-[14px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
+        <div className={`flex items-center gap-1.5 w-fit pl-2 pr-3 py-1.5 rounded-lg border transition-colors ${record.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
+          <Switch
+            checked={record.went_to_doctor}
+            onCheckedChange={onToggleDoctor}
+            disabled={loading}
+            className="scale-[0.8] origin-left data-[state=checked]:bg-[#00865B] shadow-sm -ml-0.5"
+          />
+          <span className={`text-[10px] font-extrabold uppercase tracking-widest ${record.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
+            {record.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
+          </span>
+        </div>
+        {record.notes && (
+          <p className="mt-0.5 text-[12px] text-slate-500 line-clamp-2" title={record.notes}>
+            {record.notes}
+          </p>
+        )}
       </div>
-      
+
       {/* METADATA SECTION */}
       <div className="flex-1 min-w-0 lg:col-span-3 flex flex-row lg:flex-col gap-4 lg:gap-2.5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
-         <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1">
-            <Clock className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
-            <div className="flex flex-col leading-[1.3]">
-               <span className="font-bold text-slate-700">{relativeTime(record.reported_at)}</span>
-               <span>{fmtTime(record.reported_at)}</span>
+        <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1">
+          <Clock className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+          <div className="flex flex-col leading-[1.3]">
+            <span className="font-bold text-slate-700">{relativeTime(record.reported_at)}</span>
+            <span>{fmtTime(record.reported_at)}</span>
+          </div>
+        </div>
+        {record.reported_by && (
+          <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1 min-w-0">
+            <User className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+            <div className="flex flex-col leading-[1.3] min-w-0 w-full">
+              <span>Reported by</span>
+              <span className="font-bold text-slate-700 truncate block w-full">{record.reported_by.name}</span>
             </div>
-         </div>
-         {record.reported_by && (
-            <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1 min-w-0">
-               <User className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
-               <div className="flex flex-col leading-[1.3] min-w-0 w-full">
-                  <span>Reported by</span>
-                  <span className="font-bold text-slate-700 truncate block w-full">{record.reported_by.name}</span>
-               </div>
-            </div>
-         )}
+          </div>
+        )}
       </div>
 
       {/* RIGHT SECTION - Actions */}

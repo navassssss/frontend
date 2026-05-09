@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/contexts/NotificationsContext';
 import api from '@/lib/api';
 
 interface SubMenuItem {
@@ -78,20 +77,29 @@ const managerNavItems: NavItem[] = [
     { icon: User, label: 'Profile', path: '/profile' },
 ];
 
+/** Find which group label (if any) owns the current path */
+function getActiveGroupLabel(items: NavItem[], pathname: string): string | null {
+    for (const item of items) {
+        if (item.subItems?.some(s => pathname === s.path || pathname.startsWith(s.path + '/'))) {
+            return item.label;
+        }
+    }
+    return null;
+}
+
 export function Sidebar() {
     const { user, logout } = useAuth();
-    const { unreadCount } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
     const isPrincipal = user?.role === 'principal' || (user?.role === 'teacher' && user?.is_vice_principal);
     const isManager = user?.role === 'manager';
     const [openIssuesCount, setOpenIssuesCount] = useState(0);
-    // Open Students by default to match the mock visual
-    const [expandedItems, setExpandedItems] = useState<string[]>(['Students']);
+    // Single-open accordion — null means all collapsed
+    const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
     const hasPermission = (name: string) => {
         if (isPrincipal) return true;
-        return user?.permissions?.some(p => p.name === name) || false;
+        return user?.permissions?.some((p: any) => p.name === name) || false;
     };
 
     let navItems = [...baseNavItems];
@@ -100,7 +108,7 @@ export function Sidebar() {
     } else if (isManager) {
         navItems = managerNavItems;
     } else {
-        // Build dynamically for teachers based on new permissions
+        // Build dynamically for teachers based on permissions
         const extendedItems: NavItem[] = [];
 
         if (hasPermission('manage_students')) {
@@ -151,6 +159,12 @@ export function Sidebar() {
         navItems.splice(navItems.length - 1, 0, ...extendedItems);
     }
 
+    // Auto-expand the group that owns the current route
+    useEffect(() => {
+        const activeGroup = getActiveGroupLabel(navItems, location.pathname);
+        setExpandedItem(activeGroup);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.pathname]);
 
     useEffect(() => {
         if (!isPrincipal) return;
@@ -158,13 +172,11 @@ export function Sidebar() {
         let lastFetch = 0;
 
         const safeFetch = () => {
-            // Minimum 60s between open-issue refreshes
             if (Date.now() - lastFetch < 60_000) return;
             lastFetch = Date.now();
             fetchOpenIssuesCount();
         };
 
-        // Initial load
         safeFetch();
 
         const onVisible = () => { if (document.visibilityState === 'visible') safeFetch(); };
@@ -181,29 +193,18 @@ export function Sidebar() {
 
     const fetchOpenIssuesCount = async () => {
         try {
-            // Use a lightweight count endpoint — returns { count: N } not full list
             const { data } = await api.get('/issues?status=open&per_page=1');
-            // Paginated response: total gives the real count
             setOpenIssuesCount(data.total ?? data.length ?? 0);
         } catch {
             // Silently fail — stale badge count is acceptable
         }
     };
 
-
-    const handleLogout = () => {
-        logout();
-        navigate('/staff/login');
-    };
-
+    /** Toggle a group open/closed. Clicking the already-open group collapses it. */
     const toggleExpand = (label: string, e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setExpandedItems(prev =>
-            prev.includes(label)
-                ? prev.filter(p => p !== label)
-                : [...prev, label]
-        );
+        setExpandedItem(prev => (prev === label ? null : label));
     };
 
     return (
@@ -222,11 +223,10 @@ export function Sidebar() {
             {/* Navigation */}
             <div className="flex-1 overflow-y-auto py-2 px-0">
                 {navItems.map((item) => {
-                    const isExpanded = expandedItems.includes(item.label);
-                    // Determine if the item or any of its subitems is active
+                    const isExpanded = expandedItem === item.label;
                     const isActive = item.path
                         ? location.pathname === item.path
-                        : item.subItems?.some(sub => location.pathname === sub.path);
+                        : item.subItems?.some(sub => location.pathname === sub.path || location.pathname.startsWith(sub.path + '/'));
 
                     return (
                         <div key={item.label} className="mb-0.5">
@@ -262,6 +262,11 @@ export function Sidebar() {
                                 >
                                     <item.icon className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={2.5} />
                                     <span className="flex-1 text-[14px]">{item.label}</span>
+                                    {item.showBadge && openIssuesCount > 0 && (
+                                        <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full h-5 min-w-[1.25rem] px-1.5 flex items-center justify-center">
+                                            {openIssuesCount > 99 ? '99+' : openIssuesCount}
+                                        </span>
+                                    )}
                                 </RouterNavLink>
                             )}
 
@@ -289,36 +294,7 @@ export function Sidebar() {
                 })}
             </div>
 
-            {/* Footer Actions */}
-            <div className="pb-8 pt-6 space-y-1">
-                <button
-                    onClick={() => navigate('/notifications')}
-                    className="w-full flex items-center gap-3 pl-6 pr-4 py-3 text-slate-600 font-bold hover:bg-slate-200/50 hover:text-slate-900 transition-colors mr-6 rounded-r-xl relative"
-                >
-                    <div className="relative">
-                        <Bell className="w-[18px] h-[18px] flex-shrink-0 text-slate-500" strokeWidth={2.5} />
-                        {unreadCount > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-bold rounded-full h-4 min-w-[1rem] px-1 flex items-center justify-center">
-                                {unreadCount > 99 ? '99+' : unreadCount}
-                            </span>
-                        )}
-                    </div>
-                    <span className="text-[14px]">Notifications</span>
-                </button>
-                <button hidden
-                    className="w-full flex items-center gap-3 pl-6 pr-4 py-3 text-slate-600 font-bold hover:bg-slate-200/50 hover:text-slate-900 transition-colors mr-6 rounded-r-xl"
-                >
-                    <HelpCircle className="w-[18px] h-[18px] flex-shrink-0 text-slate-500" strokeWidth={2.5} />
-                    <span className="text-[14px]">Support Desk</span>
-                </button>
-                <button
-                    className="w-full flex items-center gap-3 pl-6 pr-4 py-3 text-rose-600 font-bold hover:bg-rose-50 transition-colors mr-6 rounded-r-xl"
-                    onClick={handleLogout}
-                >
-                    <LogOut className="w-[18px] h-[18px] flex-shrink-0 text-rose-500" strokeWidth={2.5} />
-                    <span className="text-[14px]">Logout</span>
-                </button>
-            </div>
+            {/* Sidebar footer removed — notifications, profile, logout moved to DesktopHeader */}
         </aside>
     );
 }
