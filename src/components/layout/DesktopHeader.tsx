@@ -90,7 +90,7 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
         : user?.role || '';
 
     return (
-        <header className="hidden lg:flex fixed top-0 left-60 right-0 h-[64px] z-40 bg-white border-b border-slate-100/80 items-center px-6 gap-0">
+        <header className="hidden lg:flex fixed top-0 left-60 right-0 h-[72px] z-40 bg-white border-b border-slate-100/80 items-center px-6 gap-0">
 
             {/* ── LEFT: Breadcrumb / Page context ─────────────────────────────── */}
             <div className="flex items-center gap-1.5 shrink-0 min-w-[180px]">
@@ -127,16 +127,16 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
             </div>
 
             {/* ── CENTER: Search ───────────────────────────────────────────────── */}
-            <div className="flex-1 flex justify-center px-4">
-                <div className="relative w-full max-w-[260px]">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            <div className="flex-1 flex justify-center px-6">
+                <div className="relative w-full max-w-[300px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     <input
                         type="text"
                         placeholder="Search records..."
                         className="
-                            w-full h-[36px] pl-8 pr-3
+                            w-full h-[42px] pl-10 pr-4
                             bg-slate-50 border border-slate-200/80
-                            rounded-lg text-[12px] text-slate-700
+                            rounded-xl text-[13px] text-slate-700
                             placeholder:text-slate-400/80
                             focus:outline-none focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-300/80
                             transition-all duration-150
@@ -161,16 +161,19 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
                 </button>
 
                 {/* Divider */}
-                <div className="w-px h-4 bg-slate-200 mx-3" />
+                <div className="w-px h-6 bg-slate-200 mx-3" />
 
                 {/* Profile cluster */}
                 <div className="relative" ref={menuRef}>
                     <button
                         onClick={() => setShowMenu(v => !v)}
-                        className="flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-slate-50 transition-all duration-150 focus:outline-none group"
+                        className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-50 transition-all duration-150 focus:outline-none group"
                     >
                         {/* Avatar */}
-                            <div className="w-9 h-9 rounded-full bg-emerald-700 flex items-center justify-center text-white text-[10px] font-black shrink-0 ring-2 ring-emerald-700/10">
+                        <div className="w-10 h-10 rounded-full bg-emerald-700 flex items-center justify-center text-white text-[11px] font-black shrink-0 ring-2 ring-emerald-700/10">
+                            {avatarInitials}
+                        </div>
+                        <div className="hidden xl:flex flex-col items-start leading-none">
                             <span className="text-[12px] font-semibold text-slate-700 leading-[1.3]">{displayName}</span>
                             <span className="text-[10px] text-slate-400 leading-[1.3] capitalize">{displayRole}</span>
                         </div>

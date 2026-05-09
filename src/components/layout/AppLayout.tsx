@@ -34,7 +34,7 @@ export function AppLayout({ children, title, hideNav = false, showBack = false, 
       {/* Desktop: left margin for sidebar, top padding for header, constrained width */}
       <main className="
         pb-24 pt-4 px-4 max-w-lg mx-auto
-        lg:ml-60 lg:pb-8 lg:pt-16 lg:px-0 lg:max-w-none lg:mx-0
+        lg:ml-60 lg:pb-8 lg:pt-20 lg:px-0 lg:max-w-none lg:mx-0
       ">
         {/* Inner content wrapper — constrains max width on very wide screens */}
         <div className="lg:max-w-[1600px] lg:mx-auto lg:px-8">
