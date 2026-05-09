@@ -164,10 +164,10 @@ export function Sidebar() {
     };
 
     return (
-        <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#f8fafc] border-r border-[#e2e8f0] z-50 flex flex-col hidden lg:flex shadow-sm">
+        <aside className="fixed left-0 top-0 bottom-0 w-60 bg-[#f8fafc] border-r border-[#e2e8f0] z-50 flex flex-col hidden lg:flex shadow-sm">
             {/* Logo */}
-            <div className="pt-5 pb-5 px-6 flex items-center border-b border-slate-100">
-                <div className="w-9 h-9 bg-emerald-800 rounded-lg flex items-center justify-center mr-3 shadow-sm shrink-0">
+            <div className="pt-5 pb-5 px-5 flex items-center border-b border-slate-100">
+                <div className="w-8 h-8 bg-emerald-800 rounded-lg flex items-center justify-center mr-2.5 shadow-sm shrink-0">
                     <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -179,7 +179,7 @@ export function Sidebar() {
             {/* Navigation */}
             <div className="flex-1 overflow-y-auto py-3 px-0">
                 {/* Section label */}
-                <p className="text-[9px] font-black tracking-[0.15em] text-slate-400 uppercase px-6 pb-2">Main Menu</p>
+                <p className="text-[9px] font-black tracking-[0.15em] text-slate-400 uppercase px-5 pb-2">Main Menu</p>
                 {navItems.map((item) => {
                     const isExpanded = expandedItem === item.label;
                     const isActive = item.path
@@ -194,7 +194,7 @@ export function Sidebar() {
                             {item.subItems ? (
                                 <div
                                     className={cn(
-                                        "flex items-center gap-2.5 py-2 pl-6 pr-4 mr-4 rounded-r-xl transition-colors duration-150 cursor-pointer",
+                                        "flex items-center gap-2.5 py-2 pl-5 pr-3 mr-3 rounded-r-xl transition-colors duration-150 cursor-pointer",
                                         isActive
                                             ? "bg-emerald-100/60 text-emerald-800"
                                             : "text-slate-500 hover:bg-slate-200/40 hover:text-slate-800"
@@ -214,7 +214,7 @@ export function Sidebar() {
                                 <RouterNavLink
                                     to={item.path!}
                                     className={({ isActive }) => cn(
-                                        "flex items-center gap-2.5 py-2 pl-6 pr-4 mr-4 rounded-r-xl transition-colors duration-150",
+                                        "flex items-center gap-2.5 py-2 pl-5 pr-3 mr-3 rounded-r-xl transition-colors duration-150",
                                         isActive
                                             ? "bg-emerald-100/60 text-emerald-800 font-semibold"
                                             : "text-slate-500 font-medium hover:bg-slate-200/40 hover:text-slate-800"
@@ -237,7 +237,7 @@ export function Sidebar() {
                                             key={subItem.path}
                                             to={subItem.path}
                                             className={({ isActive }) => cn(
-                                                "flex items-center pl-12 pr-4 py-1.5 mr-4 rounded-r-xl transition-colors duration-150 text-[12px]",
+                                                "flex items-center pl-11 pr-4 py-1.5 mr-3 rounded-r-xl transition-colors duration-150 text-[12px]",
                                                 isActive
                                                     ? "text-emerald-700 font-semibold bg-emerald-50/50"
                                                     : "text-slate-400 font-medium hover:text-slate-700 hover:bg-slate-100/50"
