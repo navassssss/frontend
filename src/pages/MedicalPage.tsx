@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Search, Heart, Home, CheckCircle2, Clock, RefreshCw,
   ChevronRight, Stethoscope, History, AlertTriangle, X, User,
-  Calendar, FileText, Thermometer, Filter, Shield, Briefcase
+  Calendar, FileText, Thermometer, Filter, Shield, Briefcase, Trash2
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -101,6 +101,8 @@ export default function MedicalPage() {
 
   /* history search */
   const [histSearch, setHistSearch] = useState('');
+  const [historySort, setHistorySort] = useState<'reported' | 'resolved'>('reported');
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'recovered' | 'sent_home'>('all');
 
   /* action loading */
   const [actionId, setActionId] = useState<number | null>(null);
@@ -110,8 +112,13 @@ export default function MedicalPage() {
     api.get('/medical/active').then(r => setActive(r.data)), []);
 
   const loadHistory = useCallback(() =>
-    api.get('/medical/history', { params: { search: histSearch || undefined } })
-       .then(r => setHistory(Array.isArray(r.data) ? r.data : (r.data?.data ?? []))), [histSearch]);
+    api.get('/medical/history', { 
+      params: { 
+        search: histSearch || undefined,
+        sort: historySort === 'resolved' ? 'resolved_at' : undefined,
+        status_filter: historyFilter !== 'all' ? historyFilter : undefined
+      } 
+    }).then(r => setHistory(Array.isArray(r.data) ? r.data : (r.data?.data ?? []))), [histSearch, historySort, historyFilter]);
 
   useEffect(() => {
     if (!canAccess) return;
@@ -133,7 +140,7 @@ export default function MedicalPage() {
 
   useEffect(() => {
     if (tab === 'history' && canAccess) loadHistory();
-  }, [tab, histSearch, canAccess]);
+  }, [tab, histSearch, historySort, historyFilter, canAccess]);
 
   /* ── Submit new record ── */
   const handleSubmit = async () => {
@@ -201,6 +208,17 @@ export default function MedicalPage() {
       setActive(prev => prev.map(r => r.id === id ? { ...r, went_to_doctor: data.went_to_doctor } : r));
       toast.success(data.went_to_doctor ? 'Doctor consulted' : 'Doctor not consulted');
     } catch { toast.error('Failed to update consultation status'); } finally { setActionId(null); }
+  };
+
+  /* ── Delete history record ── */
+  const handleDeleteHistory = async (id: number) => {
+    if (!window.confirm('Permanently delete this medical record?')) return;
+    setActionId(id);
+    try {
+      await api.delete(`/medical/${id}`);
+      setHistory(prev => prev.filter(r => r.id !== id));
+      toast.success('Record deleted');
+    } catch { toast.error('Failed to delete record'); } finally { setActionId(null); }
   };
 
   /* ── Student search ── */
@@ -360,15 +378,36 @@ export default function MedicalPage() {
         {/* ════════════ HISTORY TAB ════════════ */}
         {tab === 'history' && (
           <div className="animate-slide-up space-y-6">
-            <div className="relative max-w-xl">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <Input
-                id="history-search"
-                placeholder="Search past records..."
-                value={histSearch}
-                onChange={e => setHistSearch(e.target.value)}
-                className="pl-14 h-14 bg-white border-0 rounded-2xl shadow-sm text-base font-medium focus-visible:ring-[#00865B]/20"
-              />
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Input
+                  id="history-search"
+                  placeholder="Search past records..."
+                  value={histSearch}
+                  onChange={e => setHistSearch(e.target.value)}
+                  className="pl-14 h-14 bg-white border-0 rounded-2xl shadow-sm text-base font-medium focus-visible:ring-[#00865B]/20"
+                />
+              </div>
+              <div className="flex gap-2">
+                <select 
+                  value={historyFilter} 
+                  onChange={e => setHistoryFilter(e.target.value as any)}
+                  className="h-14 px-4 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-600 outline-none hover:bg-slate-50 transition-colors"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="recovered">Recovered Only</option>
+                  <option value="sent_home">Sent Home Only</option>
+                </select>
+                <select 
+                  value={historySort} 
+                  onChange={e => setHistorySort(e.target.value as any)}
+                  className="h-14 px-4 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-[#00865B]/20 text-slate-600 outline-none hover:bg-slate-50 transition-colors"
+                >
+                  <option value="reported">Sort by Reported Time</option>
+                  <option value="resolved">Sort by Resolved Time</option>
+                </select>
+              </div>
             </div>
 
             {history.length === 0 ? (
@@ -423,23 +462,35 @@ export default function MedicalPage() {
                        </div>
                     </div>
                     
-                    <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8">
-                       <div className="flex items-start gap-2 text-[11px] text-slate-500">
-                          <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
-                          <div className="flex flex-col leading-[1.3]">
-                             <span className="text-slate-400">Reported</span>
-                             <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.reported_at)}</span>
-                             <span>{fmtTime(rec.reported_at)}</span>
-                          </div>
-                       </div>
-                       <div className="flex items-start gap-2 text-[11px] text-slate-500">
-                          <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-[1px] ${rec.status === 'recovered' ? 'text-emerald-500' : 'text-blue-500'}`} />
-                          <div className="flex flex-col leading-[1.3]">
-                             <span className="text-slate-400">{rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}</span>
-                             <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
-                             <span>{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
-                          </div>
-                       </div>
+                    <div className="flex-1 min-w-0 lg:col-span-5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 lg:gap-8">
+                      <div className="flex gap-4 sm:gap-6 lg:gap-8">
+                         <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                            <Clock className="w-3.5 h-3.5 shrink-0 mt-[1px] text-slate-400" />
+                            <div className="flex flex-col leading-[1.3]">
+                               <span className="text-slate-400">Reported</span>
+                               <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.reported_at)}</span>
+                               <span>{fmtTime(rec.reported_at)}</span>
+                            </div>
+                         </div>
+                         <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                            <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-[1px] ${rec.status === 'recovered' ? 'text-emerald-500' : 'text-blue-500'}`} />
+                            <div className="flex flex-col leading-[1.3]">
+                               <span className="text-slate-400">{rec.status === 'recovered' ? 'Recovered' : 'Sent Home'}</span>
+                               <span className="font-bold text-slate-700 mt-0.5">{fmtDate(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                               <span>{fmtTime(rec.recovered_at || rec.sent_home_at || rec.reported_at)}</span>
+                            </div>
+                         </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteHistory(rec.id)}
+                        disabled={actionId === rec.id}
+                        className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0"
+                        title="Delete Record"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
