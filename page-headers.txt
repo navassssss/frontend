@@ -1,0 +1,670 @@
+FILE AchievementSettingsPage.tsx
+154:             <div className="p-4 space-y-6 pb-24 max-w-4xl mx-auto">
+155:                 <div className="flex items-center gap-4">
+158:                         className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
+160:                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+163:                         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+164:                             <Settings2 className="w-6 h-6 text-primary" />
+167:                         <p className="text-sm text-muted-foreground">Manage categories and star rules</p>
+172:                     <div className="flex justify-center py-12">
+173:                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+176:                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+179:                         <Card className="md:col-span-2 border-primary/20 bg-primary/5">
+181:                                 <CardTitle className="text-lg flex items-center gap-2">
+182:                                     <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+189:                                     <div className="space-y-4">
+190:                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+---
+FILE AddStudentsPage.tsx
+---
+FILE AnnouncementDetailPage.tsx
+59:     if (mime?.startsWith('image/'))       return <ImageIcon className="w-5 h-5 text-violet-500" />;
+60:     if (mime === 'application/pdf')       return <FileText className="w-5 h-5 text-red-500" />;
+61:     return <Paperclip className="w-5 h-5 text-slate-500" />;
+---
+FILE AnnouncementsPage.tsx
+117:             <div className="px-4 py-6 pb-24 space-y-8">
+120:                 <div className="flex items-start justify-between gap-4">
+122:                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">
+125:                         <h1 className="text-[32px] font-black text-slate-900 leading-tight tracking-tight">
+128:                         <p className="text-sm text-slate-500 mt-1.5 max-w-sm leading-relaxed">
+133:                     <div className="flex items-center gap-2 mt-1 shrink-0">
+135:                         <div className="flex bg-slate-100 rounded-full p-1 gap-0.5">
+140:                                     className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+154:                                 className="flex items-center gap-1.5 px-4 py-2 bg-[#008f6c] text-white text-xs font-bold rounded-full hover:bg-[#007a5c] transition-colors shadow-sm"
+---
+FILE AttendancePage.tsx
+173:             <div className="p-4 lg:p-6 space-y-6">
+175:                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+176:                     <div className="text-center md:text-left">
+177:                         <h1 className="text-2xl font-bold text-foreground">Attendance Overview</h1>
+178:                         <p className="text-muted-foreground text-[11px]">
+184:                     <div className="flex items-center justify-center bg-card border border-border rounded-xl p-1 shadow-sm mx-auto md:mx-0 w-fit">
+185:                         <Button variant="ghost" size="icon" onClick={() => changeDate(-1)} className="h-8 w-8 shrink-0">
+186:                             <ChevronLeft className="w-4 h-4" />
+188:                         <div className="flex items-center justify-center gap-2 px-2 sm:px-3 border-x border-border mx-1 min-w-[120px]">
+189:                             <CalendarIcon className="w-3.5 h-3.5 text-primary shrink-0" />
+194:                                 className="bg-transparent border-none focus:ring-0 text-[13px] font-medium w-auto cursor-pointer p-0"
+197:                         <Button variant="ghost" size="icon" onClick={() => changeDate(1)} className="h-8 w-8 shrink-0">
+198:                             <ChevronRight className="w-4 h-4" />
+205:                             className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-105 w-full md:w-auto"
+207:                             <Plus className="w-4 h-4 mr-2" />
+---
+FILE CCEMarksPage.tsx
+105:             <div className="p-4 space-y-6">
+107:                 <div className="space-y-2">
+116:                                     <div className="flex items-center gap-2">
+117:                                         {subject.isLocked && <Lock className="w-3 h-3" />}
+129:                         <CardContent className="p-4">
+130:                             <div className="flex items-center justify-between">
+132:                                     <h3 className="font-semibold text-foreground">{selectedSubjectInfo.name}</h3>
+133:                                     <p className="text-sm text-muted-foreground">{selectedSubjectInfo.className}</p>
+135:                                 <div className="flex items-center gap-2">
+138:                                             <><Lock className="w-3 h-3 mr-1" /> Locked</>
+140:                                             <><Unlock className="w-3 h-3 mr-1" /> Open</>
+---
+FILE CCEWorkDetailPage.tsx
+106:             <span className="inline-flex items-center px-3 py-1 bg-[#4ade80] text-emerald-900 text-[11px] font-black rounded-full whitespace-nowrap">
+114:             <span className="inline-flex items-center px-3 py-1 bg-emerald-100 text-emerald-700 text-[11px] font-black uppercase tracking-wider rounded-full whitespace-nowrap">
+121:         <span className="inline-flex items-center px-3 py-1 bg-slate-200 text-slate-500 text-[11px] font-black uppercase tracking-wider rounded-full whitespace-nowrap">
+---
+FILE CCEWorksPage.tsx
+134:             <div className="p-4 md:p-8 max-w-[1100px] mx-auto space-y-6 pb-24 min-h-screen">
+137:                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 animate-fade-in">
+139:                         <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">CCE Works Management</h1>
+140:                         <p className="text-sm font-medium text-slate-500 mt-1">Expand classes to manage subject-specific evaluation rubrics.</p>
+144:                         className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-bold text-sm px-6 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
+146:                         <Plus className="w-4 h-4" strokeWidth={3} /> New Assessment
+151:                 <div className="space-y-4">
+153:                         <div className="space-y-4">
+154:                             {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-3xl animate-pulse border border-slate-100" />)}
+165:                             <div key={className} className={`bg-white rounded-3xl transition-all duration-300 shadow-[0_2px_12px_rgb(0,0,0,0.03)] border border-slate-100 cursor-pointer overflow-hidden ${isExpanded ? 'p-2 md:p-3' : 'hover:-translate-y-0.5'}`}>
+168:                                 <div className={`p-4 md:p-5 flex items-center justify-between transition-colors ${!isExpanded && 'hover:bg-slate-50/50'}`} onClick={() => toggleClass(className)}>
+169:                                     <div className="flex items-center gap-4 md:gap-5">
+170:                                         <div className="w-[52px] h-[52px] rounded-2xl bg-emerald-100/60 flex items-center justify-center font-black text-emerald-800 text-[18px] shrink-0">
+---
+FILE ClassesPage.tsx
+108:                 <div className="p-6 text-center">Loading...</div>
+115:             <div className="p-4 lg:p-6 space-y-6">
+117:                 <div className="animate-fade-in">
+118:                     <h2 className="text-2xl font-bold text-foreground">
+121:                     <p className="text-[11px] text-muted-foreground">{classes.length} {isClassTeacher ? 'class assigned' : 'classes'}</p>
+125:                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+129:                             className="animate-slide-up hover:shadow-lg transition-all hover:border-primary/40"
+132:                             <CardContent className="p-3">
+134:                                 <div className="flex items-start gap-3 mb-3">
+135:                                     <div className={`w-9 h-9 rounded-lg ${getClassColor(classRoom.level)} flex items-center justify-center flex-shrink-0`}>
+136:                                         <GraduationCap className="w-4 h-4" />
+138:                                     <div className="flex-1 min-w-0">
+139:                                         <h3 className="font-bold text-sm text-foreground leading-tight">
+142:                                         <Badge variant="secondary" className="text-[10px] mt-1 bg-muted text-muted-foreground font-medium">
+143:                                             <Users className="w-3 h-3 mr-1" />
+---
+FILE ClassPerformanceReportPage.tsx
+174:                 <div className="p-8 text-center">Loading...</div>
+182:                 <div className="p-8 text-center">Class not found</div>
+189:             <div className="p-4 space-y-6 pb-24 max-w-7xl mx-auto">
+191:                 <div className="flex items-center justify-between animate-fade-in mb-2">
+192:                     <div className="flex items-center gap-4">
+195:                             className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
+197:                             <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
+200:                             <h2 className="text-xl font-bold text-foreground">Class {report.class.name}</h2>
+201:                             <p className="text-sm text-muted-foreground">Performance Report</p>
+211:                             className="gap-2 shadow-sm shadow-destructive/20"
+---
+FILE ClassReportPage.tsx
+250:             <div className="p-4 space-y-6 pb-24">
+254:                         <CardTitle className="text-base">Select Class</CardTitle>
+273:                     <div className="text-center py-8">
+274:                         <p className="text-muted-foreground">Loading report...</p>
+281:                         <div className="grid grid-cols-2 gap-3">
+283:                                 <CardContent className="p-4">
+284:                                     <div className="flex items-center gap-3">
+285:                                         <Users className="w-8 h-8 text-primary" />
+287:                                             <p className="text-2xl font-bold">{reportData.students.length}</p>
+---
+FILE CreateAnnouncementPage.tsx
+200:             <div className="p-4 space-y-6 pb-24 max-w-3xl mx-auto">
+203:                 <div className="flex items-center gap-3 animate-fade-in">
+206:                         className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+208:                         <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+211:                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+212:                             <Megaphone className="w-5 h-5 text-primary" />
+215:                         <p className="text-sm text-muted-foreground">Publish targeted messages to staff or students</p>
+220:                 <Card className="animate-slide-up">
+221:                     <CardHeader className="pb-3">
+222:                         <CardTitle className="text-sm font-semibold">Who is this for?</CardTitle>
+224:                     <CardContent className="grid grid-cols-2 gap-3">
+232:                                 className={`rounded-xl border-2 p-4 flex flex-col items-center gap-2 transition-all font-semibold text-sm ${
+---
+FILE CreateCCEWorkPage.tsx
+137:                 <div className="flex items-center justify-center h-[50vh]">
+138:                     <div className="w-8 h-8 border-4 border-[#00a67e]/20 border-t-[#00a67e] rounded-full animate-spin" />
+146:             <div className="p-4 md:p-8 max-w-[1200px] mx-auto space-y-8 bg-slate-50/50">
+148:                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+152:                             className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-2 transition-colors hover:opacity-80"
+154:                             <span className="text-slate-400 flex items-center gap-1">
+155:                                 &larr; ASSESSMENTS <span className="text-slate-300">/</span>
+157:                             <span className="text-[#00a67e]">{editId ? 'EDIT ENTRY' : 'NEW ENTRY'}</span>
+159:                         <h1 className="text-3xl md:text-[32px] font-black text-slate-800 tracking-tight leading-none mb-3">
+162:                         <p className="text-sm font-medium text-slate-500 max-w-xl leading-relaxed">
+168:                     <div className="hidden md:flex items-center gap-3">
+171:                             className="h-[60px] px-6 rounded-full border border-slate-200 bg-white text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors shadow-sm leading-tight text-center"
+---
+FILE CreateDutyPage.tsx
+100:       <div className="min-h-screen bg-slate-50/50 pb-24">
+103:         <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+104:           <div className="flex items-center gap-4">
+107:               className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-800"
+109:               <ArrowLeft className="w-5 h-5" />
+111:             <h1 className="text-xl font-bold text-emerald-900 tracking-tight">Create New Institutional Duty</h1>
+113:           <div className="flex items-center gap-4">
+114:             <button className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors hidden sm:block">
+120:               className="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold rounded-full shadow-sm transition-colors disabled:opacity-70"
+127:         <main className="max-w-7xl mx-auto p-4 md:p-8">
+128:           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+131:             <div className="lg:col-span-2 space-y-6">
+134:               <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-slate-100">
+135:                 <div className="flex items-center gap-2.5 mb-2">
+136:                   <div className="w-6 h-6 rounded-full bg-emerald-700 flex items-center justify-center">
+137:                     <Info className="w-3.5 h-3.5 text-white" />
+---
+FILE CreateTaskPage.tsx
+218:       <div className="p-4 md:p-8 max-w-[1280px] mx-auto pb-24">
+221:         <div className="flex items-center gap-4 mb-8 animate-fade-in">
+224:             className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm shrink-0"
+226:             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+229:             <h1 className="text-2xl font-black text-foreground tracking-tight">Create Task</h1>
+230:             <p className="text-sm text-muted-foreground mt-0.5">
+237:         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 xl:gap-8 animate-slide-up">
+240:           <div className="space-y-5">
+243:             <Card className="shadow-sm border-border/60">
+244:               <CardContent className="p-6 space-y-5">
+246:                   <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4">
+251:                   <div className="space-y-2 mb-4">
+252:                     <label className="text-sm font-semibold text-foreground">
+254:                         <>Custom Title Suffix <span className="text-muted-foreground font-normal">(optional)</span></>
+---
+FILE DashboardPage.tsx
+126:       <div className="lg:hidden p-4 space-y-6">
+128:           <h2 className="text-xl font-bold text-foreground">
+132:           <p className="text-muted-foreground text-sm mt-0.5">Here's your overview for today</p>
+136:         <div className="grid grid-cols-2 gap-3">
+138:             <p className="col-span-2 text-center text-sm text-muted-foreground py-4">Loading...</p>
+142:               <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+143:                 <div className="flex items-center justify-between mb-3">
+144:                   <div className={`w-9 h-9 rounded-xl ${stat.color || 'bg-primary/10'} flex items-center justify-center`}>
+145:                     <Icon className="w-4 h-4 text-foreground" />
+147:                   <ArrowUpRight className="w-4 h-4 text-muted-foreground/40" />
+149:                 <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+150:                 <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+158:           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</h3>
+159:           <div className="grid grid-cols-3 gap-3">
+---
+FILE DutiesPage.tsx
+183:                 className="group bg-white rounded-[2rem] p-5 md:p-6 shadow-sm border border-slate-100 cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-300 animate-slide-up flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-6"
+187:                 <div className="flex flex-1 items-start gap-4 md:gap-6 w-full">
+189:                    <div className={`w-[52px] h-[52px] md:w-[60px] md:h-[60px] rounded-2xl flex items-center justify-center shrink-0 ${mainIconConfig}`}>
+190:                        <DutyIcon className="w-6 h-6 md:w-7 md:h-7" strokeWidth={2.5} />
+193:                    <div className="flex-1 min-w-0 pr-4">
+194:                        <div className="flex flex-wrap items-center gap-2 mb-2">
+195:                            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border-transparent ${badgeConfig}`}>
+198:                            <span className="text-[10px] font-semibold text-slate-400">
+203:                        <h3 className="text-[15px] md:text-[17px] font-bold text-slate-800 leading-snug group-hover:text-emerald-700 transition-colors mb-1.5 line-clamp-1">
+207:                        <p className="text-[13px] font-medium text-slate-500 leading-relaxed max-w-[85%] md:line-clamp-2">
+214:                 <div className="w-full md:w-48 shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center mt-3 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100">
+215:                     <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full md:mb-2 ${statusConfig.bg}`}>
+217:                              <Award className="w-3.5 h-3.5 text-emerald-600" />
+---
+FILE DutyDetailPage.tsx
+91:       <div className="p-6 text-center text-muted-foreground">Loading...</div>
+102:       <div className="p-4 md:p-6 pb-28 space-y-6">
+105:         <div className="space-y-2">
+106:           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+107:             <button onClick={() => navigate('/')} className="hover:text-primary transition-colors">Dashboard</button>
+108:             <ChevronRight className="w-3 h-3" />
+109:             <button onClick={() => navigate('/duties')} className="hover:text-primary transition-colors">Duty Schedule</button>
+110:             <ChevronRight className="w-3 h-3" />
+111:             <span className="text-foreground">Duty Details</span>
+115:             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+117:             <ArrowLeft className="w-4 h-4" /> Back to Duties
+122:         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+124:             <div className="flex items-center gap-2 mb-2">
+125:               <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+---
+FILE DutyPlannerPage.tsx
+81:     <div className="min-h-screen bg-background">
+83:       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+84:         <div className="flex items-center h-14 px-4 max-w-lg mx-auto">
+86:             <ArrowLeft className="w-5 h-5" />
+88:           <h1 className="font-semibold text-foreground ml-3">Weekly Planner</h1>
+92:       <main className="p-4 max-w-lg mx-auto pb-8">
+94:         <div className="flex items-center justify-between mb-6 animate-fade-in">
+96:             <ChevronLeft className="w-5 h-5" />
+98:           <span className="font-semibold text-foreground">{currentWeek}</span>
+100:             <ChevronRight className="w-5 h-5" />
+105:         <div className="space-y-3 animate-slide-up">
+109:               className={`animate-slide-up ${day === 'Sun' || day === 'Sat' ? 'opacity-60' : ''}`}
+112:               <CardContent className="p-4">
+113:                 <div className="flex items-center justify-between mb-3">
+115:                     <p className="font-semibold text-foreground">{day}</p>
+116:                     <p className="text-xs text-muted-foreground">
+---
+FILE FeeManagementPage.tsx
+---
+FILE FeeReportsPage.tsx
+371:             <div className="space-y-4">
+373:                 <div className="hidden lg:flex items-center gap-2 mb-2">
+378:                         className="gap-1.5 text-muted-foreground hover:text-foreground"
+380:                         <ArrowLeft className="w-4 h-4" />
+384:                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+385:                     <TabsList className="grid w-full grid-cols-4">
+392:                     <TabsContent value="summary" className="mt-4">
+396:                     <TabsContent value="monthly" className="mt-4">
+400:                     <TabsContent value="class" className="mt-4">
+404:                     <TabsContent value="daily" className="mt-4">
+---
+FILE ForwardIssuePage.tsx
+89:             <div className="max-w-xl mx-auto p-4">
+90:                 <Button variant="ghost" className="mb-4 pl-0" onClick={() => navigate(-1)}>
+91:                     <ArrowLeft className="w-4 h-4 mr-2" />
+100:                     <CardContent className="space-y-6">
+101:                         <div className="bg-muted p-4 rounded-lg">
+102:                             <h3 className="font-semibold">{issue.title}</h3>
+103:                             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{issue.description}</p>
+106:                         <form onSubmit={handleSubmit} className="space-y-4">
+107:                             <div className="space-y-2">
+108:                                 <label className="text-sm font-medium">Assign To <span className="text-destructive">*</span></label>
+110:                                     <SelectTrigger className="h-12">
+115:                                                     <div className="flex items-center gap-3">
+116:                                                         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+117:                                                             <span className="text-xs font-semibold text-primary-foreground">
+121:                                                         <div className="flex flex-col items-start">
+122:                                                             <span className="font-medium">{teacher.name}</span>
+123:                                                             <span className="text-xs text-muted-foreground capitalize">{teacher.role}</span>
+FILE IssueDetailPage.tsx
+132:     <div className="min-h-screen bg-background">
+133:       <header className="sticky top-0 border-b bg-background/95 backdrop-blur z-10">
+134:         <div className="flex items-center h-14 px-4 max-w-2xl lg:max-w-4xl mx-auto">
+136:             <ArrowLeft className="w-5 h-5" />
+138:           <h1 className="ml-3 font-semibold">Issue Details</h1>
+142:       <main className="p-4 max-w-2xl lg:max-w-4xl mx-auto space-y-4 pb-32">
+146:           <CardContent className="p-4 space-y-3">
+148:             <div className="flex gap-2 flex-wrap">
+149:               <Badge className={`${getStatusBadgeStyle(issue.status)} font-medium px-2.5 py-0.5 border`}>
+152:               <Badge className={`${getPriorityBadgeStyle(issue.priority)} font-medium px-2.5 py-0.5 border`}>
+158:             <h2 className="text-lg font-bold leading-tight">{issue.title}</h2>
+161:             <p className="text-sm text-muted-foreground leading-relaxed">{issue.description}</p>
+164:             <div className="space-y-2 pt-1">
+165:               <div className="flex items-center gap-2 text-sm text-muted-foreground">
+166:                 <Tag className="w-4 h-4 text-teal-600 flex-shrink-0" />
+167:                 <span className="font-medium">{issue.category.name}</span>
+---
+FILE IssuesPage.tsx
+77:       <div className="p-4 space-y-4">
+80:         <div className="flex items-center justify-between">
+82:             <h2 className="text-xl font-bold flex items-center gap-2">
+84:               <Badge variant="secondary" className="text-xs font-normal">
+92:             className="bg-primary hover:bg-primary/90"
+94:             <Plus className="w-4 h-4 mr-1" />
+100:         <div className="flex gap-2">
+105:               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeFilter === tab.id
+---
+FILE LandingPage.tsx
+11:         <div className="min-h-screen w-full bg-background relative overflow-hidden selection:bg-primary/20">
+13:             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+14:                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl animate-pulse" />
+15:                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-3xl animate-pulse delay-1000" />
+16:                 <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-yellow-500/5 blur-3xl animate-pulse delay-2000" />
+19:             <div className="container mx-auto px-4 h-full min-h-screen flex flex-col">
+21:                 <nav className="flex items-center justify-between py-6">
+22:                     <div className="flex items-center gap-2">
+23:                         <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+24:                             <GraduationCap className="h-6 w-6 text-primary-foreground" />
+26:                         <span className="text-xl font-bold tracking-tight">DHIC Portal</span>
+31:                 <div className="flex-1 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 py-8 lg:py-0">
+34:                     <div className="flex-1 space-y-8 text-center lg:text-left animate-in slide-in-from-left-5 fade-in duration-700">
+35:                         <Badge variant="outline" className="py-1.5 px-4 rounded-full border-primary/20 bg-primary/5 text-primary animate-in fade-in zoom-in duration-700 delay-100">
+36:                             <Sparkles className="w-3.5 h-3.5 mr-2" />
+40:                         <div className="space-y-4">
+41:                             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1]">
+43:                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Excellence</span>
+45:                             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+---
+FILE LoginPage.tsx
+39:     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 flex items-center justify-center p-4 relative overflow-hidden">
+41:       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+43:         <div className="absolute -top-32 -right-32 w-96 h-96 bg-white/10 rounded-full"></div>
+46:         <div className="absolute top-20 left-12 space-y-4">
+48:           <div className="w-24 h-12 bg-white/20 rounded-t-full"></div>
+50:           <div className="grid grid-cols-5 gap-2">
+52:               <div key={i} className="w-1.5 h-1.5 bg-white/30 rounded-full"></div>
+56:           <div className="flex gap-3">
+57:             <div className="w-6 h-32 bg-white/20 rounded-full"></div>
+58:             <div className="w-6 h-24 bg-white/15 rounded-full mt-4"></div>
+63:         <div className="absolute top-16 right-1/4">
+64:           <div className="flex items-center gap-3">
+65:             <div className="w-8 h-8 bg-white/20 rounded-full"></div>
+66:             <div className="w-6 h-6 bg-white/15 rounded-full"></div>
+71:         <div className="absolute bottom-20 left-16 flex items-end gap-3">
+72:           <div className="w-3 h-3 bg-cyan-300/40 rounded-full"></div>
+73:           <div className="space-y-2">
+74:             <div className="grid grid-cols-4 gap-1.5">
+76:                 <div key={i} className="w-1.5 h-1.5 bg-white/25 rounded-full"></div>
+---
+FILE MedicalPage.tsx
+233:         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
+234:           <AlertTriangle className="w-12 h-12 text-amber-400 mb-4" />
+235:           <h2 className="text-lg font-bold text-slate-800 mb-2">Access Restricted</h2>
+236:           <p className="text-sm text-slate-500">You don't have permission to access Medical Records.</p>
+245:       <div className="p-4 md:p-10 max-w-[1280px] mx-auto pb-28 space-y-8 bg-slate-50/30 min-h-screen">
+248:         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 animate-fade-in">
+250:             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
+253:             <p className="text-base text-slate-600 mt-2 font-medium">
+257:           <div className="flex items-center gap-3 shrink-0">
+261:               className="h-12 w-12 rounded-2xl border-0 bg-white shadow-sm text-slate-600 hover:bg-slate-100"
+263:               <Filter className="w-5 h-5" />
+268:               className="h-12 px-6 rounded-2xl gap-2 bg-[#00865B] hover:bg-[#00704c] text-white shadow-md border-0 transition-all font-semibold"
+270:               <Plus className="w-5 h-5" /> Add Record
+---
+FILE NotFound.tsx
+14:     <div className="flex min-h-screen items-center justify-center bg-background p-6">
+15:       <div className="text-center animate-fade-in">
+16:         <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+17:           <span className="text-4xl font-bold text-muted-foreground">404</span>
+19:         <h1 className="mb-2 text-2xl font-bold text-foreground">Page Not Found</h1>
+20:         <p className="mb-6 text-muted-foreground">The page you're looking for doesn't exist</p>
+22:           <Home className="w-5 h-5" />
+---
+FILE NotificationsPage.tsx
+77:             <div className="p-4 space-y-4 max-w-2xl mx-auto">
+78:                 <div className="flex items-center justify-between animate-fade-in">
+79:                     <h2 className="text-xl font-bold text-foreground">Notifications</h2>
+82:                             <CheckCheck className="w-4 h-4 mr-1" />
+89:                     <p className="text-center text-muted-foreground py-8">Loading notifications...</p>
+91:                     <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in">
+92:                         <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+93:                             <Bell className="w-8 h-8 text-muted-foreground" />
+95:                         <h3 className="font-semibold text-foreground">No new notifications</h3>
+96:                         <p className="text-sm text-muted-foreground mt-1">
+101:                     <div className="space-y-3">
+106:                                 className={`transition-all duration-300 animate-slide-up ${!n.read_at ? "border-l-4 border-l-primary" : "opacity-75"
+111:                                 <CardContent className="p-4 cursor-pointer hover:bg-secondary/50 transition-colors">
+112:                                     <div className="flex gap-4">
+113:                                         <div className={`mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${!n.read_at ? "bg-primary/10" : "bg-secondary"
+---
+FILE OutpassesPage.tsx
+168:         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 pb-24 sm:pb-6 animate-fade-in" onClick={onClose}>
+169:             <div className="w-full max-w-md max-h-[calc(100vh-7rem)] sm:max-h-[85vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+171:                 <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+172:                     <h2 className="text-lg font-black text-slate-900">New Outpass</h2>
+175:                         className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-500"
+177:                         <X className="w-4 h-4" />
+181:                 <div className="flex-1 overflow-y-auto p-6 space-y-5">
+183:                     <div className="space-y-2">
+184:                         <label className="text-sm font-bold text-slate-700">Student</label>
+186:                             <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#ebf3ff]/50 border border-blue-100">
+187:                                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-sm font-bold text-blue-700 shrink-0 shadow-sm">
+190:                                 <div className="flex-1 min-w-0">
+191:                                     <p className="font-bold text-slate-900">{selectedStudent.name}</p>
+192:                                     <p className="text-sm font-medium text-slate-500">
+198:                                     className="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center shrink-0 transition-colors shadow-sm bg-blue-50/50"
+200:                                     <X className="w-4 h-4 text-slate-500" />
+204:                             <div className="space-y-2 relative">
+205:                                 <div className="relative">
+206:                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+---
+FILE ProfilePage.tsx
+52:             <div className="p-4 md:p-8 space-y-6 pb-12">
+55:                 <div className="animate-fade-in">
+56:                     <h1 className="text-2xl font-black text-slate-800">Profile Information</h1>
+57:                     <p className="text-sm text-slate-500 mt-1">Manage your institutional identity and public-facing academic profile.</p>
+60:                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+63:                     <div className="lg:col-span-2 space-y-5 animate-slide-up">
+66:                         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+67:                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-6">
+69:                                 <div className="relative shrink-0">
+70:                                     <div className="w-20 h-20 rounded-2xl bg-[#008f6c] text-white flex items-center justify-center text-2xl font-black shadow-md">
+73:                                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
+74:                                         <CheckCircle className="w-3 h-3 text-white" />
+77:                                 <div className="flex-1">
+78:                                     <h2 className="text-xl font-black text-slate-800">{user?.name || 'User'}</h2>
+79:                                     <p className="text-sm text-slate-500 mt-0.5">{user?.department ? `${user.department} Department` : 'Staff Member'}</p>
+80:                                     <span className="inline-block mt-2 text-[10px] font-black px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 uppercase tracking-widest">
+87:                                     className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#008f6c] hover:bg-[#007a5c] text-white font-bold text-sm transition-colors shadow-sm disabled:opacity-60 shrink-0"
+89:                                     <Save className="w-4 h-4" />
+---
+FILE RaiseIssuePage.tsx
+105:     <div className="min-h-screen bg-muted/10 p-4 md:p-8 flex items-center justify-center">
+106:       <div className="w-full max-w-2xl mx-auto">
+108:         <div className="mb-6 flex items-center justify-between">
+110:             <Button variant="ghost" size="sm" onClick={() => navigate('/issues')} className="mb-2 -ml-2 text-muted-foreground hover:text-foreground">
+111:               <ArrowLeft className="w-4 h-4 mr-2" />
+114:             <h1 className="text-2xl font-bold tracking-tight">Raise New Issue</h1>
+115:             <p className="text-muted-foreground">Submit a ticket for maintenance or improvements</p>
+120:         <Card className="border-muted shadow-sm">
+121:           <CardContent className="p-6 md:p-8">
+122:             <form onSubmit={handleSubmit} className="space-y-8">
+125:               <div className="space-y-4">
+126:                 <div className="flex items-center justify-between">
+127:                   <h3 className="text-lg font-semibold tracking-tight">Issue Details</h3>
+130:                 <div className="grid gap-5">
+132:                   <div className="space-y-1.5">
+133:                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+134:                       Issue Title <span className="text-red-500">*</span>
+140:                       className="bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/20"
+---
+FILE ReportDetailPage.tsx
+119:         <div className="flex items-center justify-center min-h-[50vh]">
+120:           <div className="animate-pulse flex flex-col items-center">
+121:             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+122:             <p className="mt-4 text-muted-foreground font-medium">Loading report data...</p>
+132:         <div className="text-center mt-20 text-muted-foreground">Report not found.</div>
+147:       <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 pb-28 animate-fade-in">
+150:         <div className="mb-8">
+153:             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium mb-6 transition-colors"
+155:             <ArrowLeft className="w-4 h-4" /> Back to all reports
+---
+FILE ReportsPage.tsx
+123:       <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 pb-28">
+126:         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+128:             <h1 className="text-3xl font-bold text-foreground tracking-tight">Duty Reports</h1>
+129:             <p className="text-sm text-muted-foreground mt-1">Review and manage academic faculty submissions</p>
+131:           <div className="relative w-full md:w-72">
+132:             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+138:               className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+144:         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+146:           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-center">
+147:             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+148:             <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Total Reports</p>
+149:             <p className="text-4xl font-black text-foreground tracking-tight">{totalCount.toLocaleString()}</p>
+150:             <div className="flex items-center gap-1.5 mt-3 text-emerald-600">
+151:               <ArrowUpRight className="w-4 h-4" />
+152:               <span className="text-xs font-bold">12% from last month</span>
+157:           <div className="bg-card border border-border rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-center">
+158:             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500" />
+159:             <div className="p-6">
+160:               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Pending Review</p>
+---
+FILE SelectRolePage.tsx
+40:     <div className="min-h-screen bg-background flex flex-col p-6">
+41:       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+45:           <p className="text-muted-foreground mt-2">{user?.name || 'User'}</p>
+46:           <p className="text-sm text-muted-foreground mt-1">Select your role to continue</p>
+50:         <div className="space-y-4">
+56:               className={`animate-slide-up stagger-${index + 1}`}
+59:               <CardContent className="p-4 flex items-center gap-4">
+60:                 <div className={`w-14 h-14 rounded-2xl ${role.color} flex items-center justify-center flex-shrink-0`}>
+61:                   <role.icon className="w-7 h-7 text-primary-foreground" />
+63:                 <div className="flex-1 min-w-0">
+64:                   <h3 className="font-semibold text-foreground">{role.title}</h3>
+65:                   <p className="text-sm text-muted-foreground line-clamp-2">{role.description}</p>
+67:                 <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+---
+FILE StudentAchievementReviewPage.tsx
+199:             <div className="p-4 space-y-6 pb-24">
+201:                 <div className="flex items-center justify-between gap-4">
+202:                     <div className="flex items-center gap-4">
+206:                                 className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
+208:                                 <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
+212:                             <h2 className="text-xl font-bold text-foreground">
+216:                                 <p className="text-sm text-muted-foreground">Student Profile & History</p>
+218:                                 <p className="text-sm text-muted-foreground">Manage and review student submissions</p>
+225:                             <Settings className="w-4 h-4 mr-2" />
+233:                     <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20 animate-slide-up">
+234:                         <CardContent className="p-6">
+235:                             <div className="flex items-center justify-between">
+236:                                 <div className="flex items-center gap-4">
+---
+FILE StudentAttendanceOverviewPage.tsx
+85:                 <div className="p-4 text-center py-12">
+86:                     <p className="text-muted-foreground">Loading attendance...</p>
+95:                 <div className="p-4 text-center py-12">
+96:                     <p className="text-muted-foreground">No attendance data found</p>
+104:             <div className="p-4 space-y-4 pb-24">
+107:                 <div className="flex items-center gap-3 animate-fade-in">
+110:                         className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center"
+112:                         <ArrowLeft className="w-5 h-5" />
+115:                         <h2 className="text-lg font-bold text-foreground">{data.student.name}</h2>
+116:                         <p className="text-sm text-muted-foreground">Attendance Overview</p>
+121:                 <Card className="animate-slide-up">
+122:                     <CardContent className="p-6">
+---
+FILE StudentDetailPage.tsx
+77:                 <div className="flex justify-center items-center h-[60vh]">
+78:                     <div className="w-10 h-10 border-4 border-emerald-700 border-t-transparent rounded-full animate-spin"></div>
+87:                 <div className="p-4 text-center py-12">
+88:                     <p className="text-muted-foreground">Student not found</p>
+89:                     <Button className="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white" onClick={() => navigate('/students')}>
+109:             <div className="p-4 md:p-6 space-y-5 pb-24 animate-fade-in min-h-screen">
+112:                 <div className="flex items-center gap-3 mb-4">
+113:                     <Button variant="ghost" size="icon" onClick={() => navigate('/students')} className="hover:bg-slate-100">
+114:                         <ArrowLeft className="w-5 h-5 text-slate-700" />
+---
+FILE StudentFeeDetailPage.tsx
+256:                     <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400">
+257:                         <CheckCircle className="w-3 h-3 mr-1" />
+263:                     <Badge className="bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400">
+264:                         <Clock className="w-3 h-3 mr-1" />
+270:                     <Badge className="bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400">
+271:                         <AlertCircle className="w-3 h-3 mr-1" />
+---
+FILE StudentMarksPage.tsx
+---
+FILE StudentsPage.tsx
+111:             <div className="p-4 lg:p-6 max-w-[1400px] mx-auto space-y-6 pb-24">
+114:                 <div className="hidden lg:flex flex-col md:flex-row md:items-start justify-between gap-3 mb-6 animate-fade-in">
+116:                         <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1">
+119:                         <p className="text-[11px] font-medium text-muted-foreground mt-0.5 max-w-md">
+124:                     <div className="bg-emerald-300 rounded-2xl p-4 flex items-center justify-between gap-6 min-w-[200px] shadow-sm shrink-0">
+126:                             <p className="text-[10px] font-black uppercase text-emerald-900 tracking-widest mb-1 opacity-80">Total Students</p>
+127:                             <p className="text-3xl font-black text-emerald-950 leading-none">{pagination.total}</p>
+129:                         <Users className="w-6 h-6 text-emerald-800 opacity-60" />
+134:                 <div className="lg:hidden bg-[#0a6c5b] text-white rounded-2xl p-5 mb-6 shadow-sm relative overflow-hidden animate-fade-in">
+135:                     <p className="text-[10px] uppercase font-black tracking-[0.15em] text-emerald-300/80 mb-1">
+138:                     <div className="flex items-baseline gap-2">
+139:                         <span className="text-4xl font-black tracking-tight">{pagination.total}</span>
+140:                         <span className="text-emerald-50 text-sm font-semibold opacity-90">Total Students</span>
+145:                 <div className="lg:hidden space-y-3 mb-6">
+146:                     <div className="relative">
+147:                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+---
+FILE SubjectDetailPage.tsx
+90:                 <div className="p-4">
+92:                         <CardContent className="p-8 text-center">
+93:                             <p className="text-muted-foreground">Loading...</p>
+104:                 <div className="p-4">
+106:                         <CardContent className="p-8 text-center">
+107:                             <p className="text-muted-foreground">Subject not found</p>
+117:             <div className="p-4 space-y-4">
+119:                 <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+121:                         <CardTitle className="flex items-center gap-2">
+122:                             <BookOpen className="w-5 h-5" />
+125:                         <div className="flex flex-wrap gap-2 mt-2">
+---
+FILE SubjectsPage.tsx
+369:                 <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+370:                     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+371:                         <BookOpen className="w-8 h-8 text-slate-400" />
+373:                     <h2 className="text-lg font-bold text-slate-800 mb-2">Access Restricted</h2>
+374:                     <p className="text-sm text-slate-500 max-w-xs">
+380:                         className="mt-6 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors"
+391:             <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-8 pb-24">
+393:                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+395:                         <h2 className="text-xl font-bold text-foreground">Subjects Directory</h2>
+396:                         <p className="text-sm text-muted-foreground">Manage institutional syllabus structures</p>
+399:                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+402:                             className="rounded-xl flex-1 sm:flex-none"
+405:                             <Download className="w-4 h-4 mr-2" />
+---
+FILE SubmitReportPage.tsx
+65:         <div className="flex items-center justify-center min-h-[60vh]">
+66:           <div className="text-center animate-scale-in">
+67:             <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
+68:               <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+70:             <h2 className="text-xl font-bold text-foreground">Report Submitted!</h2>
+71:             <p className="text-muted-foreground mt-1 text-sm">Your report has been recorded successfully.</p>
+82:       <div className="p-4 md:p-6 max-w-2xl mx-auto pb-28 space-y-6">
+86:           <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+87:             <ArrowLeft className="w-4 h-4" /> Back
+89:           <h1 className="text-2xl font-bold text-foreground tracking-tight">Submit Report</h1>
+90:           <p className="text-sm text-muted-foreground mt-0.5">Document your duty completion with details and attachments.</p>
+93:         <form onSubmit={handleSubmit} className="space-y-5">
+96:           <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+97:             <div className="px-5 py-4 border-b border-border">
+98:               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Step 1</p>
+99:               <h2 className="font-bold text-foreground">Select Duty <span className="text-destructive">*</span></h2>
+101:             <div className="p-4">
+---
+FILE TakeAttendancePage.tsx
+159:             <div className="p-4 space-y-6 pb-24 max-w-2xl mx-auto">
+161:                 <div className="flex items-center gap-4">
+164:                         className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
+166:                         <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
+169:                         <h2 className="text-lg font-bold text-foreground">Attendance Entry</h2>
+170:                         <p className="text-sm text-muted-foreground">Mark student attendance</p>
+175:                 <div className="space-y-2">
+192:                 <div className="space-y-2">
+---
+FILE TaskDetailPage.tsx
+61:       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider"
+---
+FILE TeacherDetailPage.tsx
+186:       <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6 pb-24">
+189:         <div className="flex items-center gap-3 mb-6">
+190:             <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
+191:                 <ArrowLeft className="w-5 h-5" />
+194:                 <h1 className="text-2xl font-bold">Teacher Profile</h1>
+195:                 <p className="text-sm text-muted-foreground">Overview, tasks, and reports</p>
+201:         <div className="mb-8">
+203:           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+206:             <div className="flex items-center gap-4">
+208:               <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shrink-0 shadow-md relative">
+209:                 <span className="text-2xl md:text-3xl font-extrabold text-primary-foreground tracking-tight">
+212:                 <div className="absolute -bottom-1.5 -right-1.5 bg-success text-white rounded-full p-0.5 border-2 border-background shadow-sm">
+213:                   <CheckSquare className="w-3 h-3" />
+218:               <div className="flex-1 min-w-0">
+219:                 <div className="flex items-center gap-2 mb-0.5">
+220:                   <Badge variant="secondary" className="px-2 py-0 text-[9px] uppercase tracking-wider bg-muted text-muted-foreground shrink-0">{teacher.role}</Badge>
+221:                   <span className="text-[10px] text-muted-foreground truncate">Active Account</span>
+223:                 <h2 className="text-lg md:text-2xl font-extrabold text-foreground tracking-tight leading-tight truncate">{teacher.name}</h2>
+---
+FILE TeachersPage.tsx
+208:       <div className="p-4 lg:p-6 space-y-6">
+210:         <div className="flex items-center justify-between animate-fade-in">
+212:             <h2 className="text-2xl font-bold text-foreground">Teachers</h2>
+213:             <p className="text-[11px] text-muted-foreground">{teachers.length} teachers</p>
+216:             <Plus className="w-3.5 h-3.5" />
+222:         <Card className="animate-slide-up">
+223:           <CardContent className="p-3">
+224:             <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Quick Actions</h3>
+225:             <div className="grid grid-cols-5 gap-2">
+228:                 className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
+230:                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-blue-600">
+231:                   <ClipboardList className="w-4 h-4" />
+233:                 <span className="text-[10px] font-medium text-center text-foreground">
+240:                 className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
+242:                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-green-600">
+243:                   <CheckSquare className="w-4 h-4" />
+245:                 <span className="text-[10px] font-medium text-center text-foreground">
+---

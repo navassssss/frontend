@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -197,7 +197,7 @@ export default function CreateAnnouncementPage() {
 
     return (
         <AppLayout title="Create Announcement">
-            <div className="p-4 space-y-6 pb-24 max-w-3xl mx-auto">
+            <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-3xl mx-auto">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 animate-fade-in">
@@ -212,7 +212,7 @@ export default function CreateAnnouncementPage() {
                             <Megaphone className="w-5 h-5 text-primary" />
                             Create Announcement
                         </h2>
-                        <p className="text-sm text-muted-foreground">Publish targeted messages to staff or students</p>
+                        <p className="text-[11px] text-muted-foreground">Publish targeted messages to staff or students</p>
                     </div>
                 </div>
 
@@ -446,7 +446,7 @@ export default function CreateAnnouncementPage() {
 
                 {/* Options */}
                 <Card className="animate-slide-up" style={{ animationDelay: '0.12s' }}>
-                    <CardContent className="p-4 space-y-4">
+                    <CardContent className="p-4 lg:p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium flex items-center gap-2">
@@ -479,3 +479,4 @@ export default function CreateAnnouncementPage() {
         </AppLayout>
     );
 }
+

@@ -142,7 +142,7 @@ export default function TasksPage() {
 
   return (
     <AppLayout title="Tasks">
-      <div className="p-4 md:p-6 max-w-4xl mx-auto pb-28 space-y-5">
+      <div className="p-4 lg:p-6 max-w-4xl mx-auto pb-28 space-y-4">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -150,11 +150,11 @@ export default function TasksPage() {
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
               {isPrincipal && viewMode === 'all' ? 'All Tasks' : 'My Tasks'}
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Track your scheduled duties and assignments</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Track your scheduled duties and assignments</p>
           </div>
           {isPrincipal && (
-            <Button size="sm" onClick={() => navigate('/tasks/new')} className="h-9 rounded-xl">
-              <Plus className="w-4 h-4 mr-1" /> Add
+            <Button size="sm" onClick={() => navigate('/tasks/new')} className="h-8 rounded-xl">
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add
             </Button>
           )}
         </div>
@@ -163,32 +163,32 @@ export default function TasksPage() {
         <div className="flex flex-wrap items-center gap-2">
           {/* Mine / All toggle (principal only) */}
           {isPrincipal && (
-            <div className="flex bg-muted rounded-xl p-0.5 text-sm">
+            <div className="flex bg-muted rounded-xl p-0.5 text-[12px]">
               <button
                 onClick={() => setViewMode('mine')}
-                className={`px-3 py-1.5 rounded-[10px] font-medium transition-all flex items-center gap-1.5 ${viewMode === 'mine' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-2.5 py-1.5 rounded-[10px] font-medium transition-all flex items-center gap-1 ${viewMode === 'mine' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                <User className="w-3.5 h-3.5" /> Mine
+                <User className="w-3 h-3" /> Mine
               </button>
               <button
                 onClick={() => setViewMode('all')}
-                className={`px-3 py-1.5 rounded-[10px] font-medium transition-all flex items-center gap-1.5 ${viewMode === 'all' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-2.5 py-1.5 rounded-[10px] font-medium transition-all flex items-center gap-1 ${viewMode === 'all' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                <Users className="w-3.5 h-3.5" /> All
+                <Users className="w-3 h-3" /> All
               </button>
             </div>
           )}
 
           {/* Filter tabs */}
-          <div className="flex bg-muted rounded-xl p-0.5 text-sm">
+          <div className="flex bg-muted rounded-xl p-0.5 text-[12px]">
             {filterTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-[10px] font-medium transition-all flex items-center gap-1.5 ${activeFilter === tab.id ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-2.5 py-1.5 rounded-[10px] font-medium transition-all flex items-center gap-1 ${activeFilter === tab.id ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {tab.label}
-                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${activeFilter === tab.id ? 'bg-primary text-white' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
+                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${activeFilter === tab.id ? 'bg-primary text-white' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
                   {tab.count}
                 </span>
               </button>
@@ -204,9 +204,9 @@ export default function TasksPage() {
               size="sm"
               onClick={handleBulkDelete}
               disabled={isDeleting}
-              className="h-[34px] px-3 font-semibold rounded-[10px] animate-fade-in"
+              className="h-8 px-3 font-semibold rounded-[10px] animate-fade-in"
             >
-              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Trash2 className="w-4 h-4 mr-1.5" />}
+              {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Trash2 className="w-3.5 h-3.5 mr-1" />}
               Delete ({selectedTaskIds.length})
             </Button>
           )}
@@ -216,31 +216,31 @@ export default function TasksPage() {
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse h-20" />
+              <div key={i} className="bg-card border border-border rounded-2xl p-3 animate-pulse h-16" />
             ))}
           </div>
         ) : filteredTasks.length === 0 ? (
-          <div className="bg-card border border-border rounded-2xl p-12 text-center shadow-sm">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+          <div className="bg-card border border-border rounded-2xl p-8 text-center shadow-sm">
+            <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
             <p className="font-semibold text-foreground">All caught up!</p>
-            <p className="text-sm text-muted-foreground mt-1">No tasks in this category.</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">No tasks in this category.</p>
           </div>
         ) : (
           <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden divide-y divide-border">
             {/* Select All row */}
             {isPrincipal && (
-              <div className="flex items-center gap-3 px-5 py-3 bg-muted/30 border-b border-border">
+              <div className="flex items-center gap-3 px-4 py-2.5 bg-muted/30 border-b border-border">
                 <input
                   ref={selectAllRef}
                   type="checkbox"
                   id="select-all-tasks"
-                  className="w-4 h-4 rounded border-border text-primary cursor-pointer"
+                  className="w-3.5 h-3.5 rounded border-border text-primary cursor-pointer"
                   checked={allSelected}
                   onChange={handleSelectAll}
                 />
                 <label
                   htmlFor="select-all-tasks"
-                  className="text-xs font-semibold text-muted-foreground cursor-pointer select-none"
+                  className="text-[11px] font-semibold text-muted-foreground cursor-pointer select-none"
                 >
                   {allSelected
                     ? `All ${filteredIds.length} selected`
@@ -251,7 +251,7 @@ export default function TasksPage() {
                 {someSelected && (
                   <button
                     onClick={() => setSelectedTaskIds(prev => prev.filter(id => !filteredIds.includes(id)))}
-                    className="ml-auto text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+                    className="ml-auto text-[11px] text-muted-foreground hover:text-foreground underline transition-colors"
                   >
                     Clear
                   </button>
@@ -267,7 +267,7 @@ export default function TasksPage() {
                 <div
                   key={task.id}
                   onClick={() => navigate(`/tasks/${task.id}`)}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-muted/20 cursor-pointer transition-colors group animate-slide-up"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 cursor-pointer transition-colors group animate-slide-up"
                   style={{ animationDelay: `${index * 0.04}s`, animationFillMode: 'backwards' }}
                 >
                   {/* Selection Checkbox */}
@@ -275,7 +275,7 @@ export default function TasksPage() {
                     <div className="shrink-0 flex items-center" onClick={(e) => e.stopPropagation()}>
                        <input 
                          type="checkbox" 
-                         className="w-4 h-4 rounded border-border text-primary cursor-pointer"
+                         className="w-3.5 h-3.5 rounded border-border text-primary cursor-pointer"
                          checked={selectedTaskIds.includes(task.id)}
                          onChange={(e) => {
                             setSelectedTaskIds(prev =>
@@ -287,7 +287,7 @@ export default function TasksPage() {
                   )}
 
                   {/* Status icon */}
-                  <div className={`w-10 h-10 rounded-xl ${cfg.iconBg} flex items-center justify-center shrink-0`}>
+                  <div className={`w-9 h-9 rounded-xl ${cfg.iconBg} flex items-center justify-center shrink-0`}>
                     <StatusIcon status={isMissed(task) ? 'missed' : task.status} />
                   </div>
 
@@ -306,7 +306,7 @@ export default function TasksPage() {
                       {toTitleCase(displayTitle)}
                     </h3>
                     {/* Date & Time */}
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDate(task.scheduled_date)}</span>
@@ -328,10 +328,10 @@ export default function TasksPage() {
 
                   {/* Right side */}
                   <div className="flex items-center gap-2 shrink-0 ml-2">
-                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${cfg.badgeClass}`}>
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${cfg.badgeClass}`}>
                       {cfg.label}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                   </div>
                 </div>
               );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -144,13 +144,13 @@ export default function ReportDetailPage() {
 
   return (
     <AppLayout title="Report Details">
-      <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 pb-28 animate-fade-in">
+      <div className="p-4 lg:p-6 max-w-6xl mx-auto space-y-6 pb-28 animate-fade-in">
 
         {/* Top Header Section */}
         <div className="mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium mb-6 transition-colors"
+            className="flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground font-medium mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to all reports
           </button>
@@ -360,3 +360,4 @@ export default function ReportDetailPage() {
     </AppLayout>
   );
 }
+

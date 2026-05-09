@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -247,7 +247,7 @@ export default function ClassReportPage() {
 
     return (
         <AppLayout title="Class Report" showBack>
-            <div className="p-4 space-y-6 pb-24">
+            <div className="p-4 lg:p-6 space-y-6 pb-24">
                 {/* Class Selector */}
                 <Card>
                     <CardHeader>
@@ -413,3 +413,4 @@ export default function ClassReportPage() {
         </AppLayout>
     );
 }
+

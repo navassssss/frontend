@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ChevronRight, Clock, User, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,7 +74,7 @@ export default function IssuesPage() {
 
   return (
     <AppLayout title="Issues">
-      <div className="p-4 space-y-4">
+      <div className="p-4 lg:p-6 space-y-4">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -194,3 +194,4 @@ export default function IssuesPage() {
     </AppLayout>
   );
 }
+

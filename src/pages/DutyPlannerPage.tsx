@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Plus, X, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -89,7 +89,7 @@ export default function DutyPlannerPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-lg mx-auto pb-8">
+      <main className="p-4 lg:p-6 max-w-lg mx-auto pb-8">
         {/* Week Navigation */}
         <div className="flex items-center justify-between mb-6 animate-fade-in">
           <Button variant="ghost" size="icon-sm">
@@ -152,7 +152,7 @@ export default function DutyPlannerPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No teachers assigned</p>
+                  <p className="text-[11px] text-muted-foreground">No teachers assigned</p>
                 )}
               </CardContent>
             </Card>
@@ -200,3 +200,4 @@ export default function DutyPlannerPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -99,7 +99,7 @@ export default function DutyDetailPage() {
 
   return (
     <AppLayout title="Duty Details">
-      <div className="p-4 md:p-6 pb-28 space-y-6">
+      <div className="p-4 lg:p-6 pb-28 space-y-6">
 
         {/* ── Breadcrumb + Back ── */}
         <div className="space-y-2">
@@ -112,7 +112,7 @@ export default function DutyDetailPage() {
           </div>
           <button
             onClick={() => navigate('/duties')}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Duties
           </button>
@@ -128,7 +128,7 @@ export default function DutyDetailPage() {
             </div>
             <h1 className="text-3xl font-black text-foreground tracking-tight leading-tight">{toTitleCase(duty.name)}</h1>
             {duty.description && (
-              <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">{duty.description}</p>
+              <p className="text-[11px] text-muted-foreground mt-2 max-w-xl leading-relaxed">{duty.description}</p>
             )}
           </div>
           <Button
@@ -397,3 +397,4 @@ export default function DutyDetailPage() {
     </AppLayout>
   );
 }
+

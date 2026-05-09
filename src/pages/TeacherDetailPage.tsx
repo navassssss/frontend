@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Mail, Phone, Briefcase, CheckSquare, RotateCcw, Plus, X, Calendar, User as UserIcon, Edit2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -183,7 +183,7 @@ export default function TeacherDetailPage() {
 
   return (
     <AppLayout title="Teacher Profile">
-      <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6 pb-24">
+      <div className="p-4 lg:p-6 max-w-6xl mx-auto space-y-6 pb-24">
         
         {/* Page Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -192,7 +192,7 @@ export default function TeacherDetailPage() {
             </Button>
             <div>
                 <h1 className="text-2xl font-bold">Teacher Profile</h1>
-                <p className="text-sm text-muted-foreground">Overview, tasks, and reports</p>
+                <p className="text-[11px] text-muted-foreground">Overview, tasks, and reports</p>
             </div>
         </div>
         
@@ -649,7 +649,7 @@ export default function TeacherDetailPage() {
               <h3 className="text-lg font-semibold text-foreground">
                 Deactivate Teacher
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 Are you sure you want to deactivate <span className="font-medium">{teacher.name}</span>?
                 They will no longer appear in duty or task assignments, but their past reports
                 and records will remain.
@@ -797,3 +797,4 @@ export default function TeacherDetailPage() {
     </AppLayout>
   );
 }
+

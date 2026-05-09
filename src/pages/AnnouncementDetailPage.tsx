@@ -148,7 +148,7 @@ export default function AnnouncementDetailPage() {
 
     return (
         <AppLayout title="View Notice">
-            <div className="px-4 py-6 pb-24">
+            <div className="p-4 lg:p-6 pb-24">
 
                 {/* ── Breadcrumb ── */}
                 <nav className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">

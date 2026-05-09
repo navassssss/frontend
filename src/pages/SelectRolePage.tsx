@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Briefcase, Users, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
@@ -43,7 +43,7 @@ export default function SelectRolePage() {
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-2xl font-bold text-foreground">Welcome back!</h1>
           <p className="text-muted-foreground mt-2">{user?.name || 'User'}</p>
-          <p className="text-sm text-muted-foreground mt-1">Select your role to continue</p>
+          <p className="text-[11px] text-muted-foreground mt-1">Select your role to continue</p>
         </div>
 
         {/* Role Cards */}
@@ -62,7 +62,7 @@ export default function SelectRolePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground">{role.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{role.description}</p>
+                  <p className="text-[11px] text-muted-foreground line-clamp-2">{role.description}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               </CardContent>
@@ -73,3 +73,4 @@ export default function SelectRolePage() {
     </div>
   );
 }
+

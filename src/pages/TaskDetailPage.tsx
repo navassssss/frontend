@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+﻿import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -131,7 +131,7 @@ export default function TaskDetailPage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-            <p className="text-sm text-muted-foreground font-medium">Loading task details...</p>
+            <p className="text-[11px] text-muted-foreground font-medium">Loading task details...</p>
           </div>
         </div>
       </AppLayout>
@@ -176,7 +176,7 @@ export default function TaskDetailPage() {
 
   return (
     <AppLayout title="Task Details">
-      <div className="min-h-screen bg-slate-50/60 p-4 md:p-6 pb-28">
+      <div className="min-h-screen bg-slate-50/60 p-4 lg:p-6 pb-28">
         <div className="max-w-6xl mx-auto space-y-5">
 
           {/* Breadcrumb */}
@@ -371,7 +371,7 @@ export default function TaskDetailPage() {
                         Attachments <span className="text-slate-400 font-normal">(Optional)</span>
                       </h2>
                     </div>
-                    <div className="p-4 space-y-3">
+                    <div className="p-4 lg:p-6 space-y-3">
                       <label className="block cursor-pointer">
                         <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
                         <div className="flex flex-col items-center justify-center gap-2.5 py-8 rounded-xl border-2 border-dashed border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/30 transition-all">
@@ -472,7 +472,7 @@ export default function TaskDetailPage() {
                     <h3 className="font-bold text-slate-700 text-sm">Latest Submission</h3>
                     <StatusPill status={latestReport.status} />
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="p-4 lg:p-6 space-y-3">
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <span className="font-medium">Submitted On</span>
                       <span className="font-bold text-slate-700">
@@ -561,7 +561,7 @@ export default function TaskDetailPage() {
                 <div className="px-4 py-3 border-b border-slate-100">
                   <h3 className="font-bold text-slate-700 text-sm">Academic Context</h3>
                 </div>
-                <div className="p-4 space-y-3">
+                <div className="p-4 lg:p-6 space-y-3">
                   {task.duty?.name && (
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
@@ -596,3 +596,4 @@ export default function TaskDetailPage() {
     </AppLayout>
   );
 }
+

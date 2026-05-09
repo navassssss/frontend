@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -139,11 +139,11 @@ export default function IssueDetailPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl lg:max-w-4xl mx-auto space-y-4 pb-32">
+      <main className="p-4 lg:p-6 max-w-2xl lg:max-w-4xl mx-auto space-y-4 pb-32">
 
         {/* Main Info Card - Reduced padding */}
         <Card>
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-4 lg:p-6 space-y-3">
             {/* Badges */}
             <div className="flex gap-2 flex-wrap">
               <Badge className={`${getStatusBadgeStyle(issue.status)} font-medium px-2.5 py-0.5 border`}>
@@ -158,17 +158,17 @@ export default function IssueDetailPage() {
             <h2 className="text-lg font-bold leading-tight">{issue.title}</h2>
 
             {/* Description */}
-            <p className="text-sm text-muted-foreground leading-relaxed">{issue.description}</p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">{issue.description}</p>
 
             {/* Category & Assignee - No separator, tighter spacing */}
             <div className="space-y-2 pt-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                 <Tag className="w-4 h-4 text-teal-600 flex-shrink-0" />
                 <span className="font-medium">{issue.category.name}</span>
               </div>
 
               {issue.responsible_user && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                   <User className="w-4 h-4 text-teal-600 flex-shrink-0" />
                   <span className="font-medium">{toTitleCase(issue.responsible_user.name)}</span>
                 </div>
@@ -259,3 +259,4 @@ export default function IssueDetailPage() {
     </div>
   );
 }
+

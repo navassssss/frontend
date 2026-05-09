@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     BookOpen,
@@ -114,7 +114,7 @@ export default function SubjectDetailPage() {
 
     return (
         <AppLayout title={data.subject.name} showBack>
-            <div className="p-4 space-y-4">
+            <div className="p-4 lg:p-6 space-y-4">
                 {/* Subject Overview */}
                 <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
                     <CardHeader>
@@ -182,7 +182,7 @@ export default function SubjectDetailPage() {
                                                 <h3 className="font-semibold text-foreground">
                                                     {work.title}
                                                 </h3>
-                                                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                                <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">
                                                     {work.description}
                                                 </p>
                                             </div>
@@ -298,3 +298,4 @@ export default function SubjectDetailPage() {
         </AppLayout>
     );
 }
+

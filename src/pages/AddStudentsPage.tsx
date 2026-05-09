@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useBlocker } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -330,7 +330,7 @@ export default function AddStudentsPage() {
 
     return (
         <AppLayout title="Add New Students">
-            <div className="p-4 space-y-4 max-w-6xl mx-auto pb-24">
+            <div className="p-4 lg:p-6 space-y-4 max-w-6xl mx-auto pb-24">
                 
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon" onClick={() => {
@@ -346,7 +346,7 @@ export default function AddStudentsPage() {
                     </Button>
                     <div>
                         <h1 className="text-2xl font-bold">Add Students</h1>
-                        <p className="text-sm text-muted-foreground">Import from Excel or add manually</p>
+                        <p className="text-[11px] text-muted-foreground">Import from Excel or add manually</p>
                     </div>
                 </div>
 
@@ -514,7 +514,7 @@ export default function AddStudentsPage() {
                 </Card>
 
                 {students.length > itemsPerPage && (
-                    <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between mt-4 text-[11px] text-muted-foreground">
                         <div>
                             Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, students.length)} of {students.length}
                         </div>
@@ -544,3 +544,4 @@ export default function AddStudentsPage() {
         </AppLayout>
     );
 }
+

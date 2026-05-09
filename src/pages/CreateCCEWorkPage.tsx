@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import {
     BookOpen,
@@ -143,7 +143,7 @@ export default function CreateCCEWorkPage() {
 
     return (
         <AppLayout title={editId ? "Edit CCE Work" : "Create CCE Work"} showBack={false}>
-            <div className="p-4 md:p-8 max-w-[1200px] mx-auto space-y-8 bg-slate-50/50">
+            <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-8 bg-slate-50/50">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div>

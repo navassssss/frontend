@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList,
   CheckSquare,
@@ -135,7 +135,7 @@ export default function DashboardPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
           {loading ? (
-            <p className="col-span-2 text-center text-sm text-muted-foreground py-4">Loading...</p>
+            <p className="col-span-2 text-center text-[11px] text-muted-foreground py-4">Loading...</p>
           ) : stats.map((stat) => {
             const Icon = getIcon(stat.icon);
             return (
@@ -364,3 +364,4 @@ export default function DashboardPage() {
     </AppLayout>
   );
 }
+

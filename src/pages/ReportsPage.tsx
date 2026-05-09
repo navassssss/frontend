@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Filter,
@@ -120,13 +120,13 @@ export default function ReportsPage() {
 
   return (
     <AppLayout title="Reports">
-      <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 pb-28">
+      <div className="p-4 lg:p-6 max-w-7xl mx-auto space-y-8 pb-28">
         
         {/* Top Header Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">Duty Reports</h1>
-            <p className="text-sm text-muted-foreground mt-1">Review and manage academic faculty submissions</p>
+            <p className="text-[11px] text-muted-foreground mt-1">Review and manage academic faculty submissions</p>
           </div>
           <div className="relative w-full md:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -326,7 +326,7 @@ export default function ReportsPage() {
           
           {/* Pagination Footer */}
           <div className="p-5 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 bg-muted/10">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               Showing {startEntry} to {endEntry} of {filteredReports.length} entries
             </p>
             {totalPages > 1 && (
@@ -435,3 +435,4 @@ export default function ReportsPage() {
     </AppLayout>
   );
 }
+

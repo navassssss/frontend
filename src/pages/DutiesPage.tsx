@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -113,7 +113,7 @@ export default function DutiesPage() {
   // ── TEACHER VIEW ("Mine") — list style like reference image ──
   // ── TEACHER VIEW ("Mine") — list style like reference image ──
   const MyDutiesView = () => (
-    <div className="p-4 md:p-8 max-w-[1050px] mx-auto pb-28 space-y-6">
+    <div className="p-4 lg:p-6 max-w-[1050px] mx-auto pb-28 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-[22px] font-black text-slate-800 tracking-tight">Your Assigned Duties</h1>
@@ -239,12 +239,12 @@ export default function DutiesPage() {
 
   // ── PRINCIPAL "ALL" VIEW — grid style ──
   const AllDutiesView = () => (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto pb-28 space-y-6">
+    <div className="p-4 lg:p-6 max-w-6xl mx-auto pb-28 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">All Duty Assignments</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage all institutional responsibilities.</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Manage all institutional responsibilities.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex bg-muted rounded-xl p-0.5 text-sm">
@@ -302,7 +302,7 @@ export default function DutiesPage() {
                   <h3 className="font-bold text-base text-foreground leading-snug mb-1.5 group-hover:text-primary transition-colors">
                     {toTitleCase(duty.name)}
                   </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                  <p className="text-[11px] text-muted-foreground line-clamp-3 leading-relaxed">
                     {duty.description || 'No description provided.'}
                   </p>
                 </div>
@@ -379,3 +379,4 @@ export default function DutiesPage() {
     </AppLayout>
   );
 }
+

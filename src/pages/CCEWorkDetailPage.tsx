@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Calendar,
@@ -404,7 +404,7 @@ export default function CCEWorkDetailPage() {
 
     return (
         <AppLayout title="CCE Work Details" showBack={true}>
-            <div className="p-4 md:p-8 max-w-[1200px] mx-auto space-y-8 pb-24 min-h-screen bg-slate-50/50">
+            <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-8 pb-24 min-h-screen bg-slate-50/50">
                 
                 {/* Header Layout */}
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 pt-2">
@@ -682,7 +682,7 @@ export default function CCEWorkDetailPage() {
 
                     
                     {/* Toolbar */}
-                    <div className="p-4 md:p-6 border-b border-slate-100 bg-slate-50/50 space-y-3">
+                    <div className="p-4 lg:p-6 border-b border-slate-100 bg-slate-50/50 space-y-3">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                             <div className="relative w-full md:w-80">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

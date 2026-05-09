@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Upload, Camera, FileText, X, Loader2, CheckCircle2, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,15 +79,15 @@ export default function SubmitReportPage() {
 
   return (
     <AppLayout title="Submit Report">
-      <div className="p-4 md:p-6 max-w-2xl mx-auto pb-28 space-y-6">
+      <div className="p-4 lg:p-6 max-w-2xl mx-auto pb-28 space-y-6">
 
         {/* Header */}
         <div>
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Submit Report</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Document your duty completion with details and attachments.</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Document your duty completion with details and attachments.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -104,7 +104,7 @@ export default function SubmitReportPage() {
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 </div>
               ) : duties.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No duties available</p>
+                <p className="text-[11px] text-muted-foreground text-center py-4">No duties available</p>
               ) : (
                 <div className="space-y-2">
                   {duties.map((duty) => {
@@ -170,7 +170,7 @@ export default function SubmitReportPage() {
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Step 3</p>
               <h2 className="font-bold text-foreground">Attachments <span className="text-muted-foreground font-normal text-sm">(Optional)</span></h2>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-4 lg:p-6 space-y-3">
               <div className="flex gap-3">
                 <label className="flex-1 cursor-pointer">
                   <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
@@ -221,3 +221,4 @@ export default function SubmitReportPage() {
     </AppLayout>
   );
 }
+

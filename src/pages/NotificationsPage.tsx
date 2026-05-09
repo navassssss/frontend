@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CheckCircle2, AlertCircle, Info, Clock, CheckCheck, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -74,7 +74,7 @@ export default function NotificationsPage() {
 
     return (
         <AppLayout title="Notifications">
-            <div className="p-4 space-y-4 max-w-2xl mx-auto">
+            <div className="p-4 lg:p-6 space-y-4 max-w-2xl mx-auto">
                 <div className="flex items-center justify-between animate-fade-in">
                     <h2 className="text-xl font-bold text-foreground">Notifications</h2>
                     {notifications.some(n => !n.read_at) && (
@@ -93,7 +93,7 @@ export default function NotificationsPage() {
                             <Bell className="w-8 h-8 text-muted-foreground" />
                         </div>
                         <h3 className="font-semibold text-foreground">No new notifications</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-[11px] text-muted-foreground mt-1">
                             You're all caught up! Check back later.
                         </p>
                     </div>
@@ -138,3 +138,4 @@ export default function NotificationsPage() {
         </AppLayout>
     );
 }
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -151,7 +151,7 @@ export default function AchievementSettingsPage() {
 
     return (
         <AppLayout title="Achievement Settings">
-            <div className="p-4 space-y-6 pb-24 max-w-4xl mx-auto">
+            <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-4xl mx-auto">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/student-achievements')}
@@ -164,7 +164,7 @@ export default function AchievementSettingsPage() {
                             <Settings2 className="w-6 h-6 text-primary" />
                             Achievement Settings
                         </h2>
-                        <p className="text-sm text-muted-foreground">Manage categories and star rules</p>
+                        <p className="text-[11px] text-muted-foreground">Manage categories and star rules</p>
                     </div>
                 </div>
 
@@ -345,3 +345,4 @@ export default function AchievementSettingsPage() {
         </AppLayout>
     );
 }
+

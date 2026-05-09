@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Sun,
@@ -156,7 +156,7 @@ export default function TakeAttendancePage() {
 
     return (
         <AppLayout title="Take Attendance" showBack={false}>
-            <div className="p-4 space-y-6 pb-24 max-w-2xl mx-auto">
+            <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-2xl mx-auto">
                 {/* Header with Back Button */}
                 <div className="flex items-center gap-4">
                     <button
@@ -167,7 +167,7 @@ export default function TakeAttendancePage() {
                     </button>
                     <div>
                         <h2 className="text-lg font-bold text-foreground">Attendance Entry</h2>
-                        <p className="text-sm text-muted-foreground">Mark student attendance</p>
+                        <p className="text-[11px] text-muted-foreground">Mark student attendance</p>
                     </div>
                 </div>
 
@@ -250,7 +250,7 @@ export default function TakeAttendancePage() {
                                         <Badge variant="destructive">{absentStudents.length} Absent</Badge>
                                     </div>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-[11px] text-muted-foreground">
                                     By default, all students are marked present. Type names of absent students below.
                                 </p>
                             </CardContent>
@@ -284,7 +284,7 @@ export default function TakeAttendancePage() {
                                             >
                                                 <div>
                                                     <p className="font-medium text-foreground">{student.name}</p>
-                                                    <p className="text-sm text-muted-foreground">Roll: {student.roll_number}</p>
+                                                    <p className="text-[11px] text-muted-foreground">Roll: {student.roll_number}</p>
                                                 </div>
                                                 {absentStudents.some(abs => abs.id === student.id) ? (
                                                     <Badge variant="destructive">Already Absent</Badge>
@@ -308,7 +308,7 @@ export default function TakeAttendancePage() {
                                             <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                                                 <div className="flex-1">
                                                     <p className="font-medium text-foreground">{student.name}</p>
-                                                    <p className="text-sm text-muted-foreground">Roll: {student.roll_number}</p>
+                                                    <p className="text-[11px] text-muted-foreground">Roll: {student.roll_number}</p>
                                                 </div>
                                                 <div className="flex-1 max-w-sm">
                                                     <Input

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -196,7 +196,7 @@ export default function StudentAchievementReviewPage() {
 
     return (
         <AppLayout title={studentId ? `Achievements` : "Review Achievements"} showBack={!!studentId}>
-            <div className="p-4 space-y-6 pb-24">
+            <div className="p-4 lg:p-6 space-y-6 pb-24">
                 {/* Back Button & Header */}
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
@@ -213,9 +213,9 @@ export default function StudentAchievementReviewPage() {
                                 {studentId ? toTitleCase(studentName) : 'Achievement Reviews'}
                             </h2>
                             {studentId ? (
-                                <p className="text-sm text-muted-foreground">Student Profile & History</p>
+                                <p className="text-[11px] text-muted-foreground">Student Profile & History</p>
                             ) : (
-                                <p className="text-sm text-muted-foreground">Manage and review student submissions</p>
+                                <p className="text-[11px] text-muted-foreground">Manage and review student submissions</p>
                             )}
                         </div>
                     </div>
@@ -238,10 +238,10 @@ export default function StudentAchievementReviewPage() {
                                         {studentName.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Total Score</p>
+                                        <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Total Score</p>
                                         <div className="flex items-baseline gap-2">
                                             <h2 className="text-3xl font-bold text-foreground">{totalPoints}</h2>
-                                            <span className="text-sm text-muted-foreground font-medium">Points</span>
+                                            <span className="text-[11px] text-muted-foreground font-medium">Points</span>
                                         </div>
                                     </div>
                                 </div>
@@ -260,7 +260,7 @@ export default function StudentAchievementReviewPage() {
                     <Card className="bg-gradient-to-br from-warning/5 to-transparent border-warning/20 animate-slide-up">
                         <CardContent className="p-6 flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider mb-1">Pending Requests</p>
+                                <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Pending Requests</p>
                                 <p className="text-3xl font-bold text-foreground">{pendingCount}</p>
                             </div>
                             <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
@@ -358,7 +358,7 @@ export default function StudentAchievementReviewPage() {
                                             </div>
 
                                             {/* Student Info (if valid) */}
-                                            <div className="flex items-center gap-4 text-sm text-muted-foreground py-2 border-y border-dashed bg-muted/20 -mx-5 px-5">
+                                            <div className="flex items-center gap-4 text-[11px] text-muted-foreground py-2 border-y border-dashed bg-muted/20 -mx-5 px-5">
                                                 <div className="flex items-center gap-1.5">
                                                     <User className="h-3.5 w-3.5" />
                                                     <span className="font-medium text-foreground">{toTitleCase(achievement.student?.user?.name || 'Unknown')}</span>

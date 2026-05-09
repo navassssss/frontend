@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Camera, FileText, X, Loader2, CheckCircle2, ChevronDown, Plus, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -374,7 +374,7 @@ export default function RaiseIssuePage() {
                         className="hidden"
                         accept="image/*,.pdf"
                       />
-                      <div className="h-12 border-2 border-dashed rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:border-primary transition-colors text-sm text-muted-foreground">
+                      <div className="h-12 border-2 border-dashed rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:border-primary transition-colors text-[11px] text-muted-foreground">
                         <Upload className="w-4 h-4" />
                         Drop files here or click to upload
                       </div>
@@ -423,3 +423,4 @@ export default function RaiseIssuePage() {
     </div>
   );
 }
+

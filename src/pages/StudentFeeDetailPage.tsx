@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -500,7 +500,7 @@ const StudentFeeDetailPage: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h2 className="text-lg font-semibold">{toTitleCase(studentFee.studentName)}</h2>
-                                <p className="text-sm text-muted-foreground">Class {studentFee.className}</p>
+                                <p className="text-[11px] text-muted-foreground">Class {studentFee.className}</p>
                             </div>
                             <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-md">
                                 <div>
@@ -827,14 +827,14 @@ const StudentFeeDetailPage: React.FC = () => {
                                         <div className="font-bold text-green-700 dark:text-green-400">
                                             {formatCurrency(payment.amount)}
                                         </div>
-                                        <div className="text-sm text-muted-foreground">
+                                        <div className="text-[11px] text-muted-foreground">
                                             {new Date(payment.date).toLocaleDateString('en-IN', {
                                                 day: 'numeric',
                                                 month: 'short',
                                                 year: 'numeric'
                                             })}
                                         </div>
-                                        <div className="text-sm text-muted-foreground truncate">
+                                        <div className="text-[11px] text-muted-foreground truncate">
                                             {payment.remarks || '-'}
                                         </div>
                                         <div className="text-right">

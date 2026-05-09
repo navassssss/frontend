@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
@@ -101,7 +101,7 @@ export default function StudentAttendanceOverviewPage() {
 
     return (
         <AppLayout title={`Attendance - ${data.student.name}`}>
-            <div className="p-4 space-y-4 pb-24">
+            <div className="p-4 lg:p-6 space-y-4 pb-24">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 animate-fade-in">
@@ -113,7 +113,7 @@ export default function StudentAttendanceOverviewPage() {
                     </button>
                     <div>
                         <h2 className="text-lg font-bold text-foreground">{data.student.name}</h2>
-                        <p className="text-sm text-muted-foreground">Attendance Overview</p>
+                        <p className="text-[11px] text-muted-foreground">Attendance Overview</p>
                     </div>
                 </div>
 
@@ -122,7 +122,7 @@ export default function StudentAttendanceOverviewPage() {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <p className="text-sm text-muted-foreground">Overall Attendance</p>
+                                <p className="text-[11px] text-muted-foreground">Overall Attendance</p>
                                 <p className="text-3xl font-bold text-foreground mt-1">
                                     {Math.floor(data.overallStats.presentDays)}/{data.overallStats.totalDays}
                                 </p>
@@ -185,7 +185,7 @@ export default function StudentAttendanceOverviewPage() {
                                         <p className="text-xs text-muted-foreground">{data.today.morning.className}</p>
                                     </>
                                 ) : (
-                                    <p className="text-sm text-muted-foreground">Not marked</p>
+                                    <p className="text-[11px] text-muted-foreground">Not marked</p>
                                 )}
                             </div>
 
@@ -206,7 +206,7 @@ export default function StudentAttendanceOverviewPage() {
                                         <p className="text-xs text-muted-foreground">{data.today.afternoon.className}</p>
                                     </>
                                 ) : (
-                                    <p className="text-sm text-muted-foreground">Not marked</p>
+                                    <p className="text-[11px] text-muted-foreground">Not marked</p>
                                 )}
                             </div>
                         </div>
@@ -311,3 +311,4 @@ export default function StudentAttendanceOverviewPage() {
         </AppLayout>
     );
 }
+

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { GraduationCap, Users, Trophy, ArrowRight, Sparkles, BookOpen, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,15 +60,15 @@ export default function LandingPage() {
                         <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border/50">
                             <div>
                                 <h4 className="text-2xl font-bold text-foreground">100%</h4>
-                                <p className="text-sm text-muted-foreground">Digital Workflow</p>
+                                <p className="text-[11px] text-muted-foreground">Digital Workflow</p>
                             </div>
                             <div>
                                 <h4 className="text-2xl font-bold text-foreground">24/7</h4>
-                                <p className="text-sm text-muted-foreground">Access Anywhere</p>
+                                <p className="text-[11px] text-muted-foreground">Access Anywhere</p>
                             </div>
                             <div>
                                 <h4 className="text-2xl font-bold text-foreground">Real-time</h4>
-                                <p className="text-sm text-muted-foreground">Updates</p>
+                                <p className="text-[11px] text-muted-foreground">Updates</p>
                             </div>
                         </div>
                     </div>
@@ -94,7 +94,7 @@ export default function LandingPage() {
                                             Staff Portal
                                             <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
                                         </h3>
-                                        <p className="text-sm text-muted-foreground">Manage duties, reports, and academic records.</p>
+                                        <p className="text-[11px] text-muted-foreground">Manage duties, reports, and academic records.</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -114,7 +114,7 @@ export default function LandingPage() {
                                             Student Portal
                                             <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-green-500" />
                                         </h3>
-                                        <p className="text-sm text-muted-foreground">View progress, marks, and personal achievements.</p>
+                                        <p className="text-[11px] text-muted-foreground">View progress, marks, and personal achievements.</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -134,7 +134,7 @@ export default function LandingPage() {
                                             Public Leaderboard
                                             <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-amber-500" />
                                         </h3>
-                                        <p className="text-sm text-muted-foreground">Check the top performers and hall of fame.</p>
+                                        <p className="text-[11px] text-muted-foreground">Check the top performers and hall of fame.</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -142,10 +142,11 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                <div className="py-6 text-center text-sm text-muted-foreground border-t border-border/40 mt-auto">
+                <div className="py-6 text-center text-[11px] text-muted-foreground border-t border-border/40 mt-auto">
                     <p>© 2025 Darul Hasanath Islamic College.</p>
                 </div>
             </div>
         </div>
     );
 }
+

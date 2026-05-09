@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Calculator,
@@ -102,7 +102,7 @@ export default function CCEMarksPage() {
 
     return (
         <AppLayout title="CCE Marks" showBack>
-            <div className="p-4 space-y-6">
+            <div className="p-4 lg:p-6 space-y-6">
                 {/* Subject Selection */}
                 <div className="space-y-2">
                     <Label>Select Subject</Label>
@@ -130,7 +130,7 @@ export default function CCEMarksPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="font-semibold text-foreground">{selectedSubjectInfo.name}</h3>
-                                    <p className="text-sm text-muted-foreground">{selectedSubjectInfo.className}</p>
+                                    <p className="text-[11px] text-muted-foreground">{selectedSubjectInfo.className}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Badge variant={selectedSubjectInfo.isLocked ? 'warning' : 'success'}>
@@ -160,7 +160,7 @@ export default function CCEMarksPage() {
                                                 <DialogTitle>Set Final Maximum Marks</DialogTitle>
                                             </DialogHeader>
                                             <div className="space-y-4 mt-4">
-                                                <p className="text-sm text-muted-foreground">
+                                                <p className="text-[11px] text-muted-foreground">
                                                     Current: {selectedSubjectInfo.finalMaxMarks} marks
                                                 </p>
                                                 <div className="space-y-2">
@@ -247,7 +247,7 @@ export default function CCEMarksPage() {
                                 <Calculator className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-medium text-foreground">Mark Normalization</p>
-                                    <p className="text-sm text-muted-foreground mt-1">
+                                    <p className="text-[11px] text-muted-foreground mt-1">
                                         Normalized marks are calculated as: (Obtained ÷ Total Possible) × {selectedSubjectInfo?.finalMaxMarks}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-2">

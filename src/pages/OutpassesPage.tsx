@@ -577,7 +577,7 @@ export default function OutpassesPage() {
 
     return (
         <AppLayout title="Outpasses">
-            <div className="p-4 md:p-10 max-w-[1280px] mx-auto pb-28 space-y-8 bg-slate-50/30 min-h-screen">
+            <div className="p-4 lg:p-6 max-w-[1280px] mx-auto pb-28 space-y-8 bg-slate-50/30 min-h-screen">
 
                 {/* ── Page Header ── */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 animate-fade-in">

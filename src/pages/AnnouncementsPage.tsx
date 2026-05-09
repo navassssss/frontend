@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import {
@@ -114,7 +114,7 @@ export default function AnnouncementsPage() {
 
     return (
         <AppLayout title={pageTitle}>
-            <div className="px-4 py-6 pb-24 space-y-8">
+            <div className="p-4 lg:p-6 pb-24 space-y-8">
 
                 {/* ── Page Header ── */}
                 <div className="flex items-start justify-between gap-4">
@@ -445,3 +445,4 @@ export default function AnnouncementsPage() {
         </AppLayout>
     );
 }
+

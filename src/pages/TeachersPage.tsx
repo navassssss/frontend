@@ -205,30 +205,30 @@ export default function TeachersPage() {
 
   return (
     <AppLayout title="Teachers">
-      <div className="p-4 space-y-4">
+      <div className="p-4 lg:p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Teachers</h2>
-            <p className="text-sm text-muted-foreground">{teachers.length} teachers</p>
+            <h2 className="text-2xl font-bold text-foreground">Teachers</h2>
+            <p className="text-[11px] text-muted-foreground">{teachers.length} teachers</p>
           </div>
           <Button variant="default" size="sm" onClick={() => setShowAddForm(true)}>
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             Add
           </Button>
         </div>
 
         {/* Quick Actions Bar */}
         <Card className="animate-slide-up">
-          <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h3>
+          <CardContent className="p-3">
+            <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Quick Actions</h3>
             <div className="grid grid-cols-5 gap-2">
               <button
                 onClick={() => navigate('/duties')}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+                className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-blue-600">
-                  <ClipboardList className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-blue-600">
+                  <ClipboardList className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] font-medium text-center text-foreground">
                   Duties
@@ -237,10 +237,10 @@ export default function TeachersPage() {
 
               <button
                 onClick={() => navigate('/tasks')}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+                className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-green-600">
-                  <CheckSquare className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-green-600">
+                  <CheckSquare className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] font-medium text-center text-foreground">
                   Tasks
@@ -249,10 +249,10 @@ export default function TeachersPage() {
 
               <button
                 onClick={() => navigate('/subjects')}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+                className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-purple-600">
-                  <GraduationCap className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-purple-600">
+                  <GraduationCap className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] font-medium text-center text-foreground">
                   Subjects
@@ -261,10 +261,10 @@ export default function TeachersPage() {
 
               <button
                 onClick={() => navigate('/cce/works')}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+                className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-orange-600">
-                  <BookOpen className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-orange-600">
+                  <BookOpen className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] font-medium text-center text-foreground">
                   CCE Works
@@ -273,10 +273,10 @@ export default function TeachersPage() {
 
               <button
                 onClick={() => navigate('/reports')}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+                className="flex flex-col items-center gap-2 p-2.5 rounded-xl hover:bg-secondary transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-teal-600">
-                  <FileText className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-teal-600">
+                  <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] font-medium text-center text-foreground">
                   Reports
@@ -288,12 +288,12 @@ export default function TeachersPage() {
 
         {/* Search */}
         <div className="relative animate-slide-up">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search teachers..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-9 h-9"
           />
         </div>
 
@@ -310,8 +310,8 @@ export default function TeachersPage() {
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
                   {/* Smaller Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                    <span className="text-xs font-bold text-primary group-hover:text-primary-foreground">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                    <span className="text-[11px] font-bold text-primary group-hover:text-primary-foreground">
                       {teacher.initials}
                     </span>
                   </div>
@@ -322,12 +322,12 @@ export default function TeachersPage() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-sm text-foreground truncate">{teacher.name}</h3>
                         {teacher.permissions && teacher.permissions.length > 0 && (
-                          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[10px]" title={`${teacher.permissions.length} Custom Permissions`}>
-                             <Briefcase className="w-2.5 h-2.5 text-primary" />
+                          <span className="w-3.5 h-3.5 rounded-full bg-primary/10 flex items-center justify-center text-[9px]" title={`${teacher.permissions.length} Custom Permissions`}>
+                             <Briefcase className="w-2 h-2 text-primary" />
                           </span>
                         )}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground/50 flex-shrink-0 group-hover:text-primary transition-colors" />
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 group-hover:text-primary transition-colors" />
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5 mt-0.5 text-[11px] text-muted-foreground">
@@ -358,14 +358,14 @@ export default function TeachersPage() {
       {showAddForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm animate-fade-in p-4">
           <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto animate-scale-in rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-foreground">Add Teacher</h3>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[15px] font-semibold text-foreground">Add Teacher</h3>
                 <Button variant="ghost" size="icon-sm" onClick={() => setShowAddForm(false)}>
                   ✕
                 </Button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Name */}
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">

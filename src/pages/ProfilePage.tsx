@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     LogOut, Mail, Phone, Building2, Eye, EyeOff, Save, Lock, CheckCircle
@@ -49,7 +49,7 @@ export default function ProfilePage() {
 
     return (
         <AppLayout title="Profile">
-            <div className="p-4 md:p-8 space-y-6 pb-12">
+            <div className="p-4 lg:p-6 space-y-6 pb-12">
 
                 {/* Page Title */}
                 <div className="animate-fade-in">
@@ -316,3 +316,4 @@ function SecurityCard() {
         </div>
     );
 }
+

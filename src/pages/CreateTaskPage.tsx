@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, X, Check, Users, ClipboardList, Calendar,
@@ -215,7 +215,7 @@ export default function CreateTaskPage() {
   /* ─────────────────────── render ─────────────────────── */
   return (
     <AppLayout title="Create Task" showBack>
-      <div className="p-4 md:p-8 max-w-[1280px] mx-auto pb-24">
+      <div className="p-4 lg:p-6 max-w-[1280px] mx-auto pb-24">
 
         {/* ── Page Header ── */}
         <div className="flex items-center gap-4 mb-8 animate-fade-in">
@@ -227,7 +227,7 @@ export default function CreateTaskPage() {
           </button>
           <div>
             <h1 className="text-2xl font-black text-foreground tracking-tight">Create Task</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-[11px] text-muted-foreground mt-0.5">
               Assign tasks to teachers individually or in bulk via duty groups.
             </p>
           </div>
@@ -393,7 +393,7 @@ export default function CreateTaskPage() {
                         ))}
                       </div>
                     ) : filteredDuties.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-6">No duties found</p>
+                      <p className="text-[11px] text-muted-foreground text-center py-6">No duties found</p>
                     ) : (
                       <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                         {filteredDuties.map((duty, idx) => {
@@ -689,3 +689,4 @@ export default function CreateTaskPage() {
     </AppLayout>
   );
 }
+

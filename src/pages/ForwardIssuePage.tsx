@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Send } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -86,7 +86,7 @@ export default function ForwardIssuePage() {
 
     return (
         <AppLayout title="Forward Issue">
-            <div className="max-w-xl mx-auto p-4">
+            <div className="max-w-xl mx-auto p-4 lg:p-6">
                 <Button variant="ghost" className="mb-4 pl-0" onClick={() => navigate(-1)}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Issue
@@ -100,7 +100,7 @@ export default function ForwardIssuePage() {
                     <CardContent className="space-y-6">
                         <div className="bg-muted p-4 rounded-lg">
                             <h3 className="font-semibold">{issue.title}</h3>
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{issue.description}</p>
+                            <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{issue.description}</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -176,3 +176,4 @@ export default function ForwardIssuePage() {
         </AppLayout>
     );
 }
+

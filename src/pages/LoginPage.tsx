@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -230,7 +230,7 @@ export default function LoginPage() {
 
               {/* Student Portal Link */}
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-3">
+                <p className="text-[11px] text-muted-foreground mb-3">
                   Are you a student?{' '}
                   <button
                     onClick={() => navigate('/student/login')}
@@ -258,3 +258,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

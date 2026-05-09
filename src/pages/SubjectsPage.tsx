@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -388,12 +388,12 @@ export default function SubjectsPage() {
 
     return (
         <AppLayout title="Subjects" showBack>
-            <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-8 pb-24">
+            <div className="p-4 lg:p-6 max-w-6xl mx-auto space-y-8 pb-24">
                 {/* Header & Create Button */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
                     <div>
                         <h2 className="text-xl font-bold text-foreground">Subjects Directory</h2>
-                        <p className="text-sm text-muted-foreground">Manage institutional syllabus structures</p>
+                        <p className="text-[11px] text-muted-foreground">Manage institutional syllabus structures</p>
                     </div>
                     {canManage && (
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -953,3 +953,4 @@ export default function SubjectsPage() {
         </AppLayout>
     );
 }
+

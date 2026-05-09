@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Users, TrendingUp, Trophy, Calendar, User, ChevronRight,
@@ -186,7 +186,7 @@ export default function ClassPerformanceReportPage() {
 
     return (
         <AppLayout title={`Class ${report.class.name} - Report`} showBack>
-            <div className="p-4 space-y-6 pb-24 max-w-7xl mx-auto">
+            <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-7xl mx-auto">
                 {/* Custom Page Header */}
                 <div className="flex items-center justify-between animate-fade-in mb-2">
                     <div className="flex items-center gap-4">
@@ -198,7 +198,7 @@ export default function ClassPerformanceReportPage() {
                         </button>
                         <div>
                             <h2 className="text-xl font-bold text-foreground">Class {report.class.name}</h2>
-                            <p className="text-sm text-muted-foreground">Performance Report</p>
+                            <p className="text-[11px] text-muted-foreground">Performance Report</p>
                         </div>
                     </div>
                     {/* Only non-teachers can delete classes */}
@@ -249,7 +249,7 @@ export default function ClassPerformanceReportPage() {
                     <Card className="hover:shadow-md transition-all border-l-4 border-l-primary/50">
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-muted-foreground font-medium">Total Students</p>
+                                <p className="text-[11px] text-muted-foreground font-medium">Total Students</p>
                                 <p className="text-2xl font-bold mt-1">{report.class.total_students}</p>
                             </div>
                             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -260,7 +260,7 @@ export default function ClassPerformanceReportPage() {
                     <Card className="hover:shadow-md transition-all border-l-4 border-l-success/50">
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-muted-foreground font-medium">Avg Attendance</p>
+                                <p className="text-[11px] text-muted-foreground font-medium">Avg Attendance</p>
                                 <p className="text-2xl font-bold mt-1">{report.attendance.average_percentage}%</p>
                             </div>
                             <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
@@ -271,7 +271,7 @@ export default function ClassPerformanceReportPage() {
                     <Card className="hover:shadow-md transition-all border-l-4 border-l-warning/50">
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-muted-foreground font-medium">Avg Marks</p>
+                                <p className="text-[11px] text-muted-foreground font-medium">Avg Marks</p>
                                 <p className="text-2xl font-bold mt-1">{report.academic.average_marks}</p>
                             </div>
                             <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
@@ -349,7 +349,7 @@ export default function ClassPerformanceReportPage() {
                                     </div>
                                 ))}
                                 {report.academic.top_performers.length === 0 && (
-                                    <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
+                                    <p className="text-[11px] text-muted-foreground text-center py-4">No data available</p>
                                 )}
                             </div>
                         </CardContent>
@@ -383,7 +383,7 @@ export default function ClassPerformanceReportPage() {
                                     </div>
                                 ))}
                                 {report.achievements.top_achievers.length === 0 && (
-                                    <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
+                                    <p className="text-[11px] text-muted-foreground text-center py-4">No data available</p>
                                 )}
                             </div>
                         </CardContent>
@@ -450,7 +450,7 @@ export default function ClassPerformanceReportPage() {
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                             <div>
                                 <h3 className="text-lg font-bold">All Students</h3>
-                                <p className="text-sm text-muted-foreground">Manage and view student performance</p>
+                                <p className="text-[11px] text-muted-foreground">Manage and view student performance</p>
                             </div>
                             <div className="relative w-full md:w-72">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -581,3 +581,4 @@ export default function ClassPerformanceReportPage() {
         </AppLayout>
     );
 }
+

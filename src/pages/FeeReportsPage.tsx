@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -523,7 +523,7 @@ const OverallSummaryReport: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="text-center">
-                        <p className="text-sm text-muted-foreground">Collection Rate</p>
+                        <p className="text-[11px] text-muted-foreground">Collection Rate</p>
                         <p className="text-4xl font-bold text-primary">{collectionPercentage}%</p>
                     </div>
 
@@ -766,7 +766,7 @@ const ClassWiseReportSection: React.FC = () => {
 
                     {/* Student List */}
                     <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground px-1">
+                        <p className="text-[11px] text-muted-foreground px-1">
                             {report.students.length} students
                         </p>
                         {report.students.map((student) => (
@@ -975,19 +975,19 @@ const DailyCollectionReportSection: React.FC = () => {
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                                     <div className="flex items-center gap-1.5">
                                         <Users className="w-4 h-4 text-muted-foreground" />
-                                        <span className="text-sm text-muted-foreground">Students:</span>
+                                        <span className="text-[11px] text-muted-foreground">Students:</span>
                                         <span className="font-semibold">{report.totalStudents}</span>
                                     </div>
                                     <div className="hidden sm:block h-4 w-px bg-border" />
                                     <div className="flex items-center gap-1.5">
                                         <IndianRupee className="w-4 h-4 text-muted-foreground" />
-                                        <span className="text-sm text-muted-foreground">Collected:</span>
+                                        <span className="text-[11px] text-muted-foreground">Collected:</span>
                                         <span className="font-semibold text-green-700 dark:text-green-400">
                                             {formatCurrency(report.totalAmount)}
                                         </span>
                                     </div>
                                 </div>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-[11px] text-muted-foreground">
                                     {formatDisplayDate(selectedDate)}
                                 </span>
                             </div>
@@ -1022,7 +1022,7 @@ const DailyCollectionReportSection: React.FC = () => {
                                         key={payment.paymentId}
                                         className="grid grid-cols-[80px_1fr_80px_2fr_100px_120px] gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 items-center transition-colors bg-background"
                                     >
-                                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                                             <Clock className="w-3.5 h-3.5" />
                                             {payment.time}
                                         </div>
@@ -1036,7 +1036,7 @@ const DailyCollectionReportSection: React.FC = () => {
                                                 </p>
                                             )}
                                         </div>
-                                        <div className="text-sm text-muted-foreground">
+                                        <div className="text-[11px] text-muted-foreground">
                                             {payment.className}
                                         </div>
                                         <div className="flex flex-wrap gap-1">
@@ -1102,7 +1102,7 @@ const DailyCollectionReportSection: React.FC = () => {
                                         <CardContent className="p-0">
                                             {/* Header with Amount and Time */}
                                             <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border-b">
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                                                     <Clock className="w-4 h-4" />
                                                     <span>{payment.time}</span>
                                                 </div>

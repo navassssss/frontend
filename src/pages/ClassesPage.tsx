@@ -105,20 +105,20 @@ export default function ClassesPage() {
     if (loading) {
         return (
             <AppLayout title="Classes">
-                <div className="p-8 text-center">Loading...</div>
+                <div className="p-6 text-center">Loading...</div>
             </AppLayout>
         );
     }
 
     return (
         <AppLayout title="Classes" showBack>
-            <div className="p-4 space-y-4">
+            <div className="p-4 lg:p-6 space-y-6">
                 {/* Header */}
                 <div className="animate-fade-in">
-                    <h2 className="text-xl font-bold text-foreground">
+                    <h2 className="text-2xl font-bold text-foreground">
                         {isClassTeacher ? 'My Class' : 'Class Management'}
                     </h2>
-                    <p className="text-sm text-muted-foreground">{classes.length} {isClassTeacher ? 'class assigned' : 'classes'}</p>
+                    <p className="text-[11px] text-muted-foreground">{classes.length} {isClassTeacher ? 'class assigned' : 'classes'}</p>
                 </div>
 
                 {/* Classes Grid - Responsive */}
@@ -129,17 +129,17 @@ export default function ClassesPage() {
                             className="animate-slide-up hover:shadow-lg transition-all hover:border-primary/40"
                             style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'backwards' }}
                         >
-                            <CardContent className="p-4">
+                            <CardContent className="p-3">
                                 {/* Header with Class Name and Icon */}
                                 <div className="flex items-start gap-3 mb-3">
-                                    <div className={`w-10 h-10 rounded-lg ${getClassColor(classRoom.level)} flex items-center justify-center flex-shrink-0`}>
-                                        <GraduationCap className="w-5 h-5" />
+                                    <div className={`w-9 h-9 rounded-lg ${getClassColor(classRoom.level)} flex items-center justify-center flex-shrink-0`}>
+                                        <GraduationCap className="w-4 h-4" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-bold text-base text-foreground leading-tight">
+                                        <h3 className="font-bold text-sm text-foreground leading-tight">
                                             Class {classRoom.name}
                                         </h3>
-                                        <Badge variant="secondary" className="text-xs mt-1 bg-muted text-muted-foreground font-medium">
+                                        <Badge variant="secondary" className="text-[10px] mt-1 bg-muted text-muted-foreground font-medium">
                                             <Users className="w-3 h-3 mr-1" />
                                             {classRoom.students_count ?? 0} students
                                         </Badge>
@@ -147,38 +147,38 @@ export default function ClassesPage() {
                                 </div>
 
                                 {/* Class Teacher */}
-                                <div className="space-y-1.5 mb-3">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                <div className="space-y-1 mb-3">
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                                         Class Teacher
                                     </label>
                                     {classRoom.class_teacher ? (
                                         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                                            <div className={`w-7 h-7 rounded-full ${getAvatarColor(classRoom.class_teacher.name)} flex items-center justify-center flex-shrink-0`}>
-                                                <span className="text-xs font-bold text-white">
+                                            <div className={`w-6 h-6 rounded-full ${getAvatarColor(classRoom.class_teacher.name)} flex items-center justify-center flex-shrink-0`}>
+                                                <span className="text-[10px] font-bold text-white">
                                                     {classRoom.class_teacher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                                                 </span>
                                             </div>
-                                            <span className="text-sm font-medium truncate" title={toTitleCase(classRoom.class_teacher.name)}>
+                                            <span className="text-[12px] font-medium truncate" title={toTitleCase(classRoom.class_teacher.name)}>
                                                 {toTitleCase(classRoom.class_teacher.name)}
                                             </span>
                                         </div>
                                     ) : isClassTeacher ? (
                                         // Teachers cannot assign a class teacher
-                                        <p className="text-xs text-muted-foreground italic px-1">Not assigned</p>
+                                        <p className="text-[11px] text-muted-foreground italic px-1">Not assigned</p>
                                     ) : (
                                         <Select
                                             value=""
                                             onValueChange={(value) => handleAssignTeacher(classRoom.id, value)}
                                         >
-                                            <SelectTrigger className="h-9 text-sm">
+                                            <SelectTrigger className="h-8 text-[12px]">
                                                 <SelectValue placeholder="Assign teacher" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {teachers.map((teacher) => (
                                                     <SelectItem key={teacher.id} value={teacher.id.toString()}>
                                                         <div className="flex items-center gap-2">
-                                                            <div className={`w-6 h-6 rounded-full ${getAvatarColor(teacher.name)} flex items-center justify-center`}>
-                                                                <span className="text-[10px] font-bold text-white">
+                                                            <div className={`w-5 h-5 rounded-full ${getAvatarColor(teacher.name)} flex items-center justify-center`}>
+                                                                <span className="text-[9px] font-bold text-white">
                                                                     {teacher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                                                                 </span>
                                                             </div>
@@ -194,10 +194,10 @@ export default function ClassesPage() {
                                 {/* View Report Button */}
                                 <button
                                     onClick={() => navigate(`/classes/${classRoom.id}/performance`)}
-                                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-[12px] font-medium shadow-sm hover:shadow-md"
                                 >
                                     <span>View Report</span>
-                                    <ChevronRight className="w-4 h-4" />
+                                    <ChevronRight className="w-3.5 h-3.5" />
                                 </button>
                             </CardContent>
                         </Card>

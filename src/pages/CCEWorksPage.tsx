@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Plus,
@@ -131,7 +131,7 @@ export default function CCEWorksPage() {
 
     return (
         <AppLayout title="CCE Works">
-            <div className="p-4 md:p-8 max-w-[1100px] mx-auto space-y-6 pb-24 min-h-screen">
+            <div className="p-4 lg:p-6 max-w-[1100px] mx-auto space-y-6 pb-24 min-h-screen">
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 animate-fade-in">
@@ -318,3 +318,4 @@ export default function CCEWorksPage() {
         </AppLayout>
     );
 }
+
