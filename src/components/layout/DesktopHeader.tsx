@@ -90,13 +90,13 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
         : user?.role || '';
 
     return (
-        <header className="hidden lg:flex fixed top-0 left-60 right-0 h-[52px] z-40 bg-white border-b border-slate-100/80 items-center px-5 gap-0">
+        <header className="hidden lg:flex fixed top-0 left-60 right-0 h-[64px] z-40 bg-white border-b border-slate-100/80 items-center px-6 gap-0">
 
             {/* ── LEFT: Breadcrumb / Page context ─────────────────────────────── */}
             <div className="flex items-center gap-1.5 shrink-0 min-w-[180px]">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-150"
+                    className="flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-150"
                     title="Dashboard"
                 >
                     <Home className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
                         type="text"
                         placeholder="Search records..."
                         className="
-                            w-full h-[30px] pl-8 pr-3
+                            w-full h-[36px] pl-8 pr-3
                             bg-slate-50 border border-slate-200/80
                             rounded-lg text-[12px] text-slate-700
                             placeholder:text-slate-400/80
@@ -151,7 +151,7 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
                 {/* Notification bell */}
                 <button
                     onClick={() => navigate('/notifications')}
-                    className="relative flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all duration-150"
+                    className="relative flex items-center justify-center w-10 h-10 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all duration-150"
                     title="Notifications"
                 >
                     <Bell className="w-4 h-4" strokeWidth={2} />
@@ -170,12 +170,7 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
                         className="flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-slate-50 transition-all duration-150 focus:outline-none group"
                     >
                         {/* Avatar */}
-                        <div className="w-7 h-7 rounded-full bg-emerald-700 flex items-center justify-center text-white text-[10px] font-black shrink-0 ring-2 ring-emerald-700/10">
-                            {avatarInitials}
-                        </div>
-
-                        {/* Name + role — hidden below xl */}
-                        <div className="hidden xl:flex flex-col items-start leading-none">
+                            <div className="w-9 h-9 rounded-full bg-emerald-700 flex items-center justify-center text-white text-[10px] font-black shrink-0 ring-2 ring-emerald-700/10">
                             <span className="text-[12px] font-semibold text-slate-700 leading-[1.3]">{displayName}</span>
                             <span className="text-[10px] text-slate-400 leading-[1.3] capitalize">{displayRole}</span>
                         </div>
