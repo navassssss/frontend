@@ -330,10 +330,11 @@ export default function AddStudentsPage() {
 
     return (
         <AppLayout title="Add New Students">
-            <div className="p-4 lg:p-6 max-w-6xl mx-auto space-y-6 pb-24 min-h-screen">
+            <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-5 pb-24 min-h-screen">
                 
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" onClick={() => {
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon-sm" onClick={() => {
                         if (hasChanges) {
                             if (window.confirm("You have unsaved changes. Are you sure you want to leave this page?")) {
                                 navigate('/students');
@@ -353,7 +354,7 @@ export default function AddStudentsPage() {
                 <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Select value={String(itemsPerPage)} onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1); }}>
-                           <SelectTrigger className="w-32 bg-white"><SelectValue placeholder="Per Page" /></SelectTrigger>
+                           <SelectTrigger className="h-9 w-32 bg-white text-sm"><SelectValue placeholder="Per Page" /></SelectTrigger>
                            <SelectContent>
                                <SelectItem value="25">25 per page</SelectItem>
                                <SelectItem value="50">50 per page</SelectItem>
@@ -362,11 +363,11 @@ export default function AddStudentsPage() {
                            </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Button onClick={downloadTemplate} variant="ghost" className="gap-2 text-primary hover:text-primary/80 hover:bg-primary/10 shadow-sm border border-transparent hover:border-primary/20">
+                    <div className="flex flex-wrap gap-2 items-center justify-start lg:justify-end">
+                        <Button size="sm" onClick={downloadTemplate} variant="ghost" className="gap-2 text-primary hover:text-primary/80 hover:bg-primary/10 shadow-sm border border-transparent hover:border-primary/20">
                             Download Template
                         </Button>
-                        <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="gap-2 text-primary border-primary hover:bg-primary/10">
+                        <Button size="sm" onClick={() => fileInputRef.current?.click()} variant="outline" className="gap-2 text-primary border-primary hover:bg-primary/10">
                             <Upload className="w-4 h-4" /> Import Excel
                         </Button>
                         <input
@@ -376,35 +377,35 @@ export default function AddStudentsPage() {
                             className="hidden"
                             onChange={handleFileUpload}
                         />
-                         <Button onClick={handleSort} variant="secondary" className="gap-2 group">
+                         <Button size="sm" onClick={handleSort} variant="secondary" className="gap-2 group">
                              <ArrowDownAZ className={`w-4 h-4 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} /> 
                              {sortDirection === 'asc' ? 'Sort (Ascending)' : 'Sort (Descending)'}
                         </Button>
-                        <Button onClick={addEmptyRow} variant="outline" className="gap-2">
+                        <Button size="sm" onClick={addEmptyRow} variant="outline" className="gap-2">
                             <Plus className="w-4 h-4" /> Add Row
                         </Button>
                    </div>
                    
                    <div className="flex gap-2">
                        {selectedIds.length > 0 && (
-                           <Button onClick={handleBulkDelete} variant="destructive" className="gap-2 shadow-md hover:shadow-lg transition-all animate-fade-in">
+                           <Button size="sm" onClick={handleBulkDelete} variant="destructive" className="gap-2 shadow-md hover:shadow-lg transition-all animate-fade-in">
                                <Trash2 className="w-4 h-4" /> Delete ({selectedIds.length})
                            </Button>
                        )}
-                       <Button onClick={handleSave} disabled={isSaving || !hasChanges || duplicateRollNumbers.size > 0} className={`gap-2 shadow-md transition-all ${!hasChanges ? 'opacity-50' : 'hover:shadow-lg'}`}>
+                       <Button size="sm" onClick={handleSave} disabled={isSaving || !hasChanges || duplicateRollNumbers.size > 0} className={`gap-2 shadow-md transition-all ${!hasChanges ? 'opacity-50' : 'hover:shadow-lg'}`}>
                            <Save className="w-4 h-4" /> {isSaving ? "Saving..." : "Save Changes"}
                        </Button>
                    </div>
                 </div>
 
                 <Card className="border-0 shadow-lg border-t-4 border-t-primary overflow-hidden">
-                    <CardHeader className="py-4 bg-muted/20 border-b">
-                        <CardTitle className="text-base font-semibold text-foreground flex items-center justify-between">
+                    <CardHeader className="py-3 bg-muted/20 border-b">
+                        <CardTitle className="text-sm font-semibold text-foreground flex items-center justify-between">
                             <span>Student Data</span>
                             <span className="text-sm font-normal text-muted-foreground bg-secondary px-3 py-1 rounded-full">{students.length} Total</span>
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0 overflow-x-auto min-h-[400px]">
+                    <CardContent className="p-0 overflow-x-auto min-h-[320px]">
                         <table className="w-full text-sm min-w-[700px]">
                             <thead className="bg-muted/50 border-b">
                                 <tr>
