@@ -12,22 +12,15 @@ import {
     Filter,
     RefreshCw,
     ChevronDown,
+    ChevronRight,
+    User
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { formatDistanceToNow } from 'date-fns';
 import api from '@/lib/api';
 
@@ -40,7 +33,7 @@ function formatIST(dateStr: string, opts: Intl.DateTimeFormatOptions): string {
 }
 
 function fTime(dateStr: string): string {
-    return formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true });
+    return formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase();
 }
 
 // Smart label: "Today 5:30 PM", "Yesterday 3:15 PM", "22 Apr 4:00 PM"
@@ -49,7 +42,7 @@ function fSmartDateTime(dateStr: string): string {
     const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date());
     const yesterdayStr = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(new Date(Date.now() - 86400000));
     const dateOnly = new Intl.DateTimeFormat('en-CA', { timeZone: IST }).format(date);
-    const time = formatIST(dateStr, { hour: 'numeric', minute: '2-digit', hour12: true });
+    const time = fTime(dateStr);
     if (dateOnly === todayStr) return `Today, ${time}`;
     if (dateOnly === yesterdayStr) return `Yesterday, ${time}`;
     const day = formatIST(dateStr, { day: 'numeric', month: 'short' });
@@ -66,6 +59,9 @@ function istOffsetISO(offsetHours = 0): string {
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${ist.getFullYear()}-${pad(ist.getMonth()+1)}-${pad(ist.getDate())}T${pad(ist.getHours())}:${pad(ist.getMinutes())}`;
 }
+
+const initials = (name: string) =>
+  name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
 // 12-hr time picker component
 function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -92,27 +88,27 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
     };
 
     return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
             <select
-                className="border border-input rounded-md px-2 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                className="border-0 bg-slate-50 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-600/20"
                 value={toH12(h24)}
                 onChange={e => setHour(parseInt(e.target.value))}
             >
                 {Array.from({length:12},(_,i)=>i+1).map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
             </select>
-            <span className="text-muted-foreground font-bold">:</span>
+            <span className="text-slate-400 font-bold">:</span>
             <select
-                className="border border-input rounded-md px-2 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                className="border-0 bg-slate-50 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-600/20"
                 value={min}
                 onChange={e => setMinute(parseInt(e.target.value))}
             >
                 {Array.from({length:12},(_,i)=>i*5).map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
             </select>
-            <div className="flex rounded-md overflow-hidden border border-input">
+            <div className="flex rounded-xl overflow-hidden border border-slate-100 ml-1">
                 {(['AM','PM'] as const).map(ap => (
                     <button key={ap} type="button"
-                        className={`px-2 py-2 text-xs font-bold transition-colors ${
-                            ampm === ap ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-muted'
+                        className={`px-3 py-2.5 text-[11px] font-bold transition-colors uppercase tracking-widest ${
+                            ampm === ap ? 'bg-amber-100 text-amber-800' : 'bg-white text-slate-500 hover:bg-slate-50'
                         }`}
                         onClick={() => toggleAmPm(ap)}
                     >{ap}</button>
@@ -162,25 +158,6 @@ interface DashboardStats {
     returned_today: number;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-const statusConfig = {
-    outside: { label: 'Outside', className: 'bg-amber-100 text-amber-800 border-amber-300', icon: LogOut },
-    returned: { label: 'Returned', className: 'bg-emerald-100 text-emerald-800 border-emerald-300', icon: CheckCircle2 },
-    overdue: { label: 'Overdue', className: 'bg-red-100 text-red-800 border-red-300', icon: AlertTriangle },
-};
-
-function StatusBadge({ status }: { status: 'outside' | 'returned' | 'overdue' }) {
-    const cfg = statusConfig[status];
-    const Icon = cfg.icon;
-    return (
-        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.className}`}>
-            <Icon className="w-3 h-3" />
-            {cfg.label}
-        </span>
-    );
-}
-
 // ── CheckoutModal ──────────────────────────────────────────────────────────
 
 interface CheckoutModalProps {
@@ -203,7 +180,6 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
 
     useEffect(() => {
         api.get('/students?per_page=1000').then(({ data }) => {
-            // handle paginated or flat response
             const list = data.data ?? data;
             setStudents(list);
         }).catch(() => {});
@@ -228,7 +204,6 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
 
         setSubmitting(true);
         try {
-            // Combine date + time parts before sending
             const fullOutTime = `${outDate}T${outTime.split('T')[1]}`;
             const fullExpected = `${expectedDate}T${expectedInTime.split('T')[1]}`;
             await api.post('/outpasses', {
@@ -250,44 +225,47 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 pb-24 sm:pb-6 animate-fade-in" onClick={onClose}>
+            <div className="w-full max-w-md max-h-[calc(100vh-7rem)] sm:max-h-[85vh] overflow-hidden flex flex-col bg-white rounded-3xl shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b">
-                    <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
-                            <LogOut className="w-5 h-5 text-amber-700" />
-                        </div>
-                        <div>
-                            <h2 className="font-bold text-foreground">New Outpass</h2>
-                            <p className="text-xs text-muted-foreground">Student campus checkout</p>
-                        </div>
-                    </div>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+                    <h2 className="text-lg font-black text-slate-900">New Outpass</h2>
+                    <button
+                        onClick={onClose}
+                        className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-500"
+                    >
                         <X className="w-4 h-4" />
                     </button>
                 </div>
 
-                <div className="p-5 space-y-4">
+                <div className="flex-1 overflow-y-auto p-6 space-y-5">
                     {/* Student Search */}
-                    <div className="space-y-2 relative">
-                        <Label>Student <span className="text-destructive">*</span></Label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700">Student</label>
                         {selectedStudent ? (
-                            <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                                <div>
-                                    <p className="font-semibold text-sm text-foreground">{selectedStudent.name}</p>
-                                    <p className="text-xs text-muted-foreground">Roll #{selectedStudent.roll_number}</p>
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#ebf3ff]/50 border border-blue-100">
+                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-sm font-bold text-blue-700 shrink-0 shadow-sm">
+                                    {initials(selectedStudent.name)}
                                 </div>
-                                <button onClick={() => { setSelectedStudent(null); setSearchQuery(''); }} className="text-muted-foreground hover:text-destructive">
-                                    <X className="w-4 h-4" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-slate-900">{selectedStudent.name}</p>
+                                    <p className="text-sm font-medium text-slate-500">
+                                        {selectedStudent.class?.name} · ID #{selectedStudent.roll_number}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => { setSelectedStudent(null); setSearchQuery(''); }}
+                                    className="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center shrink-0 transition-colors shadow-sm bg-blue-50/50"
+                                >
+                                    <X className="w-4 h-4 text-slate-500" />
                                 </button>
                             </div>
                         ) : (
-                            <>
+                            <div className="space-y-2 relative">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     <Input
-                                        className="pl-9"
+                                        className="pl-12 h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium"
                                         placeholder="Search student name or roll no..."
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
@@ -295,60 +273,92 @@ function CheckoutModal({ onClose, onSuccess }: CheckoutModalProps) {
                                     />
                                 </div>
                                 {filteredStudents.length > 0 && (
-                                    <div className="absolute z-10 left-0 right-0 bg-background border border-border rounded-lg shadow-lg overflow-hidden mt-1">
+                                    <div className="absolute z-10 left-0 right-0 max-h-52 overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-lg p-2 mt-2">
                                         {filteredStudents.map(s => (
                                             <button
                                                 key={s.id}
-                                                className="w-full text-left px-4 py-2.5 hover:bg-muted/50 flex items-center justify-between"
+                                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 rounded-xl transition-colors text-left"
                                                 onClick={() => { setSelectedStudent(s); setSearchQuery(''); setFilteredStudents([]); }}
                                             >
-                                                <span className="font-medium text-sm">{s.name}</span>
-                                                <span className="text-xs text-muted-foreground">Roll #{s.roll_number}</span>
+                                                <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0">
+                                                    {initials(s.name)}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-900">{s.name}</p>
+                                                    <p className="text-xs font-medium text-slate-500">{s.class?.name} · #{s.roll_number}</p>
+                                                </div>
                                             </button>
                                         ))}
                                     </div>
                                 )}
-                            </>
+                            </div>
                         )}
                     </div>
 
                     {/* Reason */}
-                    <div className="space-y-2">
-                        <Label>Reason for leaving <span className="text-destructive">*</span></Label>
-                        <Input placeholder="e.g. Doctor appointment, Family emergency..." value={reason} onChange={e => setReason(e.target.value)} />
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Reason for Leaving</label>
+                        <Input
+                            placeholder="e.g. Doctor appointment, Family emergency..."
+                            value={reason}
+                            onChange={e => setReason(e.target.value)}
+                            className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-bold"
+                        />
                     </div>
 
                     {/* Out Time */}
-                    <div className="space-y-2">
-                        <Label>Out Date & Time <span className="text-destructive">*</span></Label>
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Out Date & Time</label>
                         <div className="flex gap-2 flex-wrap items-center">
-                            <Input type="date" className="w-auto flex-1 min-w-[130px]" value={outDate} onChange={e => setOutDate(e.target.value)} />
+                            <Input
+                                type="date"
+                                className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium w-auto flex-1 min-w-[130px]"
+                                value={outDate}
+                                onChange={e => setOutDate(e.target.value)}
+                            />
                             <TimePicker value={outTime} onChange={setOutTime} />
                         </div>
                     </div>
                     {/* Expected Return */}
-                    <div className="space-y-2">
-                        <Label>Expected Return <span className="text-destructive">*</span></Label>
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Expected Return</label>
                         <div className="flex gap-2 flex-wrap items-center">
-                            <Input type="date" className="w-auto flex-1 min-w-[130px]" value={expectedDate} onChange={e => setExpectedDate(e.target.value)} />
+                            <Input
+                                type="date"
+                                className="h-12 bg-slate-50 border-0 rounded-xl focus-visible:ring-amber-600/20 font-medium w-auto flex-1 min-w-[130px]"
+                                value={expectedDate}
+                                onChange={e => setExpectedDate(e.target.value)}
+                            />
                             <TimePicker value={expectedInTime} onChange={setExpectedInTime} />
                         </div>
                     </div>
 
                     {/* Notes */}
-                    <div className="space-y-2">
-                        <Label>Notes <span className="text-muted-foreground text-xs">(Optional)</span></Label>
-                        <Input placeholder="Additional details..." value={notes} onChange={e => setNotes(e.target.value)} />
+                    <div className="space-y-2 pt-2">
+                        <label className="text-sm font-bold text-slate-700">Additional Notes <span className="text-slate-400 font-normal ml-1">(Optional)</span></label>
+                        <textarea
+                            value={notes}
+                            onChange={e => setNotes(e.target.value)}
+                            rows={3}
+                            placeholder="Additional details..."
+                            className="w-full px-4 py-3 rounded-xl border-0 bg-slate-50 text-slate-900 resize-none text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-600/20"
+                        />
                     </div>
+                </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-2">
-                        <Button variant="outline" className="flex-1" onClick={onClose} disabled={submitting}>Cancel</Button>
-                        <Button className="flex-1 bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSubmit} disabled={submitting}>
-                            <LogOut className="w-4 h-4 mr-2" />
-                            {submitting ? 'Creating...' : 'Create Outpass'}
-                        </Button>
-                    </div>
+                {/* Actions */}
+                <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/50">
+                    <Button variant="ghost" className="flex-1 h-12 rounded-xl text-slate-600 font-bold hover:bg-slate-200" onClick={onClose} disabled={submitting}>
+                        Cancel
+                    </Button>
+                    <Button
+                        className="flex-1 h-12 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold tracking-wide"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                    >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        {submitting ? 'Creating...' : 'Create Outpass'}
+                    </Button>
                 </div>
             </div>
         </div>
@@ -361,118 +371,107 @@ interface OutpassCardProps {
     outpass: Outpass;
     onCheckin: (id: number) => void;
     checkingIn: boolean;
+    delay: number;
 }
 
-function OutpassCard({ outpass, onCheckin, checkingIn }: OutpassCardProps) {
-    const [expanded, setExpanded] = useState(false);
-    const [confirming, setConfirming] = useState(false);
+function OutpassCard({ outpass, onCheckin, checkingIn, delay }: OutpassCardProps) {
     const isActionable = outpass.status !== 'returned';
 
-    const handleCheckinClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!confirming) { setConfirming(true); return; }
-        setConfirming(false);
-        onCheckin(outpass.id);
-    };
-
     return (
-        <Card className={`transition-all duration-200 shadow-sm hover:shadow-md ${
-            outpass.status === 'overdue' ? 'border-red-300 bg-red-50/30' : ''
-        }`}>
-            <CardContent className="p-0">
-                <div className="p-4 flex flex-col gap-2">
-                    {/* Row 1: Icon · Name · Status · Return btn */}
-                    <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                            outpass.status === 'overdue' ? 'bg-red-100 text-red-700'
-                            : outpass.status === 'returned' ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-amber-100 text-amber-700'
-                        }`}>
-                            {outpass.status === 'returned' ? <LogIn className="w-5 h-5" /> : <LogOut className="w-5 h-5" />}
-                        </div>
-                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpanded(e => !e)}>
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <p className="font-semibold text-sm text-foreground leading-tight">{outpass.student?.user?.name ?? '—'}</p>
-                                <StatusBadge status={outpass.status} />
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                                {outpass.student?.classRoom?.name} · Roll #{outpass.student?.roll_number}
-                            </p>
-                        </div>
-                        {isActionable ? (
-                            <Button
-                                size="sm"
-                                disabled={checkingIn}
-                                onClick={handleCheckinClick}
-                                className={`shrink-0 text-xs px-2.5 h-8 transition-all ${
-                                    confirming
-                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white animate-pulse'
-                                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300'
-                                }`}
-                            >
-                                <LogIn className="w-3.5 h-3.5 mr-1" />
-                                {checkingIn ? 'Saving...' : confirming ? 'Confirm?' : 'Return'}
-                            </Button>
-                        ) : (
-                            <ChevronDown
-                                className={`w-4 h-4 text-muted-foreground shrink-0 mt-1 transition-transform cursor-pointer ${expanded ? 'rotate-180' : ''}`}
-                                onClick={() => setExpanded(e => !e)}
-                            />
-                        )}
-                    </div>
-
-                    {/* Row 2 (indented): Duration · spacer · Times · Chevron */}
-                    <div className="flex items-center gap-2 pl-[52px] cursor-pointer" onClick={() => setExpanded(e => !e)}>
-                        {outpass.status !== 'returned' && (
-                            <span className={`text-xs font-medium ${outpass.status === 'overdue' ? 'text-red-600' : 'text-amber-700'}`}>
-                                ⏱ {formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })}
-                            </span>
-                        )}
-                        <div className="flex-1" />
-                        <div className="text-right">
-                            <p className="text-[10px] text-muted-foreground">Left at</p>
-                            <p className="text-xs font-medium">{fSmartDateTime(outpass.out_time)}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[10px] text-muted-foreground">
-                                {outpass.status === 'returned' ? 'Returned' : 'Exp. back'}
-                            </p>
-                            <p className={`text-xs font-medium ${outpass.status === 'overdue' ? 'text-red-600' : ''}`}>
-                                {outpass.status === 'returned' && outpass.actual_in_time
-                                    ? fSmartDateTime(outpass.actual_in_time)
-                                    : fSmartDateTime(outpass.expected_in_time)}
-                            </p>
-                        </div>
-                        {isActionable && (
-                            <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-                        )}
-                    </div>
-
+        <div
+            className="bg-white rounded-[1.25rem] p-4 lg:p-5 shadow-sm border border-slate-100 flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-4 hover:shadow-md transition-all animate-slide-up"
+            style={{ animationDelay: `${delay}s`, animationFillMode: 'backwards' }}
+        >
+            {/* LEFT SECTION - Avatar & Name */}
+            <div className="flex items-center gap-3.5 lg:col-span-3 shrink-0">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-[15px] font-black shrink-0 ${
+                    outpass.status === 'overdue' ? 'bg-red-100/50 text-red-600'
+                    : outpass.status === 'returned' ? 'bg-[#bffff0]/40 text-[#00a877]'
+                    : 'bg-amber-100/50 text-amber-600'
+                }`}>
+                    {initials(outpass.student?.user?.name || '?')}
                 </div>
+                <div className="min-w-0">
+                    <p className="text-[15px] font-bold text-slate-900 truncate">{outpass.student?.user?.name || '—'}</p>
+                    <p className="text-[12px] font-medium text-slate-500 truncate mt-0.5">
+                        {outpass.student?.classRoom?.name} <span className="opacity-30 mx-1">•</span> ID #{outpass.student?.roll_number || 'N/A'}
+                    </p>
+                </div>
+            </div>
 
-                {/* Expanded Details */}
-                {expanded && (
-                    <div className="border-t border-border px-4 py-3 bg-muted/20">
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium mb-0.5">Reason</p>
-                                <p>{outpass.reason}</p>
-                            </div>
-                            {outpass.notes && (
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-medium mb-0.5">Notes</p>
-                                    <p>{outpass.notes}</p>
-                                </div>
-                            )}
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium mb-0.5">Created by</p>
-                                <p>{outpass.creator?.name ?? '—'}</p>
-                            </div>
-                        </div>
+            {/* MIDDLE SECTION - Reason Details */}
+            <div className="flex-1 min-w-0 lg:col-span-3 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+                 <p className="text-[14px] font-bold text-slate-900 truncate" title={outpass.reason}>{outpass.reason}</p>
+                 <div className="flex items-center gap-2">
+                    <span className={`text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-widest ${
+                        outpass.status === 'overdue' ? 'bg-red-50 text-red-600'
+                        : outpass.status === 'returned' ? 'bg-emerald-50 text-emerald-600'
+                        : 'bg-amber-50 text-amber-600'
+                    }`}>
+                        {outpass.status === 'returned' ? 'Returned' : outpass.status === 'overdue' ? 'Overdue' : 'Outside'}
+                    </span>
+                    {outpass.status !== 'returned' && (
+                        <span className={`text-[10px] font-bold ${outpass.status === 'overdue' ? 'text-red-500' : 'text-amber-500'}`}>
+                            ⏱ {formatDistanceToNow(new Date(outpass.out_time), { addSuffix: false })}
+                        </span>
+                    )}
+                 </div>
+                 {outpass.notes && (
+                     <p className="mt-0.5 text-[12px] text-slate-500 line-clamp-2" title={outpass.notes}>
+                         {outpass.notes}
+                     </p>
+                 )}
+            </div>
+
+            {/* METADATA SECTION */}
+            <div className="flex-1 min-w-0 lg:col-span-4 flex flex-row lg:flex-col gap-4 lg:gap-2.5 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
+                 <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1">
+                    <LogOut className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+                    <div className="flex flex-col leading-[1.3]">
+                       <span className="font-bold text-slate-700">{formatIST(outpass.out_time, { day: 'numeric', month: 'short' })}</span>
+                       <span>{fTime(outpass.out_time)}</span>
+                    </div>
+                 </div>
+                 <div className="flex items-start gap-2 text-[12px] text-slate-500 flex-1 min-w-0">
+                    <LogIn className="w-4 h-4 shrink-0 mt-[1px] text-slate-400" />
+                    <div className="flex flex-col leading-[1.3] min-w-0 w-full">
+                       <span className={`font-bold ${outpass.status === 'overdue' ? 'text-red-600' : 'text-slate-700'} truncate block w-full`}>
+                           {outpass.status === 'returned' && outpass.actual_in_time
+                              ? formatIST(outpass.actual_in_time, { day: 'numeric', month: 'short' })
+                              : formatIST(outpass.expected_in_time, { day: 'numeric', month: 'short' })
+                           }
+                       </span>
+                       <span className={outpass.status === 'overdue' ? 'text-red-500' : ''}>
+                           {outpass.status === 'returned' && outpass.actual_in_time
+                              ? fTime(outpass.actual_in_time)
+                              : fTime(outpass.expected_in_time)
+                           }
+                       </span>
+                    </div>
+                 </div>
+            </div>
+
+            {/* RIGHT SECTION - Actions */}
+            <div className="flex items-center justify-end gap-3 lg:col-span-2 border-t lg:border-t-0 border-slate-50 pt-4 lg:pt-0 shrink-0">
+                {isActionable ? (
+                    <Button
+                        size="sm"
+                        disabled={checkingIn}
+                        onClick={() => onCheckin(outpass.id)}
+                        className="w-full lg:w-auto h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold shadow-sm"
+                    >
+                        <LogIn className="w-4 h-4 mr-2" />
+                        {checkingIn ? 'Saving...' : 'Return'}
+                    </Button>
+                ) : (
+                    <div className="w-full text-center lg:text-right">
+                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 flex items-center justify-center lg:justify-end gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Returned
+                        </span>
                     </div>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
 
@@ -487,8 +486,8 @@ export default function OutpassesPage() {
     const [checkingInId, setCheckingInId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
 
-    // Filters — default: Outside, all dates
-    const [filterStatus, setFilterStatus] = useState('outside');
+    // Tab & Filters
+    const [tab, setTab] = useState<'active' | 'history'>('active');
     const [filterClass, setFilterClass] = useState('all');
     const [filterDate, setFilterDate] = useState('');
     const [searchStudent, setSearchStudent] = useState('');
@@ -501,19 +500,17 @@ export default function OutpassesPage() {
         if (!silent) setLoading(true);
         try {
             const params: Record<string, string> = {};
-            if (filterStatus !== 'all') params.status = filterStatus;
             if (filterClass !== 'all') params.class_id = filterClass;
             if (filterDate) params.date = filterDate;
 
             const [statsRes, listRes, classesRes] = await Promise.all([
                 api.get('/outpasses/dashboard'),
-                api.get('/outpasses', { params }),
+                api.get('/outpasses', { params }), // Fetching all (up to paginate limit)
                 api.get('/attendance/classes'),
             ]);
 
             setStats(statsRes.data);
             const raw: Outpass[] = listRes.data.data ?? listRes.data;
-            // Sort: overdue first, then outside (oldest first), then returned
             const order = { overdue: 0, outside: 1, returned: 2 };
             raw.sort((a, b) =>
                 order[a.status] !== order[b.status]
@@ -527,17 +524,17 @@ export default function OutpassesPage() {
         } finally {
             setLoading(false);
         }
-    }, [filterStatus, filterClass, filterDate]);
+    }, [filterClass, filterDate]);
 
     useEffect(() => { loadData(); }, [loadData]);
 
-    // Auto-refresh every 60s (silent — no spinner)
     useEffect(() => {
         const id = setInterval(() => loadData(true), 60_000);
         return () => clearInterval(id);
     }, [loadData]);
 
     const handleCheckin = async (id: number) => {
+        if (!window.confirm('Mark this student as returned?')) return;
         setCheckingInId(id);
         try {
             await api.put(`/outpasses/${id}/checkin`);
@@ -551,6 +548,9 @@ export default function OutpassesPage() {
     };
 
     const filteredOutpasses = outpasses.filter(op => {
+        if (tab === 'active' && op.status === 'returned') return false;
+        if (tab === 'history' && op.status !== 'returned') return false;
+
         if (!searchStudent) return true;
         const q = searchStudent.toLowerCase();
         return (
@@ -560,147 +560,183 @@ export default function OutpassesPage() {
     });
 
     return (
-        <AppLayout title="Outpass Management" showBack>
-            <div className="p-4 space-y-6 lg:p-8 pb-24">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <AppLayout title="Outpasses">
+            <div className="p-4 md:p-10 max-w-[1280px] mx-auto pb-28 space-y-8 bg-slate-50/30 min-h-screen">
+
+                {/* ── Page Header ── */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 animate-fade-in">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Outpass Management</h1>
-                        <p className="text-sm text-muted-foreground">Track students leaving and returning to campus</p>
+                        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
+                            Outpasses
+                        </h1>
+                        <p className="text-base text-slate-600 mt-2 font-medium">
+                            Track students leaving and returning
+                        </p>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => loadData()} size="icon" disabled={loading}>
-                            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    <div className="flex items-center gap-3 shrink-0">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => loadData()}
+                            disabled={loading}
+                            className="h-12 w-12 rounded-2xl border-0 bg-white shadow-sm text-slate-600 hover:bg-slate-100"
+                        >
+                            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-12 w-12 rounded-2xl border-0 bg-white shadow-sm text-slate-600 hover:bg-slate-100"
+                        >
+                            <Filter className="w-5 h-5" />
                         </Button>
                         {canCreate && (
                             <Button
                                 onClick={() => setShowModal(true)}
-                                className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20"
+                                className="h-12 px-6 rounded-2xl gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-md border-0 transition-all font-semibold"
                             >
-                                <Plus className="w-4 h-4 mr-2" />
-                                New Outpass
+                                <Plus className="w-5 h-5" /> New Outpass
                             </Button>
                         )}
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                        { label: 'Today Total', value: stats.total_today, icon: Users, color: 'bg-blue-100 text-blue-700', border: 'border-blue-100' },
-                        { label: 'Currently Outside', value: stats.currently_outside, icon: LogOut, color: 'bg-amber-100 text-amber-700', border: 'border-amber-100' },
-                        { label: 'Overdue', value: stats.overdue, icon: AlertTriangle, color: 'bg-red-100 text-red-700', border: 'border-red-100' },
-                        { label: 'Returned Today', value: stats.returned_today, icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700', border: 'border-emerald-100' },
-                    ].map(({ label, value, icon: Icon, color, border }) => (
-                        <Card key={label} className={`shadow-sm border ${border}`}>
-                            <CardContent className="p-4 flex items-center gap-4">
-                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
-                                    <Icon className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
-                                    <p className="text-2xl font-bold text-foreground">{value}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                {/* ── Stat Cards ── */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-slide-up">
+                    {/* Active Card */}
+                    <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-amber-100/80 w-full relative overflow-hidden transition-all hover:bg-amber-100 group">
+                        <div className="bg-amber-200/60 rounded-xl p-3 shrink-0 text-amber-700 transition-colors group-hover:bg-amber-200">
+                            <LogOut className="w-6 h-6" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-4xl font-black text-amber-800 tracking-tight">{stats.currently_outside.toString().padStart(2, '0')}</span>
+                            <span className="text-[11px] font-black uppercase tracking-widest text-amber-600">Outside</span>
+                        </div>
+                    </div>
+
+                    {/* Overdue Card */}
+                    <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-red-100/80 w-full relative overflow-hidden transition-all hover:bg-red-100 group">
+                        <div className="bg-red-200/60 rounded-xl p-3 shrink-0 text-red-700 transition-colors group-hover:bg-red-200">
+                            <AlertTriangle className="w-6 h-6" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-4xl font-black text-red-800 tracking-tight">{stats.overdue.toString().padStart(2, '0')}</span>
+                            <span className="text-[11px] font-black uppercase tracking-widest text-red-600">Overdue</span>
+                        </div>
+                    </div>
+
+                    {/* Returned Card */}
+                    <div className="rounded-[1.5rem] p-5 flex items-center gap-5 bg-emerald-100/80 w-full relative overflow-hidden transition-all hover:bg-emerald-100 group">
+                        <div className="bg-emerald-200/70 rounded-xl p-3 shrink-0 text-[#00865B] transition-colors group-hover:bg-emerald-200">
+                            <CheckCircle2 className="w-6 h-6" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-4xl font-black text-emerald-900 tracking-tight">{stats.returned_today.toString().padStart(2, '0')}</span>
+                            <span className="text-[11px] font-black uppercase tracking-widest text-[#00865B]">Returned Today</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Tab Toggle ── */}
+                <div className="flex gap-1 p-1.5 bg-slate-100 rounded-full w-fit animate-slide-up mb-2">
+                    {(['active', 'history'] as const).map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setTab(t)}
+                            className={`flex items-center px-6 py-2.5 rounded-full text-base font-bold transition-all ${
+                                tab === t 
+                                    ? 'bg-white shadow-sm text-amber-600' 
+                                    : 'text-slate-500 hover:text-slate-800'
+                            }`}
+                        >
+                            {t === 'active' ? 'Active Passes' : 'History'}
+                        </button>
                     ))}
                 </div>
 
-                {/* Filters */}
-                <Card className="shadow-sm">
-                    <CardContent className="p-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            {/* Search */}
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input
-                                    className="pl-9"
-                                    placeholder="Search student..."
-                                    value={searchStudent}
-                                    onChange={e => setSearchStudent(e.target.value)}
-                                />
-                            </div>
-                            {/* Status Filter */}
-                            <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="All Statuses" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Statuses</SelectItem>
-                                    <SelectItem value="outside">Outside</SelectItem>
-                                    <SelectItem value="overdue">Overdue</SelectItem>
-                                    <SelectItem value="returned">Returned</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {/* Class Filter */}
-                            <Select value={filterClass} onValueChange={setFilterClass}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="All Classes" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Classes</SelectItem>
-                                    {classes.map(c => (
-                                        <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {/* Date Filter */}
+                {/* ── Filters Bar (Desktop mainly, matches Medical Search bar style) ── */}
+                <div className="flex flex-col sm:flex-row gap-4 animate-slide-up">
+                    <div className="relative flex-1 max-w-xl">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <Input
+                            placeholder="Search student or roll no..."
+                            value={searchStudent}
+                            onChange={e => setSearchStudent(e.target.value)}
+                            className="pl-14 h-14 bg-white border-0 rounded-2xl shadow-sm text-base font-medium focus-visible:ring-amber-600/20"
+                        />
+                    </div>
+                    <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0">
+                        <div className="relative min-w-[130px] flex-1 sm:flex-none">
+                            <select 
+                                value={filterClass} 
+                                onChange={e => setFilterClass(e.target.value)}
+                                className="w-full h-14 pl-4 pr-10 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-amber-600/20 text-slate-700 outline-none appearance-none cursor-pointer"
+                            >
+                                <option value="all">All Classes</option>
+                                {classes.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                        <div className="relative min-w-[150px] flex-1 sm:flex-none">
                             <Input
                                 type="date"
                                 value={filterDate}
                                 onChange={e => setFilterDate(e.target.value)}
+                                className="w-full h-14 px-4 bg-white border-0 rounded-2xl shadow-sm text-sm font-bold focus-visible:ring-amber-600/20 text-slate-700 outline-none"
                             />
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* List */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-base font-semibold flex items-center gap-2 text-foreground">
-                            <Clock className="w-4 h-4 text-primary" />
-                            Outpass Records
-                        </h2>
-                        <Badge variant="outline" className="text-xs">{filteredOutpasses.length} records</Badge>
                     </div>
+                </div>
 
+                {/* ── List Content ── */}
+                <div className="animate-slide-up space-y-4">
                     {loading ? (
-                        <div className="space-y-3">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="h-20 bg-muted/30 animate-pulse rounded-xl" />
-                            ))}
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-[1.25rem] bg-slate-200/50 animate-pulse" />)}
                         </div>
                     ) : filteredOutpasses.length === 0 ? (
-                        <Card className="border-dashed border-2">
-                            <CardContent className="py-14 text-center">
-                                <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-4">
-                                    <LogOut className="w-8 h-8 text-muted-foreground" />
-                                </div>
-                                <h3 className="font-semibold text-foreground">No outpass records</h3>
-                                <p className="text-sm text-muted-foreground mt-1">No records match the current filters.</p>
-                                {canCreate && (
-                                    <Button className="mt-4 bg-amber-600 hover:bg-amber-700 text-white" onClick={() => setShowModal(true)}>
-                                        <Plus className="w-4 h-4 mr-2" />
-                                        Create First Outpass
-                                    </Button>
-                                )}
-                            </CardContent>
-                        </Card>
+                        <div className="py-20 flex flex-col items-center text-center gap-4 bg-white rounded-[2rem] shadow-sm">
+                            <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center">
+                                <CheckCircle2 className="w-10 h-10 text-slate-300" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800">Clear queue</h3>
+                                <p className="text-slate-500 mt-2 font-medium">No outpass records found.</p>
+                            </div>
+                        </div>
                     ) : (
-                        <div className="space-y-3">
-                            {filteredOutpasses.map(op => (
+                        <div className="flex flex-col space-y-4">
+                            {/* Desktop Table Headers */}
+                            <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div className="col-span-3">Student / ID</div>
+                                <div className="col-span-3">Reason & Status</div>
+                                <div className="col-span-4">Out & Return Time</div>
+                                <div className="col-span-2 text-right">Actions</div>
+                            </div>
+                            
+                            {filteredOutpasses.map((rec, idx) => (
                                 <OutpassCard
-                                    key={op.id}
-                                    outpass={op}
+                                    key={rec.id}
+                                    outpass={rec}
+                                    checkingIn={checkingInId === rec.id}
                                     onCheckin={handleCheckin}
-                                    checkingIn={checkingInId === op.id}
+                                    delay={idx * 0.04}
                                 />
                             ))}
+                            
+                            <div className="pt-8 pb-4 text-center">
+                                <span className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">
+                                    End of current outpasses
+                                </span>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
 
+            {/* Modal */}
             {showModal && (
                 <CheckoutModal
                     onClose={() => setShowModal(false)}
