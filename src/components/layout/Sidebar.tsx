@@ -177,7 +177,9 @@ export function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <div className="flex-1 overflow-y-auto py-2 px-0">
+            <div className="flex-1 overflow-y-auto py-3 px-0">
+                {/* Section label */}
+                <p className="text-[9px] font-black tracking-[0.15em] text-slate-400 uppercase px-5 pb-2">Main Menu</p>
                 {navItems.map((item) => {
                     const isExpanded = expandedItem === item.label;
                     const isActive = item.path
