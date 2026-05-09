@@ -330,7 +330,7 @@ export default function AddStudentsPage() {
 
     return (
         <AppLayout title="Add New Students">
-            <div className="p-4 lg:p-6 space-y-4 max-w-6xl mx-auto pb-24">
+            <div className="p-4 lg:p-6 max-w-6xl mx-auto space-y-6 pb-24 min-h-screen">
                 
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon" onClick={() => {

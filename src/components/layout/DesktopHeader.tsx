@@ -167,7 +167,7 @@ export function DesktopHeader({ title }: DesktopHeaderProps) {
                 <div className="relative" ref={menuRef}>
                     <button
                         onClick={() => setShowMenu(v => !v)}
-                        className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-50 transition-all duration-150 focus:outline-none group"
+                        className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-slate-50 transition-all duration-150 focus:outline-none focus-visible:outline-none focus-visible:ring-0 group"
                     >
                         {/* Avatar */}
                         <div className="w-10 h-10 rounded-full bg-emerald-700 flex items-center justify-center text-white text-[11px] font-black shrink-0 ring-2 ring-emerald-700/10">
