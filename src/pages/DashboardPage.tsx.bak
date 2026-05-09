@@ -207,36 +207,37 @@ export default function DashboardPage() {
       </div>
 
       {/* ── DESKTOP VIEW ── */}
-      <div className="hidden lg:flex flex-col h-full p-6 space-y-6">
+      <div className="hidden lg:flex flex-col h-full p-8 space-y-8">
 
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            {/* {getGreeting()}, {toTitleCase(user?.name?.split(' ')[0] || 'User')} */}
             Dashboard
           </h1>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            {isPrincipal ? 'Reviewing metrics for your institution' : "Your overview for today"}
+          <p className="text-muted-foreground mt-1 text-sm">
+            {isPrincipal ? 'Reviewing metrics for your institution today' : "Here's your personal overview for today"}
           </p>
         </div>
 
-        {/* Top Stat Row */}
-        <div className="grid grid-cols-4 gap-3">
+        {/* Top Stat Row — clean flat cards like img2 */}
+        <div className="grid grid-cols-4 gap-4">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-xl p-4 animate-pulse h-20" />
+              <div key={i} className="bg-card border border-border rounded-2xl p-6 animate-pulse h-28" />
             ))
           ) : stats.map((stat) => {
             const Icon = getIcon(stat.icon);
             return (
               <div
                 key={stat.label}
-                className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-default"
+                className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-default"
               >
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">{stat.label}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">{stat.label}</p>
                 <div className="flex items-end justify-between">
-                  <p className="text-3xl font-black text-foreground tracking-tight leading-none">{stat.value}</p>
-                  <div className={`w-8 h-8 rounded-lg ${stat.color || 'bg-primary/10'} flex items-center justify-center`}>
-                    <Icon className="w-3.5 h-3.5" />
+                  <p className="text-4xl font-black text-foreground tracking-tight leading-none">{stat.value}</p>
+                  <div className={`w-9 h-9 rounded-xl ${stat.color || 'bg-primary/10'} flex items-center justify-center`}>
+                    <Icon className="w-4 h-4" />
                   </div>
                 </div>
               </div>
@@ -245,15 +246,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Main 2-Column Layout */}
-        <div className="grid grid-cols-3 gap-5 flex-1">
+        <div className="grid grid-cols-3 gap-6 flex-1">
 
           {/* LEFT: Quick Actions */}
-          <div className="col-span-2 space-y-4">
+          <div className="col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Quick Actions</h2>
+              <h2 className="text-lg font-bold text-foreground">Quick Actions</h2>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               {quickActions.slice(0, 9).map((action) => {
                 let description = action.description;
                 const openIssuesStat = stats.find(s => s.label === 'Open Issues');
@@ -269,16 +270,16 @@ export default function DashboardPage() {
                   <button
                     key={action.title}
                     onClick={() => navigate(action.path)}
-                    className="group flex items-center gap-3 p-3 bg-card border border-border rounded-xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all text-left"
+                    className="group flex items-center gap-3 p-4 bg-card border border-border rounded-2xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all text-left"
                   >
-                    <div className={`w-8 h-8 rounded-lg ${action.bg} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
-                      <action.icon className={`w-4 h-4 ${action.color}`} />
+                    <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                      <action.icon className={`w-5 h-5 ${action.color}`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-foreground">{action.title}</p>
+                      <p className="text-sm font-bold text-foreground">{action.title}</p>
                       <p className="text-[11px] text-muted-foreground truncate">{description}</p>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-primary transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-primary transition-colors" />
                   </button>
                 );
               })}
@@ -286,31 +287,31 @@ export default function DashboardPage() {
           </div>
 
           {/* RIGHT: Attention + Tasks */}
-          <div className="space-y-4">
+          <div className="space-y-6">
 
             {/* Attention Required */}
             {attentionStats.length > 0 && (
-              <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-red-50/50">
-                  <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                  <h3 className="text-[12px] font-semibold text-foreground">Attention Required</h3>
+              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-4 border-b border-border bg-red-50/50">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  <h3 className="text-sm font-bold text-foreground">Attention Required</h3>
                 </div>
                 <div className="divide-y divide-border">
                   {attentionStats.map((stat) => (
                     <div
                       key={stat.label}
                       onClick={() => navigate(attentionPaths[stat.label] || '#')}
-                      className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors"
+                      className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 cursor-pointer transition-colors"
                     >
                       <div className="min-w-0">
-                        <p className="text-[13px] font-semibold text-foreground">{stat.label}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">Needs attention</p>
+                        <p className="text-sm font-semibold text-foreground">{stat.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Requires your attention</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-3">
-                        <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${attentionColors[stat.label] || 'text-foreground bg-muted border-border'}`}>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-full border ${attentionColors[stat.label] || 'text-foreground bg-muted border-border'}`}>
                           {stat.value}
                         </span>
-                        <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
                       </div>
                     </div>
                   ))}
@@ -319,34 +320,34 @@ export default function DashboardPage() {
             )}
 
             {/* Recent Tasks */}
-            <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <h3 className="text-[12px] font-semibold text-foreground">
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 className="text-sm font-bold text-foreground">
                   {isPrincipal ? 'Recent Tasks' : "Today's Tasks"}
                 </h3>
                 <button
                   onClick={() => navigate('/tasks')}
-                  className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:gap-1.5 transition-all"
+                  className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-1.5 transition-all"
                 >
-                  View all <ChevronRight className="w-3 h-3" />
+                  View all <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
               <div className="divide-y divide-border">
                 {loading ? (
-                  <p className="text-center text-xs py-6 text-muted-foreground">Loading tasks...</p>
+                  <p className="text-center text-sm py-8 text-muted-foreground">Loading tasks...</p>
                 ) : upcomingTasks.length === 0 ? (
-                  <p className="text-center text-xs py-6 text-muted-foreground">No pending tasks 🎉</p>
+                  <p className="text-center text-sm py-8 text-muted-foreground">No pending tasks 🎉</p>
                 ) : upcomingTasks.slice(0, 6).map((task) => (
                   <div
                     key={task.id}
                     onClick={() => navigate(`/tasks/${task.id}`)}
-                    className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors"
+                    className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 cursor-pointer transition-colors"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${task.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${task.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
                       <div className="min-w-0">
-                        <p className="text-[13px] font-medium text-foreground truncate">{toTitleCase(task.title)}</p>
-                        <p className="text-[11px] text-muted-foreground">{formatTime(task.time)}</p>
+                        <p className="text-sm font-medium text-foreground truncate">{toTitleCase(task.title)}</p>
+                        <p className="text-xs text-muted-foreground">{formatTime(task.time)}</p>
                       </div>
                     </div>
                     <Badge variant={task.status === 'completed' ? 'completed' : 'pending'} className="text-[10px] shrink-0 ml-2">

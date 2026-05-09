@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { DesktopHeader } from './DesktopHeader';
 import { PWAPrompt } from '../pwa/PWAPrompt';
 
+
 interface AppLayoutProps {
   children: ReactNode;
   title?: string;
@@ -23,23 +24,20 @@ export function AppLayout({ children, title, hideNav = false, showBack = false, 
         <Header title={title} showBack={showBack} onBack={onBack} />
       </div>
 
-      {/* Desktop Sidebar — 240px (w-60) */}
+      {/* Desktop Sidebar */}
       {!hideNav && <Sidebar />}
 
-      {/* Desktop Top Header — offset by sidebar width */}
-      {!hideNav && <DesktopHeader title={title} />}
+      {/* Desktop Top Header (notifications + avatar) - Hidden on Mobile */}
+      {!hideNav && <DesktopHeader />}
 
       {/* Main Content Area */}
-      {/* Mobile: top padding for header, bottom padding for nav, max-w-lg centered */}
-      {/* Desktop: left margin for sidebar, top padding for header, constrained width */}
+      {/* Mobile: Top padding for header, Bottom padding for nav, max-w-lg centered */}
+      {/* Desktop: Left margin for sidebar, top padding for desktop header, full width */}
       <main className="
         pb-24 pt-4 px-4 max-w-lg mx-auto
-        lg:ml-60 lg:pb-8 lg:pt-12 lg:px-0 lg:max-w-none lg:mx-0
+        lg:ml-64 lg:pb-8 lg:pt-14 lg:px-8 lg:max-w-none lg:mx-0
       ">
-        {/* Inner content wrapper — constrains max width on very wide screens */}
-        <div className="lg:max-w-[1600px] lg:mx-auto lg:px-8">
-          {children}
-        </div>
+        {children}
       </main>
 
       {/* Mobile Bottom Nav */}
