@@ -330,7 +330,7 @@ export default function AddStudentsPage() {
 
     return (
         <AppLayout title="Add New Students">
-            <div className="p-4 lg:p-6 max-w-[1080px] mx-auto space-y-4 pb-24 min-h-screen">
+            <div className="p-4 lg:p-6 max-w-[920px] mx-auto space-y-4 pb-24 min-h-screen">
                 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-2">
@@ -350,12 +350,11 @@ export default function AddStudentsPage() {
                         <p className="text-[11px] text-muted-foreground">Import from Excel or add manually</p>
                     </div>
                 </div>
-                </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Select value={String(itemsPerPage)} onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1); }}>
-                           <SelectTrigger className="h-9 w-28 bg-white text-sm"><SelectValue placeholder="Per Page" /></SelectTrigger>
+                           <SelectTrigger className="h-9 w-24 bg-white text-sm"><SelectValue placeholder="Per Page" /></SelectTrigger>
                            <SelectContent>
                                <SelectItem value="25">25 per page</SelectItem>
                                <SelectItem value="50">50 per page</SelectItem>
@@ -365,10 +364,10 @@ export default function AddStudentsPage() {
                         </Select>
                     </div>
                     <div className="flex flex-wrap gap-2 items-center justify-start lg:justify-end">
-                        <Button size="sm" onClick={downloadTemplate} variant="ghost" className="gap-2 text-primary hover:text-primary/80 hover:bg-primary/10 shadow-sm border border-transparent hover:border-primary/20">
+                        <Button size="sm" onClick={downloadTemplate} variant="ghost" className="gap-2 px-3 text-primary hover:text-primary/80 hover:bg-primary/10 shadow-sm border border-transparent hover:border-primary/20">
                             Download Template
                         </Button>
-                        <Button size="sm" onClick={() => fileInputRef.current?.click()} variant="outline" className="gap-2 text-primary border-primary hover:bg-primary/10">
+                        <Button size="sm" onClick={() => fileInputRef.current?.click()} variant="outline" className="gap-2 px-3 text-primary border-primary hover:bg-primary/10">
                             <Upload className="w-4 h-4" /> Import Excel
                         </Button>
                         <input
@@ -378,11 +377,11 @@ export default function AddStudentsPage() {
                             className="hidden"
                             onChange={handleFileUpload}
                         />
-                         <Button size="sm" onClick={handleSort} variant="secondary" className="gap-2 group">
+                         <Button size="sm" onClick={handleSort} variant="secondary" className="gap-2 px-3 group">
                              <ArrowDownAZ className={`w-4 h-4 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} /> 
                              {sortDirection === 'asc' ? 'Sort (Ascending)' : 'Sort (Descending)'}
                         </Button>
-                        <Button size="sm" onClick={addEmptyRow} variant="outline" className="gap-2">
+                        <Button size="sm" onClick={addEmptyRow} variant="outline" className="gap-2 px-3">
                             <Plus className="w-4 h-4" /> Add Row
                         </Button>
                    </div>
@@ -393,21 +392,21 @@ export default function AddStudentsPage() {
                                <Trash2 className="w-4 h-4" /> Delete ({selectedIds.length})
                            </Button>
                        )}
-                       <Button size="sm" onClick={handleSave} disabled={isSaving || !hasChanges || duplicateRollNumbers.size > 0} className={`gap-2 shadow-md transition-all ${!hasChanges ? 'opacity-50' : 'hover:shadow-lg'}`}>
+                       <Button size="sm" onClick={handleSave} disabled={isSaving || !hasChanges || duplicateRollNumbers.size > 0} className={`gap-2 px-3 shadow-md transition-all ${!hasChanges ? 'opacity-50' : 'hover:shadow-lg'}`}>
                            <Save className="w-4 h-4" /> {isSaving ? "Saving..." : "Save Changes"}
                        </Button>
                    </div>
                 </div>
 
-                <Card className="border-0 shadow-lg border-t-4 border-t-primary overflow-hidden">
+                <Card className="border-0 shadow-sm border-t-2 border-t-primary overflow-hidden">
                     <CardHeader className="py-3 bg-muted/20 border-b">
                         <CardTitle className="text-sm font-semibold text-foreground flex items-center justify-between">
                             <span>Student Data</span>
                             <span className="text-sm font-normal text-muted-foreground bg-secondary px-3 py-1 rounded-full">{students.length} Total</span>
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0 overflow-x-auto min-h-[320px]">
-                        <table className="w-full text-sm min-w-[680px]">
+                    <CardContent className="p-0 overflow-x-auto min-h-[280px]">
+                        <table className="w-full text-sm min-w-[640px]">
                             <thead className="bg-muted/50 border-b">
                                 <tr>
                                     <th className="px-3 py-2 w-12 text-center">
