@@ -131,17 +131,17 @@ export default function CCEWorksPage() {
 
     return (
         <AppLayout title="CCE Works">
-            <div className="p-4 lg:p-6 max-w-[1100px] mx-auto space-y-6 pb-24 min-h-screen">
+            <div className="p-4 lg:p-6 max-w-7xl mx-auto space-y-8 pb-24 min-h-screen">
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 animate-fade-in">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">CCE Works Management</h1>
-                        <p className="text-sm font-medium text-slate-500 mt-1">Expand classes to manage subject-specific evaluation rubrics.</p>
+                        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">CCE Works Management</h1>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-2xl">Expand classes to manage subject-specific evaluation rubrics.</p>
                     </div>
                     <button
                         onClick={() => navigate('/cce/works/new')}
-                        className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-bold text-sm px-6 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
+                        className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm md:text-base px-6 py-3 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
                     >
                         <Plus className="w-4 h-4" strokeWidth={3} /> New Assessment
                     </button>
@@ -162,19 +162,19 @@ export default function CCEWorksPage() {
                         const classPercent = totalClassWorks > 0 ? Math.round((completedClassWorks / totalClassWorks) * 100) : 0;
 
                         return (
-                            <div key={className} className={`bg-white rounded-3xl transition-all duration-300 shadow-[0_2px_12px_rgb(0,0,0,0.03)] border border-slate-100 cursor-pointer overflow-hidden ${isExpanded ? 'p-2 md:p-3' : 'hover:-translate-y-0.5'}`}>
+                            <div key={className} className={`bg-white rounded-3xl transition-all duration-300 shadow-[0_2px_12px_rgb(0,0,0,0.03)] border border-slate-100 cursor-pointer overflow-hidden ${isExpanded ? 'p-3 md:p-4' : 'hover:-translate-y-0.5'}`}>
 
                                 {/* Outer Class Header */}
-                                <div className={`p-4 md:p-5 flex items-center justify-between transition-colors ${!isExpanded && 'hover:bg-slate-50/50'}`} onClick={() => toggleClass(className)}>
+                                <div className={`p-5 md:p-6 flex items-center justify-between transition-colors ${!isExpanded && 'hover:bg-slate-50/50'}`} onClick={() => toggleClass(className)}>
                                     <div className="flex items-center gap-4 md:gap-5">
-                                        <div className="w-[52px] h-[52px] rounded-2xl bg-emerald-100/60 flex items-center justify-center font-black text-emerald-800 text-[18px] shrink-0">
+                                        <div className="w-[56px] h-[56px] rounded-3xl bg-emerald-100/60 flex items-center justify-center font-black text-emerald-800 text-[20px] shrink-0">
                                             {classNum}
                                         </div>
                                         <div>
-                                            <h2 className="text-base md:text-lg font-bold text-slate-800 tracking-tight">
+                                            <h2 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">
                                                 Class {className} - {getStage(className)}
                                             </h2>
-                                            <p className="text-[12px] font-medium text-slate-500 mt-1 tracking-wide">
+                                            <p className="text-sm text-slate-500 mt-2 tracking-wide">
                                                 {classSubjects.length} Subjects • {totalClassWorks} Total Works • {classPercent}% Complete
                                             </p>
                                         </div>
@@ -203,26 +203,26 @@ export default function CCEWorksPage() {
                                 {/* Subjects List */}
                                 <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2 pb-2' : 'grid-rows-[0fr] opacity-0'}`}>
                                     <div className="overflow-hidden">
-                                        <div className="px-3 md:px-4 space-y-3">
+                                        <div className="px-4 md:px-6 space-y-4">
                                             {classSubjects.map((subject, sIdx) => {
                                                 const isSubjectExpanded = expandedSubjects.has(subject.subject_id);
                                                 const worksForSubject = works.filter(w => w.subjectId === subject.subject_id);
 
                                                 return (
-                                                    <div key={subject.subject_id} className={`bg-[#f8fafc] rounded-3xl border transition-all duration-300 ${isSubjectExpanded ? 'border-slate-200 shadow-sm' : 'border-slate-100 hover:border-slate-200'}`}>
+                                                    <div key={subject.subject_id} className={`bg-slate-50 rounded-3xl border transition-all duration-300 ${isSubjectExpanded ? 'border-slate-200 shadow-sm' : 'border-slate-100 hover:border-slate-200'}`}>
 
-                                                        <div className="p-4 md:p-5 flex items-center justify-between cursor-pointer rounded-3xl transition-colors hover:bg-slate-50/80" onClick={(e) => toggleSubject(e, subject.subject_id)}>
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-11 h-11 rounded-[14px] bg-white border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
+                                                        <div className="p-5 md:p-6 flex items-center justify-between cursor-pointer rounded-3xl transition-colors hover:bg-slate-50/80" onClick={(e) => toggleSubject(e, subject.subject_id)}>
+                                                            <div className="flex items-center gap-5">
+                                                                <div className="w-12 h-12 rounded-3xl bg-white border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
                                                                     <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2.5} />
                                                                 </div>
                                                                 <div>
-                                                                    <h3 className="text-[15px] font-bold text-slate-800 tracking-tight">{subject.subject_name}</h3>
-                                                                    <p className="text-[11px] font-bold tracking-wide text-slate-400 mt-0.5">{subject.total_works} CCE Works Configured</p>
+                                                                    <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">{subject.subject_name}</h3>
+                                                                    <p className="text-sm text-slate-500 mt-2 line-clamp-1">{subject.total_works} CCE Works Configured</p>
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-5">
-                                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-emerald-700">
+                                                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm text-emerald-700">
                                                                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isSubjectExpanded ? 'rotate-180' : ''}`} />
                                                                 </div>
                                                             </div>
@@ -230,15 +230,15 @@ export default function CCEWorksPage() {
 
                                                         {/* Assessments Table */}
                                                         {isSubjectExpanded && (
-                                                            <div className="px-2 pb-2 mt-1">
-                                                                <div className="bg-white rounded-[1.25rem] shadow-sm border border-slate-100 overflow-hidden">
-                                                                    <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b-2 border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
-                                                                        <div className="col-span-1">No.</div>
-                                                                        <div className="col-span-5 md:col-span-4">Assessment Title</div>
-                                                                        <div className="col-span-3 hidden md:block">Tool & Level</div>
-                                                                        <div className="col-span-3 md:col-span-2">Issue Date</div>
-                                                                        <div className="col-span-3 md:col-span-2">Due Date</div>
-                                                                    </div>
+                                                            <div className="px-3 pb-3 mt-2">
+                                                                        <div className="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                                                                            <div className="hidden sm:grid grid-cols-12 gap-4 p-5 border-b-2 border-slate-100 bg-slate-50/50 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                                                                                <div className="col-span-1">No.</div>
+                                                                                <div className="col-span-5 md:col-span-4">Assessment Title</div>
+                                                                                <div className="col-span-3 hidden md:block">Tool & Level</div>
+                                                                                <div className="col-span-3 md:col-span-2">Issue Date</div>
+                                                                                <div className="col-span-3 md:col-span-2">Due Date</div>
+                                                                            </div>
 
                                                                     {worksForSubject.length === 0 ? (
                                                                         <div className="p-8 text-center text-sm font-semibold text-slate-400">
@@ -248,50 +248,50 @@ export default function CCEWorksPage() {
                                                                         <div className="divide-y-2 divide-slate-100">
                                                                             {worksForSubject.map((work, index) => {
                                                                                 return (
-                                                                                    <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-4 p-4 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
+                                                                                    <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 sm:gap-6 p-5 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
 
                                                                                         {/* Work Number and Badges for mobile */}
-                                                                                        <div className="sm:hidden flex items-center justify-between w-full mb-1">
-                                                                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Work No. {index + 1}</span>
-                                                                                            <div className="flex gap-1.5">
-                                                                                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
+                                                                                        <div className="sm:hidden flex items-center justify-between w-full mb-2">
+                                                                                            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Work No. {index + 1}</span>
+                                                                                            <div className="flex gap-2">
+                                                                                                <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
                                                                                                     {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
                                                                                                 </span>
-                                                                                                <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                                                                                                <span className="text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
                                                                                                     Lvl {work.level}
                                                                                                 </span>
                                                                                             </div>
                                                                                         </div>
 
-                                                                                        <div className="hidden sm:block col-span-1 text-[12px] font-bold text-slate-400">
+                                                                                        <div className="hidden sm:block col-span-1 text-sm font-bold text-slate-400">
                                                                                             #{index + 1}
                                                                                         </div>
 
                                                                                         <div className="col-span-5 md:col-span-4 w-full">
-                                                                                            <p className="text-[14px] font-bold text-slate-800 leading-tight truncate">{work.title}</p>
-                                                                                            <p className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-1">{work.description || work.submissionType || 'Internal Assessment'}</p>
+                                                                                            <p className="text-base md:text-lg font-bold text-slate-900 leading-tight truncate">{work.title}</p>
+                                                                                            <p className="text-sm text-slate-500 mt-2 line-clamp-1">{work.description || work.submissionType || 'Internal Assessment'}</p>
                                                                                         </div>
 
-                                                                                        <div className="col-span-3 hidden md:flex items-center gap-2">
-                                                                                            <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
+                                                                                        <div className="col-span-3 hidden md:flex items-center gap-3">
+                                                                                            <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
                                                                                                 {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
                                                                                             </span>
-                                                                                            <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                                                                                            <span className="text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
                                                                                                 Level {work.level}
                                                                                             </span>
                                                                                         </div>
 
-                                                                                        <div className="w-full flex items-center justify-between sm:contents mt-1 sm:mt-0">
+                                                                                        <div className="w-full flex items-center justify-between sm:contents mt-2 sm:mt-0">
                                                                                             <div className="col-span-3 md:col-span-2 flex flex-col">
-                                                                                                <span className="sm:hidden text-[9px] font-black uppercase text-slate-400 mb-0.5">Issue Date</span>
-                                                                                                <span className="text-[11px] sm:text-[12px] font-bold text-slate-600">
+                                                                                                <span className="sm:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Issue Date</span>
+                                                                                                <span className="text-[12px] sm:text-[13px] font-semibold text-slate-700">
                                                                                                     {work.issuedDate ? format(new Date(work.issuedDate), 'MMM dd, yyyy') : 'No Date'}
                                                                                                 </span>
                                                                                             </div>
 
                                                                                             <div className="col-span-3 md:col-span-2 flex flex-col items-end sm:items-start">
-                                                                                                <span className="sm:hidden text-[9px] font-black uppercase text-slate-400 mb-0.5">Due Date</span>
-                                                                                                <span className="text-[11px] sm:text-[12px] font-bold text-slate-600">
+                                                                                                <span className="sm:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Due Date</span>
+                                                                                                <span className="text-[12px] sm:text-[13px] font-semibold text-slate-700">
                                                                                                     {work.dueDate ? format(new Date(work.dueDate), 'MMM dd, yyyy') : 'No Date'}
                                                                                                 </span>
                                                                                             </div>
