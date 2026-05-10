@@ -330,7 +330,7 @@ export default function AddStudentsPage() {
 
     return (
         <AppLayout title="Add New Students">
-            <div className="p-4 lg:p-6 max-w-[920px] mx-auto space-y-4 pb-24 min-h-screen">
+            <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-4 pb-24 min-h-screen">
                 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-2">
@@ -407,10 +407,10 @@ export default function AddStudentsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 overflow-x-auto min-h-[280px]">
-                        <table className="w-full text-sm min-w-[640px]">
+                        <table className="w-full text-[13px] min-w-[640px]">
                             <thead className="bg-muted/50 border-b">
                                 <tr>
-                                    <th className="px-3 py-2 w-12 text-center">
+                                    <th className="px-3 py-2 w-12 text-center text-[11px]">
                                         <input 
                                             type="checkbox" 
                                             className="w-4 h-4 rounded border-gray-300 accent-primary cursor-pointer"
@@ -418,11 +418,11 @@ export default function AddStudentsPage() {
                                             onChange={(e) => handleSelectAll(e.target.checked)}
                                         />
                                     </th>
-                                    <th className="px-3 py-2 text-center font-semibold text-muted-foreground w-16">#</th>
-                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Name</th>
-                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-48">Ad. No (Roll No)</th>
-                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-64">Class</th>
-                                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground w-20">Actions</th>
+                                    <th className="px-3 py-2 text-center font-semibold text-muted-foreground w-16 text-[11px]">#</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground text-[11px]">Name</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-48 text-[11px]">Ad. No (Roll No)</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-64 text-[11px]">Class</th>
+                                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground w-20 text-[11px]">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -441,7 +441,7 @@ export default function AddStudentsPage() {
                                 ) : (
                                     students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((student, idx) => (
                                         <tr key={student.id} className={`border-b last:border-0 hover:bg-muted/10 transition-colors group ${selectedIds.includes(student.id) ? 'bg-primary/5' : ''}`}>
-                                            <td className="px-3 py-2 text-center">
+                                            <td className="px-3 py-2 text-center text-[13px]">
                                                 <input 
                                                     type="checkbox" 
                                                     className="w-4 h-4 rounded border-gray-300 accent-primary cursor-pointer"
@@ -449,40 +449,40 @@ export default function AddStudentsPage() {
                                                     onChange={(e) => handleSelectRow(student.id, e.target.checked)}
                                                 />
                                             </td>
-                                            <td className="px-3 py-2 font-medium text-center text-muted-foreground">
+                                            <td className="px-3 py-2 font-medium text-center text-muted-foreground text-[13px]">
                                                 {(currentPage - 1) * itemsPerPage + idx + 1}
                                             </td>
-                                            <td className="px-3 py-2">
+                                            <td className="px-3 py-2 text-[13px]">
                                                 <div className="relative">
                                                     <Input 
                                                         id={`name-input-${student.id}`}
                                                         value={student.name} 
                                                         onChange={(e) => handleFieldChange(student.id, 'name', e.target.value)}
                                                         placeholder="Student Name"
-                                                        className={`bg-transparent h-8 px-3 placeholder:text-muted/40 font-medium ${hasFieldChanged(student.id, 'name') ? 'border-amber-400 focus-visible:ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-transparent hover:border-input focus:border-input'}`}
+                                                        className={`bg-transparent h-8 px-3 text-[13px] placeholder:text-muted/40 font-medium ${hasFieldChanged(student.id, 'name') ? 'border-amber-400 focus-visible:ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-transparent hover:border-input focus:border-input'}`}
                                                     />
                                                 </div>
                                             </td>
-                                            <td className="px-3 py-2">
+                                            <td className="px-3 py-2 text-[13px]">
                                                 <div className="relative">
                                                     <Input 
                                                         value={student.roll_number} 
                                                         onChange={(e) => handleFieldChange(student.id, 'roll_number', e.target.value)}
                                                         placeholder="Admission No"
-                                                        className={`bg-transparent h-8 px-3 placeholder:text-muted/40 ${duplicateRollNumbers.has(student.roll_number?.trim()) ? 'border-destructive focus-visible:ring-destructive bg-destructive/10' : hasFieldChanged(student.id, 'roll_number') ? 'border-amber-400 focus-visible:ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-transparent hover:border-input focus:border-input'}`}
+                                                        className={`bg-transparent h-8 px-3 text-[13px] placeholder:text-muted/40 ${duplicateRollNumbers.has(student.roll_number?.trim()) ? 'border-destructive focus-visible:ring-destructive bg-destructive/10' : hasFieldChanged(student.id, 'roll_number') ? 'border-amber-400 focus-visible:ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-transparent hover:border-input focus:border-input'}`}
                                                     />
                                                     {duplicateRollNumbers.has(student.roll_number?.trim()) && student.roll_number.trim() !== '' && (
                                                         <span className="absolute -bottom-4 left-0 text-[10px] text-destructive">Duplicate Ad No</span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-3 py-2">
+                                            <td className="px-3 py-2 text-[13px]">
                                                 <div className={`rounded-md ${hasFieldChanged(student.id, 'class_id') ? 'ring-1 ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : !student.class_id ? "ring-1 ring-destructive" : ""}`}>
                                                     <Select
                                                          value={student.class_id}
                                                          onValueChange={(val) => handleFieldChange(student.id, 'class_id', val)} 
                                                     >
-                                                        <SelectTrigger className="h-9 border-transparent hover:border-input bg-transparent w-full">
+                                                        <SelectTrigger className="h-9 border-transparent hover:border-input bg-transparent w-full text-[13px]">
                                                             <SelectValue placeholder="Select Class" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -496,7 +496,7 @@ export default function AddStudentsPage() {
                                                 </div>
                                                 {!student.class_id && <p className="text-[10px] text-destructive mt-1 px-1">Required</p>}
                                             </td>
-                                            <td className="px-3 py-2 text-right">
+                                            <td className="px-3 py-2 text-right text-[13px]">
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
