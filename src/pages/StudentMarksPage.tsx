@@ -404,10 +404,10 @@ export default function StudentMarksPage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 animate-fade-in">
                     <div>
-                        <p className="text-[11px] font-bold uppercase tracking-widest mb-1">
+                        {/* <p className="text-[11px] font-bold uppercase tracking-widest mb-1">
                             <span className="text-slate-400">STUDENTS / </span>
                             <span className="text-[#00a67e]">PERFORMANCE MATRIX</span>
-                        </p>
+                        </p> */}
                         <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Academic Records</h1>
                     </div>
                 </div>

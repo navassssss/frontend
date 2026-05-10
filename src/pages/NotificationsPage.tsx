@@ -74,9 +74,9 @@ export default function NotificationsPage() {
 
     return (
         <AppLayout title="Notifications">
-            <div className="p-4 lg:p-6 space-y-4 max-w-2xl mx-auto">
+            <div className="p-4 lg:p-6 space-y-4 max-w-7xl mx-auto pb-24">
                 <div className="flex items-center justify-between animate-fade-in">
-                    <h2 className="text-xl font-bold text-foreground">Notifications</h2>
+                    <h2 className="text-2xl font-semibold text-foreground">Notifications</h2>
                     {notifications.some(n => !n.read_at) && (
                         <Button variant="ghost" size="sm" onClick={markAllAsRead}>
                             <CheckCheck className="w-4 h-4 mr-1" />
@@ -103,28 +103,28 @@ export default function NotificationsPage() {
                             <Card
                                 key={n.id}
                                 variant={n.read_at ? "flat" : "elevated"}
-                                className={`transition-all duration-300 animate-slide-up ${!n.read_at ? "border-l-4 border-l-primary" : "opacity-75"
+                                className={`transition-all duration-300 animate-slide-up shadow-sm ${!n.read_at ? "border-l-4 border-l-primary" : "opacity-75"
                                     }`}
                                 style={{ animationDelay: `${i * 0.05}s` }}
                                 onClick={() => markAsRead(n.id, n.data.action_url)}
                             >
                                 <CardContent className="p-4 cursor-pointer hover:bg-secondary/50 transition-colors">
-                                    <div className="flex gap-4">
-                                        <div className={`mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${!n.read_at ? "bg-primary/10" : "bg-secondary"
+                                    <div className="flex gap-3">
+                                        <div className={`mt-0.5 flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${!n.read_at ? "bg-primary/10" : "bg-secondary"
                                             }`}>
                                             {getIcon(n.data.type)}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start gap-2">
-                                                <h4 className={`text-sm ${!n.read_at ? "font-bold text-foreground" : "font-medium text-muted-foreground"}`}>
+                                                <h4 className={`text-sm ${!n.read_at ? "font-semibold text-foreground" : "font-medium text-muted-foreground"}`}>
                                                     {n.data.title}
                                                 </h4>
-                                                <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
+                                                <span className="text-[12px] text-muted-foreground whitespace-nowrap flex items-center gap-1">
                                                     <Clock className="w-3 h-3" />
                                                     {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                                                 </span>
                                             </div>
-                                            <p className={`text-sm mt-1 line-clamp-2 ${!n.read_at ? "text-foreground/90" : "text-muted-foreground"}`}>
+                                            <p className={`text-[13px] mt-2 line-clamp-2 ${!n.read_at ? "text-foreground/90" : "text-muted-foreground"}`}>
                                                 {n.data.message}
                                             </p>
                                         </div>
