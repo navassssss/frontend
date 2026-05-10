@@ -247,7 +247,7 @@ const FeeManagementPage: React.FC = () => {
 
     return (
         <AppLayout title="Monthly Donations" showBack={true}>
-            <div className="space-y-4 p-4 pb-20">
+            <div className="p-4 lg:p-6 space-y-6 max-w-[1400px] mx-auto pb-24">
                 {/* Header Stats - Clean Minimal Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
@@ -259,10 +259,10 @@ const FeeManagementPage: React.FC = () => {
                         <Card key={stat.label} className={cn("border border-gray-200 shadow-sm border-l-4", stat.bgColor, stat.borderColor)}>
                             <CardContent className="p-4">
                                 <div className="flex items-baseline justify-between mb-1">
-                                    <p className={cn("text-xs font-medium uppercase tracking-wide", stat.textColor)}>{stat.label}</p>
+                                    <p className={cn("text-[10px] font-black uppercase tracking-widest", stat.textColor)}>{stat.label}</p>
                                     <span className={cn("text-lg", stat.textColor)}>{stat.icon}</span>
                                 </div>
-                                <p className={cn("text-3xl font-bold mb-1", stat.textColor)}>{stat.count}</p>
+                                <p className={cn("text-3xl font-black tracking-tight leading-none mb-1", stat.textColor)}>{stat.count}</p>
                                 <p className="text-xs text-muted-foreground">
                                     {stat.count} {stat.count === 1 ? 'student' : 'students'}
                                 </p>
@@ -387,11 +387,11 @@ const FeeManagementPage: React.FC = () => {
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-between gap-4">
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-base text-foreground truncate group-hover:text-primary transition-colors mb-1.5">
+                                            <h3 className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors mb-1.5">
                                                 {toTitleCase(student.studentName)}
                                             </h3>
 
-                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-muted-foreground">
                                                 <span className="flex items-center gap-1">
                                                     <span className="font-medium">Adm.No:</span> {student.studentId}
                                                 </span>
