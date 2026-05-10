@@ -349,6 +349,7 @@ export default function AddStudentsPage() {
                         <h1 className="text-xl font-semibold">Add Students</h1>
                         <p className="text-[11px] text-muted-foreground">Import from Excel or add manually</p>
                     </div>
+                    </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
