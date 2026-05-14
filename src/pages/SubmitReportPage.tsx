@@ -79,7 +79,7 @@ export default function SubmitReportPage() {
 
   return (
     <AppLayout title="Submit Report">
-      <div className="max-w-3xl mx-auto p-4 lg:p-8">
+      <div className="max-w-5xl mx-auto p-4 lg:p-8">
         {/* Header */}
         <div className="mb-8 border-b border-border/50 pb-6">
           <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
@@ -89,10 +89,10 @@ export default function SubmitReportPage() {
           <p className="text-sm text-muted-foreground mt-2">Select an active assignment to submit your operational update.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 bg-card/50 lg:bg-transparent lg:border-none border border-border/50 p-4 lg:p-0 rounded-2xl">
+        <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-12 lg:gap-10 lg:items-start space-y-8 lg:space-y-0">
           
-          {/* Section: Duty Selector */}
-          <div className="space-y-4">
+          {/* LEFT COLUMN: Duty Selector */}
+          <div className="lg:col-span-5 xl:col-span-4 space-y-4 lg:sticky lg:top-8 bg-card/50 lg:bg-transparent border border-border/50 lg:border-none p-4 lg:p-0 rounded-2xl">
             <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
               <ClipboardList className="w-4 h-4 text-primary" /> Assignment Context
             </h2>
@@ -105,7 +105,7 @@ export default function SubmitReportPage() {
                 <p className="text-sm text-muted-foreground">No active duties assigned to you.</p>
               </div>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {duties.map((duty) => {
                   const isSelected = selectedDuty === String(duty.id);
                   return (
@@ -137,94 +137,97 @@ export default function SubmitReportPage() {
             )}
           </div>
 
-          {/* Section: Report Description */}
-          <div className="space-y-4">
-            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-              <FileText className="w-4 h-4 text-primary" /> Report Summary
-            </h2>
-            <div className="relative">
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Summarize completed work, issues encountered, outcomes, and pending actions."
-                rows={6}
-                className="w-full p-4 rounded-xl border border-input bg-card text-sm resize-y transition-all placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
-              />
-              <div className="absolute bottom-4 right-4 text-[10px] font-medium text-muted-foreground bg-card px-1 rounded">
-                {description.length} chars
-              </div>
-            </div>
-          </div>
-
-          {/* Section: Attachments */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          {/* RIGHT COLUMN: Report Description & Attachments */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-8 bg-card/50 lg:bg-transparent border border-border/50 lg:border-none p-4 lg:p-0 rounded-2xl">
+            {/* Section: Report Description */}
+            <div className="space-y-4">
               <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                <Paperclip className="w-4 h-4 text-primary" /> Attachments
+                <FileText className="w-4 h-4 text-primary" /> Report Summary
               </h2>
-              <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">Optional</span>
-            </div>
-            
-            <div className="flex flex-wrap gap-3">
-              <label className="cursor-pointer">
-                <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
-                <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
-                  <Upload className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Upload Files</span>
+              <div className="relative">
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Summarize completed work, issues encountered, outcomes, and pending actions."
+                  rows={8}
+                  className="w-full p-5 rounded-2xl border border-input bg-card text-sm resize-y transition-all placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
+                />
+                <div className="absolute bottom-4 right-4 text-[10px] font-medium text-muted-foreground bg-card px-1 rounded">
+                  {description.length} chars
                 </div>
-              </label>
-              <label className="cursor-pointer">
-                <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
-                  <Camera className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Take Photo</span>
-                </div>
-              </label>
-            </div>
-
-            {files.length > 0 && (
-              <div className="grid gap-2 sm:grid-cols-2 mt-4">
-                {files.map((file, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm group">
-                    <div className="w-10 h-10 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
-                      <FileText className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                    <button type="button" onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
-                      className="w-8 h-8 rounded-lg hover:bg-destructive/10 flex items-center justify-center transition-colors opacity-70 hover:opacity-100 group-hover:opacity-100">
-                      <X className="w-4 h-4 text-destructive" />
-                    </button>
-                  </div>
-                ))}
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Submit Action */}
-          <div className="pt-8 border-t border-border mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="w-full sm:flex-1">
-              {selectedDutyObj ? (
-                <p className="text-sm text-muted-foreground truncate text-center sm:text-left">
-                  Ready to submit report for <span className="font-semibold text-foreground">{selectedDutyObj.name}</span>
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center sm:text-left">Please select an assignment above</p>
+            {/* Section: Attachments */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <Paperclip className="w-4 h-4 text-primary" /> Attachments
+                </h2>
+                <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">Optional</span>
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                <label className="cursor-pointer">
+                  <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
+                  <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
+                    <Upload className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">Upload Files</span>
+                  </div>
+                </label>
+                <label className="cursor-pointer">
+                  <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+                  <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
+                    <Camera className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">Take Photo</span>
+                  </div>
+                </label>
+              </div>
+
+              {files.length > 0 && (
+                <div className="grid gap-2 sm:grid-cols-2 mt-4">
+                  {files.map((file, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm group">
+                      <div className="w-10 h-10 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <button type="button" onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
+                        className="w-8 h-8 rounded-lg hover:bg-destructive/10 flex items-center justify-center transition-colors opacity-70 hover:opacity-100 group-hover:opacity-100">
+                        <X className="w-4 h-4 text-destructive" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            <Button
-              type="submit"
-              className="w-full sm:w-auto px-10 h-12 rounded-xl font-bold text-base shadow-md hover:shadow-lg transition-all"
-              disabled={isSubmitting || isLoading || !selectedDuty || !description.trim()}
-            >
-              {isSubmitting ? (
-                <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Processing...</>
-              ) : (
-                'Submit Report'
-              )}
-            </Button>
+
+            {/* Submit Action */}
+            <div className="pt-8 border-t border-border mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="w-full sm:flex-1">
+                {selectedDutyObj ? (
+                  <p className="text-sm text-muted-foreground truncate text-center sm:text-left">
+                    Ready to submit report for <span className="font-semibold text-foreground">{selectedDutyObj.name}</span>
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center sm:text-left">Please select an assignment</p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                className="w-full sm:w-auto px-10 h-12 rounded-xl font-bold text-base shadow-md hover:shadow-lg transition-all"
+                disabled={isSubmitting || isLoading || !selectedDuty || !description.trim()}
+              >
+                {isSubmitting ? (
+                  <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Processing...</>
+                ) : (
+                  'Submit Report'
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </div>
