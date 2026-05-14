@@ -1,6 +1,6 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Upload, Camera, FileText, X, Loader2, CheckCircle2, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Upload, Camera, FileText, X, Loader2, CheckCircle2, ClipboardList, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { toast } from 'sonner';
@@ -52,10 +52,10 @@ export default function SubmitReportPage() {
     api.post('/reports', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(() => {
         setIsSuccess(true);
-        toast.success('Report submitted!');
+        toast.success('Report submitted successfully');
         setTimeout(() => navigate('/duties'), 1500);
       })
-      .catch(() => toast.error('Failed to submit report'))
+      .catch((err) => toast.error(err.response?.data?.message || 'Failed to submit report'))
       .finally(() => setIsSubmitting(false));
   };
 
@@ -63,12 +63,12 @@ export default function SubmitReportPage() {
     return (
       <AppLayout title="Submit Report">
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center animate-scale-in">
-            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <div className="text-center animate-scale-in max-w-sm px-6">
+            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
             </div>
-            <h2 className="text-xl font-bold text-foreground">Report Submitted!</h2>
-            <p className="text-muted-foreground mt-1 text-sm">Your report has been recorded successfully.</p>
+            <h2 className="text-xl font-semibold text-foreground">Report Submitted</h2>
+            <p className="text-muted-foreground mt-2 text-sm">Your operational report has been securely recorded.</p>
           </div>
         </div>
       </AppLayout>
@@ -79,144 +79,155 @@ export default function SubmitReportPage() {
 
   return (
     <AppLayout title="Submit Report">
-      <div className="p-4 lg:p-6 max-w-2xl mx-auto pb-28 space-y-6">
-
+      <div className="max-w-xl mx-auto pb-32">
         {/* Header */}
-        <div>
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors mb-4">
-            <ArrowLeft className="w-4 h-4" /> Back
+        <div className="p-4 lg:p-6 lg:pb-2 border-b border-border/50 bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mb-3">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Duties
           </button>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Submit Report</h1>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Document your duty completion with details and attachments.</p>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Submit Duty Report</h1>
+          <p className="text-xs text-muted-foreground mt-1">Select an active assignment to submit your operational update.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-
-          {/* Step 1: Select Duty */}
-          <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-border">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Step 1</p>
-              <h2 className="font-bold text-foreground">Select Duty <span className="text-destructive">*</span></h2>
-            </div>
-            <div className="p-4">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              ) : duties.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-4">No duties available</p>
-              ) : (
-                <div className="space-y-2">
-                  {duties.map((duty) => {
-                    const isSelected = selectedDuty === String(duty.id);
-                    return (
-                      <button
-                        key={duty.id}
-                        type="button"
-                        onClick={() => setSelectedDuty(String(duty.id))}
-                        className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
-                          isSelected
-                            ? 'border-primary bg-primary/5 shadow-sm'
-                            : 'border-border hover:border-primary/30 hover:bg-muted/20'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSelected ? 'bg-primary/10' : 'bg-muted'}`}>
-                            <ClipboardList className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-                          </div>
-                          <div>
-                            <p className={`font-semibold text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>
-                              {toTitleCase(duty.name)}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground capitalize">{duty.type || 'Responsibility'}</p>
-                          </div>
-                        </div>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+        <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-8">
+          
+          {/* Section: Duty Selector */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <ClipboardList className="w-4 h-4 text-primary" /> Assignment Context
+            </h2>
+            {isLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : duties.length === 0 ? (
+              <div className="p-4 rounded-xl border border-dashed border-border text-center">
+                <p className="text-sm text-muted-foreground">No active duties assigned to you.</p>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {duties.map((duty) => {
+                  const isSelected = selectedDuty === String(duty.id);
+                  return (
+                    <button
+                      key={duty.id}
+                      type="button"
+                      onClick={() => setSelectedDuty(String(duty.id))}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg border text-left transition-all duration-200 ${
+                        isSelected
+                          ? 'border-primary/50 bg-primary/5 shadow-sm ring-1 ring-primary/20'
+                          : 'border-border bg-card hover:bg-muted/30'
+                      }`}
+                    >
+                      <div className="flex flex-col">
+                        <p className={`font-medium text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                          {toTitleCase(duty.name)}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground uppercase tracking-wide mt-0.5">
+                          {duty.type || 'Responsibility'}
+                        </p>
+                      </div>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary' : 'border-input bg-transparent'}`}>
+                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Step 2: Description */}
-          <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-border">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Step 2</p>
-              <h2 className="font-bold text-foreground">Report Description <span className="text-destructive">*</span></h2>
-            </div>
-            <div className="p-4">
-              {selectedDutyObj && (
-                <div className="flex items-center gap-2 mb-3 p-2.5 bg-primary/5 border border-primary/20 rounded-xl">
-                  <ClipboardList className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <p className="text-xs font-semibold text-primary">Reporting for: {toTitleCase(selectedDutyObj.name)}</p>
-                </div>
-              )}
+          {/* Section: Report Description */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" /> Report Summary
+            </h2>
+            <div className="relative">
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what was accomplished, any issues encountered, and overall status..."
-                rows={5}
-                className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm resize-none transition-all placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                placeholder="Summarize completed work, issues encountered, outcomes, and pending actions."
+                rows={6}
+                className="w-full p-4 rounded-xl border border-input bg-card text-sm resize-none transition-all placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
               />
-              <p className="text-xs text-muted-foreground mt-1.5 text-right">{description.length} characters</p>
+              <div className="absolute bottom-3 right-4 text-[10px] font-medium text-muted-foreground bg-card px-1">
+                {description.length} chars
+              </div>
             </div>
           </div>
 
-          {/* Step 3: Attachments */}
-          <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-border">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Step 3</p>
-              <h2 className="font-bold text-foreground">Attachments <span className="text-muted-foreground font-normal text-sm">(Optional)</span></h2>
+          {/* Section: Attachments */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Paperclip className="w-4 h-4 text-primary" /> Attachments
+              </h2>
+              <span className="text-xs text-muted-foreground">Optional</span>
             </div>
-            <div className="p-4 lg:p-6 space-y-3">
-              <div className="flex gap-3">
-                <label className="flex-1 cursor-pointer">
-                  <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
-                  <div className="flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all">
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium text-muted-foreground">Upload files</span>
-                  </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                  <div className="flex items-center justify-center gap-2 h-12 w-14 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all">
-                    <Camera className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </label>
-              </div>
-
-              {files.length > 0 && (
-                <div className="space-y-2">
-                  {files.map((file, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border">
-                      <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="text-sm text-foreground flex-1 truncate">{file.name}</span>
-                      <button type="button" onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
-                        className="w-6 h-6 rounded-full hover:bg-destructive/10 flex items-center justify-center transition-colors">
-                        <X className="w-3.5 h-3.5 text-destructive" />
-                      </button>
-                    </div>
-                  ))}
+            
+            <div className="flex flex-wrap gap-2">
+              <label className="cursor-pointer">
+                <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
+                <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
+                  <Upload className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-foreground">Upload Files</span>
                 </div>
+              </label>
+              <label className="cursor-pointer">
+                <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+                <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
+                  <Camera className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-foreground">Take Photo</span>
+                </div>
+              </label>
+            </div>
+
+            {files.length > 0 && (
+              <div className="grid gap-2 mt-3">
+                {files.map((file, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2.5 bg-muted/30 rounded-lg border border-border/50 group">
+                    <div className="w-8 h-8 rounded bg-background border border-border flex items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{file.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                    <button type="button" onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
+                      className="w-7 h-7 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors opacity-70 hover:opacity-100 group-hover:opacity-100">
+                      <X className="w-3.5 h-3.5 text-destructive" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </form>
+
+        {/* Sticky Submit Footer */}
+        <div className="fixed bottom-0 left-0 lg:left-60 right-0 p-4 bg-background/80 backdrop-blur-md border-t border-border z-20">
+          <div className="max-w-xl mx-auto flex items-center gap-4">
+            <div className="flex-1 hidden sm:block">
+              {selectedDutyObj ? (
+                <p className="text-xs text-muted-foreground truncate">Reporting on <span className="font-semibold text-foreground">{selectedDutyObj.name}</span></p>
+              ) : (
+                <p className="text-xs text-muted-foreground">Please select an assignment</p>
               )}
             </div>
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              className="w-full sm:w-auto px-8 h-11 rounded-lg font-semibold shadow-md transition-all"
+              disabled={isSubmitting || isLoading || !selectedDuty || !description.trim()}
+            >
+              {isSubmitting ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processing</>
+              ) : (
+                'Submit Report'
+              )}
+            </Button>
           </div>
-
-          {/* Submit */}
-          <Button
-            type="submit"
-            className="w-full h-12 rounded-xl font-bold text-base shadow-md hover:shadow-lg transition-all"
-            disabled={isSubmitting || isLoading || !selectedDuty || !description.trim()}
-          >
-            {isSubmitting ? (
-              <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Submitting...</>
-            ) : (
-              'Submit Report'
-            )}
-          </Button>
-        </form>
+        </div>
       </div>
     </AppLayout>
   );
