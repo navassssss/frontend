@@ -79,33 +79,33 @@ export default function SubmitReportPage() {
 
   return (
     <AppLayout title="Submit Report">
-      <div className="max-w-xl mx-auto pb-32">
+      <div className="max-w-3xl mx-auto p-4 lg:p-8">
         {/* Header */}
-        <div className="p-4 lg:p-6 lg:pb-2 border-b border-border/50 bg-background/50 backdrop-blur-sm sticky top-0 z-10">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mb-3">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Duties
+        <div className="mb-8 border-b border-border/50 pb-6">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4">
+            <ArrowLeft className="w-4 h-4" /> Back to Duties
           </button>
-          <h1 className="text-xl font-bold text-foreground tracking-tight">Submit Duty Report</h1>
-          <p className="text-xs text-muted-foreground mt-1">Select an active assignment to submit your operational update.</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Submit Duty Report</h1>
+          <p className="text-sm text-muted-foreground mt-2">Select an active assignment to submit your operational update.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8 bg-card/50 lg:bg-transparent lg:border-none border border-border/50 p-4 lg:p-0 rounded-2xl">
           
           {/* Section: Duty Selector */}
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <div className="space-y-4">
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
               <ClipboardList className="w-4 h-4 text-primary" /> Assignment Context
             </h2>
             {isLoading ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : duties.length === 0 ? (
-              <div className="p-4 rounded-xl border border-dashed border-border text-center">
+              <div className="p-6 rounded-xl border border-dashed border-border text-center bg-card">
                 <p className="text-sm text-muted-foreground">No active duties assigned to you.</p>
               </div>
             ) : (
-              <div className="grid gap-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {duties.map((duty) => {
                   const isSelected = selectedDuty === String(duty.id);
                   return (
@@ -113,17 +113,17 @@ export default function SubmitReportPage() {
                       key={duty.id}
                       type="button"
                       onClick={() => setSelectedDuty(String(duty.id))}
-                      className={`w-full flex items-center justify-between p-3 rounded-lg border text-left transition-all duration-200 ${
+                      className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
                         isSelected
                           ? 'border-primary/50 bg-primary/5 shadow-sm ring-1 ring-primary/20'
-                          : 'border-border bg-card hover:bg-muted/30'
+                          : 'border-border bg-card hover:bg-muted/30 hover:border-border/80'
                       }`}
                     >
                       <div className="flex flex-col">
                         <p className={`font-medium text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                           {toTitleCase(duty.name)}
                         </p>
-                        <p className="text-[11px] text-muted-foreground uppercase tracking-wide mt-0.5">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
                           {duty.type || 'Responsibility'}
                         </p>
                       </div>
@@ -138,8 +138,8 @@ export default function SubmitReportPage() {
           </div>
 
           {/* Section: Report Description */}
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <div className="space-y-4">
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" /> Report Summary
             </h2>
             <div className="relative">
@@ -148,86 +148,85 @@ export default function SubmitReportPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Summarize completed work, issues encountered, outcomes, and pending actions."
                 rows={6}
-                className="w-full p-4 rounded-xl border border-input bg-card text-sm resize-none transition-all placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
+                className="w-full p-4 rounded-xl border border-input bg-card text-sm resize-y transition-all placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
               />
-              <div className="absolute bottom-3 right-4 text-[10px] font-medium text-muted-foreground bg-card px-1">
+              <div className="absolute bottom-4 right-4 text-[10px] font-medium text-muted-foreground bg-card px-1 rounded">
                 {description.length} chars
               </div>
             </div>
           </div>
 
           {/* Section: Attachments */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Paperclip className="w-4 h-4 text-primary" /> Attachments
               </h2>
-              <span className="text-xs text-muted-foreground">Optional</span>
+              <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">Optional</span>
             </div>
             
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               <label className="cursor-pointer">
                 <input type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
-                <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
+                <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
                   <Upload className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-foreground">Upload Files</span>
+                  <span className="text-sm font-medium text-foreground">Upload Files</span>
                 </div>
               </label>
               <label className="cursor-pointer">
                 <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
+                <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-input bg-card hover:bg-muted/50 transition-colors shadow-sm">
                   <Camera className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-foreground">Take Photo</span>
+                  <span className="text-sm font-medium text-foreground">Take Photo</span>
                 </div>
               </label>
             </div>
 
             {files.length > 0 && (
-              <div className="grid gap-2 mt-3">
+              <div className="grid gap-2 sm:grid-cols-2 mt-4">
                 {files.map((file, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2.5 bg-muted/30 rounded-lg border border-border/50 group">
-                    <div className="w-8 h-8 rounded bg-background border border-border flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
+                  <div key={i} className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm group">
+                    <div className="w-10 h-10 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
+                      <FileText className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{file.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                     <button type="button" onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
-                      className="w-7 h-7 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors opacity-70 hover:opacity-100 group-hover:opacity-100">
-                      <X className="w-3.5 h-3.5 text-destructive" />
+                      className="w-8 h-8 rounded-lg hover:bg-destructive/10 flex items-center justify-center transition-colors opacity-70 hover:opacity-100 group-hover:opacity-100">
+                      <X className="w-4 h-4 text-destructive" />
                     </button>
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </form>
 
-        {/* Sticky Submit Footer */}
-        <div className="fixed bottom-0 left-0 lg:left-60 right-0 p-4 bg-background/80 backdrop-blur-md border-t border-border z-20">
-          <div className="max-w-xl mx-auto flex items-center gap-4">
-            <div className="flex-1 hidden sm:block">
+          {/* Submit Action */}
+          <div className="pt-8 border-t border-border mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="w-full sm:flex-1">
               {selectedDutyObj ? (
-                <p className="text-xs text-muted-foreground truncate">Reporting on <span className="font-semibold text-foreground">{selectedDutyObj.name}</span></p>
+                <p className="text-sm text-muted-foreground truncate text-center sm:text-left">
+                  Ready to submit report for <span className="font-semibold text-foreground">{selectedDutyObj.name}</span>
+                </p>
               ) : (
-                <p className="text-xs text-muted-foreground">Please select an assignment</p>
+                <p className="text-sm text-muted-foreground text-center sm:text-left">Please select an assignment above</p>
               )}
             </div>
             <Button
               type="submit"
-              onClick={handleSubmit}
-              className="w-full sm:w-auto px-8 h-11 rounded-lg font-semibold shadow-md transition-all"
+              className="w-full sm:w-auto px-10 h-12 rounded-xl font-bold text-base shadow-md hover:shadow-lg transition-all"
               disabled={isSubmitting || isLoading || !selectedDuty || !description.trim()}
             >
               {isSubmitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processing</>
+                <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Processing...</>
               ) : (
                 'Submit Report'
               )}
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </AppLayout>
   );
