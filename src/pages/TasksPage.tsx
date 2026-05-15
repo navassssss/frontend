@@ -142,7 +142,7 @@ export default function TasksPage() {
 
   return (
     <AppLayout title="Tasks">
-      <div className="p-4 lg:p-6 max-w-4xl mx-auto pb-28 space-y-4">
+      <div className="p-4 lg:p-6 w-full pb-28 space-y-4">
 
         {/* Header */}
         <div className="flex items-center justify-between">
