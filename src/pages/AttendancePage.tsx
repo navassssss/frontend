@@ -210,292 +210,286 @@ export default function AttendancePage() {
                     )}
                 </div>
 
-                {/* Class Status Overview - Moved to Top */}
-                {!studentId && classStatuses.length > 0 && (
-                    <div className="space-y-3">
-                        <h2 className="text-[13px] font-semibold flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-primary" />
-                            Class Status Overview
-                        </h2>
-                        <Card className="h-fit shadow-sm">
-                            <CardHeader className="pb-2">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-[13px] font-semibold">Today's Progress</CardTitle>
-                                    <Badge variant="secondary">
-                                        {classStatuses.filter(c => c.morningTaken && c.afternoonTaken).length}/{classStatuses.length} Complete
-                                    </Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-3">
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                                    {classStatuses.map((cls) => {
-                                        const isComplete = cls.morningTaken && cls.afternoonTaken;
-                                        const isPartial = (cls.morningTaken || cls.afternoonTaken) && !isComplete;
+                <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start flex flex-col gap-6">
+                    {/* Main Content Area: Submission History */}
+                    <div className="lg:col-span-8 xl:col-span-9 space-y-3 order-2 lg:order-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <h2 className="text-[13px] font-semibold flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-primary" />
+                                Attendance Records
+                                <Badge variant="outline" className="text-[10px] font-normal ml-2">
+                                    {records.filter(r => r.session === sessionFilter).length} Records Found
+                                </Badge>
+                            </h2>
 
-                                        // 3-color status system
-                                        let statusColor = "bg-red-100 text-red-700 border-red-300"; // Missing
-
-                                        if (isComplete) {
-                                            statusColor = "bg-emerald-100 text-emerald-700 border-emerald-300"; // Complete
-                                        } else if (isPartial) {
-                                            statusColor = "bg-amber-100 text-amber-700 border-amber-300"; // Partial
-                                        }
-
-                                        return (
-                                            <div
-                                                key={cls.id}
-                                                className={`p-2 rounded-lg border-2 flex items-center justify-between transition-all hover:scale-105 ${statusColor}`}
-                                                title={`Morning: ${cls.morningTaken ? 'Taken' : 'Missing'}, Afternoon: ${cls.afternoonTaken ? 'Taken' : 'Missing'}`}
-                                            >
-                                                <span className="text-[11px] font-bold truncate pr-1">{cls.name}</span>
-                                                <div className="flex gap-1 shrink-0">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${cls.morningTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Morning"></div>
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${cls.afternoonTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Afternoon"></div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <div className="mt-3 pt-3 border-t flex gap-3 text-[10px] font-medium text-muted-foreground justify-center">
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-emerald-600"></div> Complete
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-amber-600"></div> Partial
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-red-400 border-2 border-red-500"></div> Missing
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                )}
-
-                {/* Main Content Area: Submission History */}
-                <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 className="text-[13px] font-semibold flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-primary" />
-                            Attendance Records
-                            <Badge variant="outline" className="text-[10px] font-normal ml-2">
-                                {records.filter(r => r.session === sessionFilter).length} Records Found
-                            </Badge>
-                        </h2>
-
-                        {/* Filter Options */}
-                        <div className="flex items-center gap-2 self-start sm:self-auto bg-muted/30 p-1 rounded-lg border border-border">
-                            {/* <Button
-                                variant={sessionFilter === 'all' ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setSessionFilter('all')}
-                                className="h-8 rounded-md"
-                            >
-                                All
-                            </Button> */}
-                            <Button
-                                variant={sessionFilter === 'morning' ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setSessionFilter('morning')}
-                                className="h-7 rounded-md"
-                            >
-                                <Sun className="w-3 h-3 mr-1.5" /> Morning
-                            </Button>
-                            <Button
-                                variant={sessionFilter === 'afternoon' ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setSessionFilter('afternoon')}
-                                className="h-7 rounded-md"
-                            >
-                                <Sunset className="w-3 h-3 mr-1.5" /> Afternoon
-                            </Button>
+                            {/* Filter Options */}
+                            <div className="flex items-center gap-2 self-start sm:self-auto bg-muted/30 p-1 rounded-lg border border-border">
+                                <Button
+                                    variant={sessionFilter === 'morning' ? 'default' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setSessionFilter('morning')}
+                                    className="h-7 rounded-md"
+                                >
+                                    <Sun className="w-3 h-3 mr-1.5" /> Morning
+                                </Button>
+                                <Button
+                                    variant={sessionFilter === 'afternoon' ? 'default' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setSessionFilter('afternoon')}
+                                    className="h-7 rounded-md"
+                                >
+                                    <Sunset className="w-3 h-3 mr-1.5" /> Afternoon
+                                </Button>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Stats Grid - Moved below filters and conditionally rendered */}
-                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-3`}>
-                        {(sessionFilter === 'morning') && (
-                            <>
-                                {/* Morning Present - Amber theme */}
-                                <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-100 shadow-sm hover:shadow-md transition-all">
-                                    <CardContent className="p-3 flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                            <Sun className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Present</p>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-xl font-bold text-amber-700">{todayStats.morningPresent}</span>
-                                                <span className="text-[11px] text-teal-600 font-semibold">Students</span>
+                        {/* Stats Grid */}
+                        <div className={`grid grid-cols-1 md:grid-cols-2 gap-3`}>
+                            {(sessionFilter === 'morning') && (
+                                <>
+                                    {/* Morning Present - Amber theme */}
+                                    <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-100 shadow-sm hover:shadow-md transition-all">
+                                        <CardContent className="p-3 flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                                <Sun className="w-4 h-4" />
                                             </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Morning Absent - Pink theme */}
-                                <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100 shadow-sm hover:shadow-md transition-all">
-                                    <CardContent className="p-3 flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                            <Sun className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-pink-900 uppercase tracking-wider">Absent</p>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-xl font-bold text-pink-700">{todayStats.morningAbsent}</span>
-                                                <span className="text-[11px] text-teal-600 font-semibold">Students</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </>
-                        )}
-
-                        {(sessionFilter === 'afternoon') && (
-                            <>
-                                {/* Afternoon Present - Amber theme */}
-                                <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-100 shadow-sm hover:shadow-md transition-all">
-                                    <CardContent className="p-3 flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                            <Sunset className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Present</p>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-xl font-bold text-amber-700">{todayStats.afternoonPresent}</span>
-                                                <span className="text-[11px] text-teal-600 font-semibold">Students</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Afternoon Absent - Pink theme */}
-                                <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100 shadow-sm hover:shadow-md transition-all">
-                                    <CardContent className="p-3 flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                            <Sunset className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-pink-900 uppercase tracking-wider">Absent</p>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-xl font-bold text-pink-700">{todayStats.afternoonAbsent}</span>
-                                                <span className="text-[11px] text-teal-600 font-semibold">Students</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </>
-                        )}
-                    </div>
-
-                    {loading ? (
-                        <div className="space-y-3">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="h-24 bg-muted/20 animate-pulse rounded-xl" />
-                            ))}
-                        </div>
-                    ) : records.filter(r => r.session === sessionFilter).length === 0 ? (
-                        <Card className="border-dashed border-2">
-                            <CardContent className="p-12 text-center">
-                                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <CalendarIcon className="w-8 h-8 text-muted-foreground" />
-                                </div>
-                                <h3 className="text-lg font-semibold text-foreground">No Records Found</h3>
-                                <p className="text-muted-foreground text-sm mt-1 max-w-xs mx-auto">
-                                    No {sessionFilter} attendance records found.
-                                </p>
-                                {!studentId && (
-                                    <Button onClick={() => navigate('/attendance/take')} className="mt-4" variant="outline">
-                                        Start Marking
-                                    </Button>
-                                )}
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <div className="space-y-3">
-                            {records.filter(r => r.session === sessionFilter).map((record) => {
-                                const isExpanded = expandedRecords.has(record.id);
-                                return (
-                                    <Card key={record.id} className="group hover:border-primary/30 transition-all duration-300 shadow-sm">
-                                        <CardContent className="p-0">
-                                            <div
-                                                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer"
-                                                onClick={() => record.absentCount > 0 && toggleExpand(record.id)}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${record.session === 'morning'
-                                                        ? 'bg-amber-100 text-amber-600'
-                                                        : 'bg-amber-100 text-amber-600'
-                                                        }`}>
-                                                        {record.session === 'morning' ? <Sun className="w-4 h-4" /> : <Sunset className="w-4 h-4" />}
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <h3 className="font-semibold text-sm text-foreground">{record.className}</h3>
-                                                            <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5 rounded-md">
-                                                                {record.session}
-                                                            </Badge>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 mt-1 text-[12px] text-muted-foreground">
-                                                            <Users className="w-3 h-3" />
-                                                            <span>Taken by {record.teacherName}</span>
-                                                            <span className="text-[10px] px-1">•</span>
-                                                            <span>{format(new Date(record.submittedAt), 'h:mm a')}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center justify-between sm:justify-end gap-4 pl-12 sm:pl-0">
-                                                    <div className="text-center">
-                                                        <p className="text-[10px] font-bold text-success uppercase tracking-wider mb-0.5">Present</p>
-                                                        <span className="text-lg font-bold text-success">{record.presentCount}</span>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <p className="text-[10px] font-bold text-destructive uppercase tracking-wider mb-0.5">Absent</p>
-                                                        <span className={`text-lg font-bold ${record.absentCount > 0 ? 'text-destructive' : 'text-muted'}`}>
-                                                            {record.absentCount}
-                                                        </span>
-                                                    </div>
-                                                    {record.absentCount > 0 && (
-                                                        <div className={`w-7 h-7 rounded-full bg-muted/10 flex items-center justify-center transition-transform duration-300 ${isExpanded ? 'rotate-90 bg-primary/10 text-primary' : ''}`}>
-                                                            <ChevronRight className="w-3.5 h-3.5" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Expanded Details */}
-                                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 border-t border-border' : 'max-h-0'}`}>
-                                                <div className="p-4 bg-pink-50/50">
-                                                    <h4 className="text-[13px] font-semibold mb-3 flex items-center gap-2 text-destructive">
-                                                        <XCircle className="w-4 h-4" />
-                                                        Absent Students List
-                                                    </h4>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                        {(Array.isArray(record.absentStudents) ? record.absentStudents : []).map((student) => (
-                                                            <div key={student.id} className="flex flex-col md:flex-row md:items-center gap-2 p-2.5 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
-                                                                <div className="flex items-center justify-between md:w-auto md:shrink-0">
-                                                                    <span className="font-medium text-foreground md:min-w-[120px] pr-2">{student.name}</span>
-                                                                    <Badge variant="secondary" className="text-[10px] md:hidden">
-                                                                        Roll #{student.roll_number}
-                                                                    </Badge>
-                                                                </div>
-                                                                {student.reason && (
-                                                                    <div className="text-[11px] text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border-l-2 border-primary/40 truncate flex-1">
-                                                                        Reason: <span className="italic">{student.reason}</span>
-                                                                    </div>
-                                                                )}
-                                                                <Badge variant="secondary" className="text-[10px] hidden md:inline-flex ml-auto shrink-0">
-                                                                    Roll #{student.roll_number}
-                                                                </Badge>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Present</p>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-xl font-bold text-amber-700">{todayStats.morningPresent}</span>
+                                                    <span className="text-[11px] text-teal-600 font-semibold">Students</span>
                                                 </div>
                                             </div>
                                         </CardContent>
                                     </Card>
-                                );
-                            })}
+
+                                    {/* Morning Absent - Pink theme */}
+                                    <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100 shadow-sm hover:shadow-md transition-all">
+                                        <CardContent className="p-3 flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                                <Sun className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-pink-900 uppercase tracking-wider">Absent</p>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-xl font-bold text-pink-700">{todayStats.morningAbsent}</span>
+                                                    <span className="text-[11px] text-teal-600 font-semibold">Students</span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </>
+                            )}
+
+                            {(sessionFilter === 'afternoon') && (
+                                <>
+                                    {/* Afternoon Present - Amber theme */}
+                                    <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-100 shadow-sm hover:shadow-md transition-all">
+                                        <CardContent className="p-3 flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                                <Sunset className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Present</p>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-xl font-bold text-amber-700">{todayStats.afternoonPresent}</span>
+                                                    <span className="text-[11px] text-teal-600 font-semibold">Students</span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Afternoon Absent - Pink theme */}
+                                    <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100 shadow-sm hover:shadow-md transition-all">
+                                        <CardContent className="p-3 flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                                                <Sunset className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-pink-900 uppercase tracking-wider">Absent</p>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-xl font-bold text-pink-700">{todayStats.afternoonAbsent}</span>
+                                                    <span className="text-[11px] text-teal-600 font-semibold">Students</span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </>
+                            )}
+                        </div>
+
+                        {loading ? (
+                            <div className="space-y-3">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="h-24 bg-muted/20 animate-pulse rounded-xl" />
+                                ))}
+                            </div>
+                        ) : records.filter(r => r.session === sessionFilter).length === 0 ? (
+                            <Card className="border-dashed border-2">
+                                <CardContent className="p-12 text-center">
+                                    <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-foreground">No Records Found</h3>
+                                    <p className="text-muted-foreground text-sm mt-1 max-w-xs mx-auto">
+                                        No {sessionFilter} attendance records found.
+                                    </p>
+                                    {!studentId && (
+                                        <Button onClick={() => navigate('/attendance/take')} className="mt-4" variant="outline">
+                                            Start Marking
+                                        </Button>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="space-y-3">
+                                {records.filter(r => r.session === sessionFilter).map((record) => {
+                                    const isExpanded = expandedRecords.has(record.id);
+                                    return (
+                                        <Card key={record.id} className="group hover:border-primary/30 transition-all duration-300 shadow-sm">
+                                            <CardContent className="p-0">
+                                                <div
+                                                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer"
+                                                    onClick={() => record.absentCount > 0 && toggleExpand(record.id)}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${record.session === 'morning'
+                                                            ? 'bg-amber-100 text-amber-600'
+                                                            : 'bg-amber-100 text-amber-600'
+                                                            }`}>
+                                                            {record.session === 'morning' ? <Sun className="w-4 h-4" /> : <Sunset className="w-4 h-4" />}
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <h3 className="font-semibold text-sm text-foreground">{record.className}</h3>
+                                                                <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5 rounded-md">
+                                                                    {record.session}
+                                                                </Badge>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 mt-1 text-[12px] text-muted-foreground">
+                                                                <Users className="w-3 h-3" />
+                                                                <span>Taken by {record.teacherName}</span>
+                                                                <span className="text-[10px] px-1">•</span>
+                                                                <span>{format(new Date(record.submittedAt), 'h:mm a')}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between sm:justify-end gap-4 pl-12 sm:pl-0">
+                                                        <div className="text-center">
+                                                            <p className="text-[10px] font-bold text-success uppercase tracking-wider mb-0.5">Present</p>
+                                                            <span className="text-lg font-bold text-success">{record.presentCount}</span>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <p className="text-[10px] font-bold text-destructive uppercase tracking-wider mb-0.5">Absent</p>
+                                                            <span className={`text-lg font-bold ${record.absentCount > 0 ? 'text-destructive' : 'text-muted'}`}>
+                                                                {record.absentCount}
+                                                            </span>
+                                                        </div>
+                                                        {record.absentCount > 0 && (
+                                                            <div className={`w-7 h-7 rounded-full bg-muted/10 flex items-center justify-center transition-transform duration-300 ${isExpanded ? 'rotate-90 bg-primary/10 text-primary' : ''}`}>
+                                                                <ChevronRight className="w-3.5 h-3.5" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Expanded Details */}
+                                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 border-t border-border' : 'max-h-0'}`}>
+                                                    <div className="p-4 bg-pink-50/50">
+                                                        <h4 className="text-[13px] font-semibold mb-3 flex items-center gap-2 text-destructive">
+                                                            <XCircle className="w-4 h-4" />
+                                                            Absent Students List
+                                                        </h4>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                            {(Array.isArray(record.absentStudents) ? record.absentStudents : []).map((student) => (
+                                                                <div key={student.id} className="flex flex-col md:flex-row md:items-center gap-2 p-2.5 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
+                                                                    <div className="flex items-center justify-between md:w-auto md:shrink-0">
+                                                                        <span className="font-medium text-foreground md:min-w-[120px] pr-2">{student.name}</span>
+                                                                        <Badge variant="secondary" className="text-[10px] md:hidden">
+                                                                            Roll #{student.roll_number}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    {student.reason && (
+                                                                        <div className="text-[11px] text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border-l-2 border-primary/40 truncate flex-1">
+                                                                            Reason: <span className="italic">{student.reason}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    <Badge variant="secondary" className="text-[10px] hidden md:inline-flex ml-auto shrink-0">
+                                                                        Roll #{student.roll_number}
+                                                                    </Badge>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Class Status Overview - Sidebar */}
+                    {!studentId && classStatuses.length > 0 && (
+                        <div className="lg:col-span-4 xl:col-span-3 space-y-3 order-1 lg:order-2 lg:sticky lg:top-6">
+                            <h2 className="text-[13px] font-semibold flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-primary" />
+                                Class Status Overview
+                            </h2>
+                            <Card className="h-fit shadow-sm">
+                                <CardHeader className="pb-2">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-[13px] font-semibold">Today's Progress</CardTitle>
+                                        <Badge variant="secondary">
+                                            {classStatuses.filter(c => c.morningTaken && c.afternoonTaken).length}/{classStatuses.length} Complete
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-1 gap-2">
+                                        {classStatuses.map((cls) => {
+                                            const isComplete = cls.morningTaken && cls.afternoonTaken;
+                                            const isPartial = (cls.morningTaken || cls.afternoonTaken) && !isComplete;
+
+                                            // 3-color status system
+                                            let statusColor = "bg-red-100 text-red-700 border-red-300"; // Missing
+
+                                            if (isComplete) {
+                                                statusColor = "bg-emerald-100 text-emerald-700 border-emerald-300"; // Complete
+                                            } else if (isPartial) {
+                                                statusColor = "bg-amber-100 text-amber-700 border-amber-300"; // Partial
+                                            }
+
+                                            return (
+                                                <div
+                                                    key={cls.id}
+                                                    className={`p-2 rounded-lg border-2 flex items-center justify-between transition-all hover:scale-105 ${statusColor}`}
+                                                    title={`Morning: ${cls.morningTaken ? 'Taken' : 'Missing'}, Afternoon: ${cls.afternoonTaken ? 'Taken' : 'Missing'}`}
+                                                >
+                                                    <span className="text-[11px] font-bold truncate pr-1">{cls.name}</span>
+                                                    <div className="flex gap-1 shrink-0">
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${cls.morningTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Morning"></div>
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${cls.afternoonTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Afternoon"></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="mt-3 pt-3 border-t flex flex-wrap gap-3 text-[10px] font-medium text-muted-foreground justify-center">
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-emerald-600"></div> Complete
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-amber-600"></div> Partial
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-red-400 border-2 border-red-500"></div> Missing
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     )}
                 </div>
