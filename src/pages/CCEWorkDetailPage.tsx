@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Calendar,
@@ -607,7 +607,7 @@ export default function CCEWorkDetailPage() {
                                             {getInitials(sub.studentName)}
                                         </div>
                                         <div className="flex-1 min-w-0 py-1">
-                                            <p className="text-[14px] font-bold text-slate-800 truncate leading-tight">{sub.studentName}</p>
+                                            <p className="text-[14px] font-bold text-slate-800 leading-tight">{sub.studentName}</p>
                                             <p className="text-[11px] font-medium text-slate-400 mt-0.5">#{sub.rollNumber}</p>
                                         </div>
                                         {isEvaluated ? (
@@ -844,12 +844,36 @@ export default function CCEWorkDetailPage() {
                                             {/* Marks */}
                                             <td className="py-4 px-6">
                                                 {submission.status === 'evaluated' && submission.marksObtained !== null ? (
-                                                    <span className="text-[14px] font-black text-slate-800">
+                                                    <span className="text-[14px] font-bold text-slate-800">
                                                         {submission.marksObtained}
-                                                        <span className="text-slate-400 font-bold"> / {work.maxMarks}</span>
+                                                        <span className="text-slate-400"> / {work.maxMarks}</span>
                                                     </span>
                                                 ) : (
-                                                    <span className="text-[13px] font-bold text-slate-300">—</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            ref={el => { inputRefs.current[submission.id] = el; }}
+                                                            type="number"
+                                                            min="0"
+                                                            max={work.maxMarks}
+                                                            step="0.5"
+                                                            value={inlineMarks[submission.id] ?? ''}
+                                                            onChange={e => setInlineMarks(prev => ({ ...prev, [submission.id]: e.target.value }))}
+                                                            onKeyDown={e => { if (e.key === 'Enter') handleInlineSave(submission, mobilePendingList); }}
+                                                            placeholder="—"
+                                                            className="w-20 h-9 text-center text-[14px] font-black bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#00a67e] focus:bg-white transition-colors"
+                                                        />
+                                                        <button
+                                                            onClick={() => handleInlineSave(submission, mobilePendingList)}
+                                                            disabled={savingIds.has(submission.id) || !inlineMarks[submission.id]}
+                                                            className="h-9 px-3 flex items-center justify-center rounded-lg bg-[#00a67e] text-white disabled:bg-slate-100 disabled:text-slate-400 transition-colors font-bold text-[13px]"
+                                                        >
+                                                            {savingIds.has(submission.id) ? (
+                                                                <span className="w-4 h-4 border-2 border-slate-300 border-t-white rounded-full animate-spin" />
+                                                            ) : (
+                                                                "Save"
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </td>
 
@@ -872,7 +896,7 @@ export default function CCEWorkDetailPage() {
                                             {/* Action */}
                                             <td className="py-4 px-6 text-right">
                                                 <button
-                                                    title={submission.status === 'evaluated' ? 'Edit Evaluation' : 'Evaluate'}
+                                                    title={submission.status === 'evaluated' ? 'Edit Evaluation' : 'Evaluate with feedback'}
                                                     onClick={() => {
                                                         setSelectedSubmission(submission);
                                                         setMarks(submission.marksObtained?.toString() || '');
