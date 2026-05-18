@@ -78,19 +78,13 @@ export default function AttendanceReportsPage() {
 
     return (
         <AppLayout title="Attendance Reports" showBack>
-            <div className="p-4 lg:p-6 space-y-6 max-w-7xl mx-auto font-sans">
-                {/* Header & Global Session Switcher */}
+            <div className="p-4 lg:p-6 space-y-6">
+                {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-xl font-bold text-foreground tracking-tight">Operational Attendance</h1>
-                        <p className="text-xs text-muted-foreground mt-0.5">Principal Control Panel</p>
+                        <h1 className="text-2xl font-bold text-foreground">Operational Attendance</h1>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">Principal Control Panel</p>
                     </div>
-                    <Tabs value={session} onValueChange={(v) => setSession(v as 'FN' | 'AN')} className="w-fit">
-                        <TabsList className="grid w-[140px] grid-cols-2">
-                            <TabsTrigger value="FN" className="text-xs font-semibold">FN Session</TabsTrigger>
-                            <TabsTrigger value="AN" className="text-xs font-semibold">AN Session</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
                 </div>
 
                 {/* Section 1: Summary Strip (Compact operational stat blocks) */}
@@ -177,14 +171,23 @@ export default function AttendanceReportsPage() {
 
                     {/* Section 3: Class Attendance */}
                     <div className="space-y-3">
-                        <div className="flex items-center justify-between mb-1">
-                            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 tracking-tight">
-                                <Users className="w-4 h-4 text-primary" />
-                                Class Attendance
-                            </h2>
-                            <Badge variant="outline" className="text-[10px] text-destructive border-destructive/20 bg-destructive/5 font-medium">
-                                Action Layer
-                            </Badge>
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 tracking-tight">
+                                    <Users className="w-4 h-4 text-primary" />
+                                    Class Attendance
+                                </h2>
+                                <Badge variant="outline" className="text-[10px] text-destructive border-destructive/20 bg-destructive/5 font-medium hidden sm:inline-flex">
+                                    Action Layer
+                                </Badge>
+                            </div>
+                            
+                            <Tabs value={session} onValueChange={(v) => setSession(v as 'FN' | 'AN')} className="w-fit">
+                                <TabsList className="grid w-[90px] grid-cols-2 h-7 p-0.5">
+                                    <TabsTrigger value="FN" className="text-[11px] font-bold h-full">FN</TabsTrigger>
+                                    <TabsTrigger value="AN" className="text-[11px] font-bold h-full">AN</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
                         
                         <div className="bg-card border rounded-md shadow-sm">
