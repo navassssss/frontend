@@ -183,11 +183,12 @@ export function Sidebar() {
                 <p className="text-[9px] font-black tracking-[0.15em] text-slate-400 uppercase px-5 pb-2">Main Menu</p>
                 {navItems.map((item) => {
                     const isExpanded = expandedItem === item.label;
+                    const exactMainMatch = navItems.some(main => main.path === location.pathname);
                     const isActive = item.path
-                        ? location.pathname === item.path
+                        ? location.pathname === item.path || (location.pathname.startsWith(item.path + '/') && item.path !== '/')
                         : item.subItems?.some(sub =>
                             location.pathname === sub.path ||
-                            location.pathname.startsWith(sub.path + '/')
+                            (!exactMainMatch && location.pathname.startsWith(sub.path + '/'))
                           );
 
                     return (
