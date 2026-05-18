@@ -143,7 +143,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="py-6 text-center text-[11px] text-muted-foreground border-t border-border/40 mt-auto">
-                    <p>© 2025 Darul Hasanath Islamic College.</p>
+                    <p>© {new Date().getFullYear()} Darul Hasanath Islamic College.</p>
                 </div>
             </div>
         </div>

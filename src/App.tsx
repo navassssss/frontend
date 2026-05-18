@@ -10,6 +10,7 @@ import { PWAPrompt } from "@/components/pwa/PWAPrompt";
 
 // Landing Page
 import LandingPage from "./pages/LandingPage";
+import InaugurationPage from "./pages/InaugurationPage";
 
 // Staff Pages
 import LoginPage from "./pages/LoginPage";
@@ -133,6 +134,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/inaugurate" element={<InaugurationPage />} />
       <Route
         path="/staff/login"
         element={
