@@ -75,8 +75,9 @@ const managerNavItems: NavItem[] = [
 ];
 
 function getActiveGroupLabel(items: NavItem[], pathname: string): string | null {
+    const exactMainMatch = items.some(main => main.path === pathname);
     for (const item of items) {
-        if (item.subItems?.some(s => pathname === s.path || pathname.startsWith(s.path + '/'))) {
+        if (item.subItems?.some(s => pathname === s.path || (!exactMainMatch && pathname.startsWith(s.path + '/')))) {
             return item.label;
         }
     }
@@ -215,6 +216,7 @@ export function Sidebar() {
                             ) : (
                                 <RouterNavLink
                                     to={item.path!}
+                                    end
                                     className={({ isActive }) => cn(
                                         "flex items-center gap-2.5 py-2 pl-5 pr-3 mr-3 rounded-r-xl transition-colors duration-150",
                                         isActive
@@ -238,6 +240,7 @@ export function Sidebar() {
                                         <RouterNavLink
                                             key={subItem.path}
                                             to={subItem.path}
+                                            end
                                             className={({ isActive }) => cn(
                                                 "flex items-center pl-11 pr-4 py-1.5 mr-3 rounded-r-xl transition-colors duration-150 text-[12px]",
                                                 isActive
