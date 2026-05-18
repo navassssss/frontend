@@ -35,6 +35,7 @@ const baseNavItems: NavItem[] = [
 
 const principalNavItems: NavItem[] = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: Calendar, label: 'Attendance Reports', path: '/attendance/reports' },
     {
         icon: Users,
         label: 'Students',
@@ -42,7 +43,6 @@ const principalNavItems: NavItem[] = [
             { label: 'All Students', path: '/students' },
             { label: 'Add Student', path: '/students/new' },
             { label: 'Attendance', path: '/attendance' },
-            { label: 'Attendance Reports', path: '/attendance/reports' },
             { label: 'CCE Works', path: '/cce/works' },
             { label: 'Marks', path: '/cce/student-marks' },
             { label: 'Achievements', path: '/student-achievements' },

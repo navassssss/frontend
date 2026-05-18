@@ -195,7 +195,7 @@ export default function AttendanceReportsPage() {
                                     <div key={cls.classId} className="flex flex-col">
                                         {/* Class Heading */}
                                         <div className="flex items-center justify-between bg-muted/20 px-4 py-2.5 border-b border-border/40">
-                                            <span className="text-[12px] font-bold text-foreground">{cls.className}</span>
+                                            <span className="text-[12px] font-bold text-foreground">Class {cls.className}</span>
                                             <span className="text-[11px] text-destructive font-semibold">
                                                 {cls.absentCount} absent
                                             </span>
