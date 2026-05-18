@@ -59,7 +59,7 @@ import SubjectsPage from "./pages/SubjectsPage";
 import SubjectDetailPage from "./pages/SubjectDetailPage";
 import StudentMarksPage from "./pages/StudentMarksPage";
 import ClassReportPage from "./pages/ClassReportPage";
-
+import AttendanceReportsPage from "./pages/AttendanceReportsPage";
 // Fee Management Pages
 import FeeManagementPage from "./pages/FeeManagementPage";
 import FeeReportsPage from "./pages/FeeReportsPage";
@@ -465,6 +465,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ClassReportPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance/reports"
+        element={
+          <ProtectedRoute>
+            <AttendanceReportsPage />
           </ProtectedRoute>
         }
       />
