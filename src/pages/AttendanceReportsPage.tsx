@@ -3,12 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Users } from 'lucide-react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+
 
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
@@ -190,44 +185,40 @@ export default function AttendanceReportsPage() {
                             </Tabs>
                         </div>
                         
-                        <div className="bg-card border rounded-md shadow-sm">
-                            <Accordion type="multiple" className="w-full">
-                                {classAttendance.map((cls) => (
-                                    <AccordionItem value={cls.classId} key={cls.classId} className="border-b border-border/60 last:border-0">
-                                        <AccordionTrigger className="px-5 py-3 hover:bg-muted/20 hover:no-underline [&[data-state=open]]:bg-muted/10 transition-colors">
-                                            <div className="flex items-center gap-3 w-full pr-4 text-left">
-                                                <span className="text-[13px] font-semibold text-foreground w-12">{cls.className}</span>
-                                                <span className="text-[11px] text-muted-foreground font-medium">—</span>
-                                                <span className="text-[12px] text-destructive font-semibold">
-                                                    {cls.absentCount} absent
-                                                </span>
-                                            </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="px-5 pb-3 pt-1">
-                                            <div className="space-y-1.5 pt-1">
-                                                {cls.students.map(student => (
-                                                    <div key={student.id} className="flex items-center justify-between text-[13px] py-1">
-                                                        <span className="font-medium text-foreground">{student.name}</span>
-                                                        {/* Subtle Indicator Marker */}
-                                                        <span className={`w-[22px] h-[22px] flex items-center justify-center rounded-sm text-[10px] font-bold shrink-0 ${
-                                                            student.marker === 'M' ? 'bg-blue-50 text-blue-700 border border-blue-200/50' :
-                                                            student.marker === 'O' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' :
-                                                            'bg-red-50 text-red-700 border border-red-200/50'
-                                                        }`}>
-                                                            {student.marker}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                                {classAttendance.length === 0 && (
-                                    <div className="p-5 text-center text-[12px] text-muted-foreground">
-                                        All classes fully present.
+                        <div className="bg-card border rounded-md shadow-sm divide-y divide-border/60">
+                            {classAttendance.length === 0 ? (
+                                <div className="p-5 text-center text-[12px] text-muted-foreground">
+                                    All classes fully present.
+                                </div>
+                            ) : (
+                                classAttendance.map((cls) => (
+                                    <div key={cls.classId} className="flex flex-col">
+                                        {/* Class Heading */}
+                                        <div className="flex items-center justify-between bg-muted/20 px-4 py-2.5 border-b border-border/40">
+                                            <span className="text-[12px] font-bold text-foreground">{cls.className}</span>
+                                            <span className="text-[11px] text-destructive font-semibold">
+                                                {cls.absentCount} absent
+                                            </span>
+                                        </div>
+                                        {/* Absentees List */}
+                                        <div className="px-4 py-2 space-y-1">
+                                            {cls.students.map(student => (
+                                                <div key={student.id} className="flex items-center justify-between text-[13px] py-1 border-b border-border/20 last:border-0">
+                                                    <span className="font-medium text-foreground">{student.name}</span>
+                                                    {/* Subtle Indicator Marker */}
+                                                    <span className={`w-[22px] h-[22px] flex items-center justify-center rounded-sm text-[10px] font-bold shrink-0 ${
+                                                        student.marker === 'M' ? 'bg-blue-50 text-blue-700 border border-blue-200/50' :
+                                                        student.marker === 'O' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' :
+                                                        'bg-red-50 text-red-700 border border-red-200/50'
+                                                    }`}>
+                                                        {student.marker}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
-                            </Accordion>
+                                ))
+                            )}
                         </div>
                         
                         {/* Compact Marker Legend */}
