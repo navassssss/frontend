@@ -10,50 +10,71 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import api from '@/lib/api';
+import { Loader2 } from 'lucide-react';
+
+interface SummaryData {
+    totalStudents: number;
+    fnAttendance: number;
+    anAttendance: number;
+    activeOutpasses: number;
+    medicalCases: number;
+    unexplainedAbsent: number;
+}
+
+interface OfficialAbsence {
+    id: number;
+    class: string;
+    student: string;
+    reason: string;
+    time: string;
+}
+
+interface ClassAttendance {
+    classId: number;
+    className: string;
+    absentCount: number;
+    students: {
+        id: number;
+        name: string;
+        marker: string;
+    }[];
+}
+
 export default function AttendanceReportsPage() {
     const defaultSession = new Date().getHours() >= 13 ? 'AN' : 'FN';
     const [session, setSession] = useState<'FN' | 'AN'>(defaultSession);
+    const [loading, setLoading] = useState(true);
 
-    // Mock summary data (would be replaced by actual API data)
-    const summary = {
-        totalStudents: 450,
-        fnAttendance: 430,
-        anAttendance: 425,
-        activeOutpasses: 12,
-        medicalCases: 5,
-        unexplainedAbsent: 14
-    };
+    const [summary, setSummary] = useState<SummaryData>({
+        totalStudents: 0,
+        fnAttendance: 0,
+        anAttendance: 0,
+        activeOutpasses: 0,
+        medicalCases: 0,
+        unexplainedAbsent: 0
+    });
 
-    // Mock official absences (Outpass/Medical)
-    const officialAbsences = [
-        { id: 1, class: '10A', student: 'Ahmed Khan', reason: 'Medical', time: '10:30 AM' },
-        { id: 2, class: '10B', student: 'Rashid Ali', reason: 'Outpass', time: '11:15 AM' },
-        { id: 3, class: '9A', student: 'Sarah Mohammed', reason: 'Medical', time: '09:00 AM' }
-    ];
+    const [officialAbsences, setOfficialAbsences] = useState<OfficialAbsence[]>([]);
+    const [classAttendance, setClassAttendance] = useState<ClassAttendance[]>([]);
 
-    // Mock class operational attendance
-    const classAttendance = [
-        {
-            classId: '10A',
-            className: '10A',
-            absentCount: 4,
-            students: [
-                { id: 1, name: 'Ahmed Khan', marker: 'M' },
-                { id: 2, name: 'Zaid Bin Tariq', marker: 'A' },
-                { id: 3, name: 'Omar', marker: 'A' },
-                { id: 4, name: 'Yusuf', marker: 'O' },
-            ]
-        },
-        {
-            classId: '10B',
-            className: '10B',
-            absentCount: 2,
-            students: [
-                { id: 5, name: 'Rashid Ali', marker: 'O' },
-                { id: 6, name: 'Hassan', marker: 'A' }
-            ]
-        }
-    ];
+    useEffect(() => {
+        const fetchReport = async () => {
+            setLoading(true);
+            try {
+                const response = await api.get(`/attendance/reports/operational?session=${session}`);
+                setSummary(response.data.summary);
+                setOfficialAbsences(response.data.officialAbsences);
+                setClassAttendance(response.data.classAttendance);
+            } catch (error) {
+                console.error("Failed to fetch operational report", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReport();
+    }, [session]);
 
     return (
         <AppLayout title="Attendance Reports" showBack>
