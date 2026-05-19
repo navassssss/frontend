@@ -176,7 +176,12 @@ export default function CCEWorkDetailPage() {
         try {
             const { data } = await api.get(`/cce/works/${id}`);
             setWork(data);
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 403) {
+                toast.error('You are not authorized to access this work');
+                navigate('/cce/works');
+                return;
+            }
             toast.error('Failed to load work details');
         } finally {
             setLoading(false);
