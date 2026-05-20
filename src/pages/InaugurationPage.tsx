@@ -134,9 +134,9 @@ const InaugurationPage = () => {
 
               {/* Right Column - Image Placeholder */}
               <div className="flex-1 flex justify-center lg:justify-end w-full relative">
-                <div className="relative w-full max-w-[420px] aspect-[4/4.5] rounded-[2rem] overflow-hidden bg-gradient-to-tr from-slate-200 to-slate-50 dark:from-muted dark:to-muted/50 border-[6px] border-white dark:border-card shadow-xl flex items-center justify-center">
-                  {/* Avatar / Placeholder */}
-                  <span className="text-7xl font-bold text-slate-300 dark:text-muted-foreground/30">SAB</span>
+                <div className="relative w-full max-w-[420px] aspect-[4/4.5] rounded-[2rem] overflow-hidden bg-slate-100 border-[6px] border-white dark:border-card shadow-xl flex items-center justify-center">
+                  {/* Image */}
+                  <img src="/principal.jpg" alt="Sayyid Ali Ba'alawi Thangal" className="w-full h-full object-cover" />
                   
                   {/* Badge */}
                   <div className="absolute bottom-6 left-6 bg-white dark:bg-card px-4 py-2 rounded-full shadow-md flex items-center gap-2">
