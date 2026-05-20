@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -163,6 +163,13 @@ export default function StudentAchievementReviewPage() {
             toast.error('Please provide a reason for disapproval');
             return;
         }
+
+        if (achievement.status === 'approved') {
+            if (!window.confirm("This achievement is already approved. Rejecting it will revoke the awarded points from the student's profile. Are you sure you want to proceed?")) {
+                return;
+            }
+        }
+
         try {
             await api.post(`/achievements/${achievement.id}/reject`, { review_note: note });
             toast.info('Achievement rejected');
@@ -412,8 +419,8 @@ export default function StudentAchievementReviewPage() {
                                                 </div>
                                             )}
 
-                                            {/* Action Buttons for Pending */}
-                                            {achievement.status === 'pending' && (
+                                            {/* Action Buttons */}
+                                            {achievement.status !== 'rejected' && (
                                                 <div className="w-full space-y-2 pt-2 sm:pt-4">
                                                     <Textarea
                                                         placeholder="Reason (for rejection)..."
@@ -431,15 +438,17 @@ export default function StudentAchievementReviewPage() {
                                                             className="h-8 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                                                             onClick={() => handleDisapprove(achievement)}
                                                         >
-                                                            Reject
+                                                            {achievement.status === 'approved' ? 'Revoke & Reject' : 'Reject'}
                                                         </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            className="h-8 bg-success hover:bg-success/90 text-white"
-                                                            onClick={() => handleApprove(achievement)}
-                                                        >
-                                                            Approve
-                                                        </Button>
+                                                        {achievement.status === 'pending' && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="h-8 bg-success hover:bg-success/90 text-white"
+                                                                onClick={() => handleApprove(achievement)}
+                                                            >
+                                                                Approve
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}

@@ -27,7 +27,7 @@ export default function AddAchievementPage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -51,14 +51,27 @@ export default function AddAchievementPage() {
   const selectedCategory = categories.find(c => c.id.toString() === formData.categoryId);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error('File size should be less than 5MB');
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      if (selectedFiles.length + newFiles.length > 3) {
+        toast.error('You can only upload a maximum of 3 files.');
         return;
       }
-      setSelectedFile(file);
+      
+      const validFiles = newFiles.filter(file => {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          toast.error(`File ${file.name} exceeds 10MB limit`);
+          return false;
+        }
+        return true;
+      });
+
+      setSelectedFiles(prev => [...prev, ...validFiles].slice(0, 3));
     }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,8 +94,10 @@ export default function AddAchievementPage() {
       submitData.append('title', formData.title.trim());
       submitData.append('description', formData.description.trim() || '');
 
-      if (selectedFile) {
-        submitData.append('attachments[]', selectedFile);
+      if (selectedFiles.length > 0) {
+        selectedFiles.forEach(file => {
+          submitData.append('attachments[]', file);
+        });
       }
 
       await api.post('/student/achievements', submitData, {
@@ -189,31 +204,35 @@ export default function AddAchievementPage() {
                       className="hidden"
                       onChange={handleFileChange}
                       accept="image/*,.pdf"
+                      multiple
                     />
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => document.getElementById('file-upload')?.click()}
+                      disabled={selectedFiles.length >= 3}
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Upload File
                     </Button>
                   </div>
-                  {selectedFile && (
-                    <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md text-sm">
-                      <FileText className="w-4 h-4 text-primary" />
-                      <span className="truncate max-w-[150px]">{selectedFile.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex flex-col gap-2">
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md text-sm">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <span className="truncate max-w-[150px]">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">Max 5MB. Images or PDF only.</p>
+                <p className="text-xs text-muted-foreground">Max 3 files, 10MB each. Images or PDF only.</p>
               </div>
 
               <Button
