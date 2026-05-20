@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList,
   CheckSquare,
@@ -16,6 +16,7 @@ import {
   ArrowUpRight,
   GraduationCap,
   ArrowRight,
+  Activity,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +47,7 @@ const getGreeting = () => {
 const teacherQuickActions = [
   { title: 'Attendance', description: 'Mark daily attendance', icon: Calendar, path: '/attendance', color: 'text-blue-500', bg: 'bg-blue-50' },
   { title: 'CCE Works', description: 'Manage assignments', icon: BookOpen, path: '/cce/works', color: 'text-amber-500', bg: 'bg-amber-50' },
+  { title: 'Medical', description: 'Manage sick bay', icon: Activity, path: '/medical', color: 'text-rose-500', bg: 'bg-rose-50' },
   { title: 'My Duties', description: '3 active duties', icon: ClipboardList, path: '/duties', color: 'text-primary', bg: 'bg-primary/10' },
   { title: 'My Tasks', description: '5 pending today', icon: CheckSquare, path: '/tasks', color: 'text-emerald-500', bg: 'bg-emerald-50' },
   { title: 'Raise Issue', description: 'Report a problem', icon: AlertCircle, path: '/issues/new', color: 'text-red-500', bg: 'bg-red-50' },
@@ -70,7 +72,7 @@ const managerQuickActions = [
 ];
 
 const getIcon = (iconName: string) => {
-  const icons: any = { Users, CheckSquare, AlertTriangle, Clock, ClipboardList, TrendingUp, Calendar, GraduationCap, FileText, Trophy, BookOpen };
+  const icons: any = { Users, CheckSquare, AlertTriangle, Clock, ClipboardList, TrendingUp, Calendar, GraduationCap, FileText, Trophy, BookOpen, Activity };
   return icons[iconName] || TrendingUp;
 };
 

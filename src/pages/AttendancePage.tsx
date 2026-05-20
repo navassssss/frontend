@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
     Calendar as CalendarIcon,
     ChevronRight,
@@ -11,7 +12,9 @@ import {
     XCircle,
     Plus,
     Users,
-    Filter
+    Filter,
+    Edit,
+    Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,6 +70,8 @@ export default function AttendancePage() {
         const hour = new Date().getHours();
         return hour >= 13 ? 'afternoon' : 'morning';
     });
+
+    const canManage = user?.role === 'principal' || user?.permissions?.some(p => p.name === 'manage_attendance');
 
     useEffect(() => {
         loadRecords();
@@ -133,6 +138,18 @@ export default function AttendancePage() {
             else newSet.add(recordId);
             return newSet;
         });
+    };
+
+    const handleDelete = async (recordId: number) => {
+        if (!window.confirm('Are you sure you want to permanently delete this attendance sheet?')) return;
+        try {
+            await api.delete(`/attendance/${recordId}`);
+            toast.success('Attendance record deleted');
+            loadRecords();
+            loadClassStatuses();
+        } catch (error) {
+            toast.error('Failed to delete record');
+        }
     };
 
     const loadClassStatuses = async () => {
@@ -423,6 +440,34 @@ export default function AttendancePage() {
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {/* Edit / Delete Actions (Bottom Bar) */}
+                                                {!studentId && canManage && (
+                                                    <div className="bg-muted/10 px-4 py-2 border-t border-border flex items-center justify-end gap-2">
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            className="text-muted-foreground hover:text-primary h-8 text-[11px]"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate(`/attendance/take?edit=${record.id}`);
+                                                            }}
+                                                        >
+                                                            <Edit className="w-3.5 h-3.5 mr-1.5" /> Edit
+                                                        </Button>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 text-[11px]"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(record.id);
+                                                            }}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </CardContent>
                                         </Card>
                                     );

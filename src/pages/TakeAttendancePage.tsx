@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     Sun,
     Sunset,
@@ -41,6 +41,8 @@ interface StudentData {
 }
 export default function TakeAttendancePage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const editId = searchParams.get('edit');
     const { user } = useAuth();
 
     const [classes, setClasses] = useState<ClassData[]>([]);
@@ -58,7 +60,10 @@ export default function TakeAttendancePage() {
 
     useEffect(() => {
         loadClasses();
-    }, []);
+        if (editId) {
+            loadEditData();
+        }
+    }, [editId]);
 
     useEffect(() => {
         if (selectedClass) {
@@ -76,15 +81,39 @@ export default function TakeAttendancePage() {
         }
     };
 
-    const loadStudents = async () => {
+    const loadStudents = async (classId?: string) => {
         try {
-            const { data } = await api.get(`/classes/${selectedClass}/students`);
+            const { data } = await api.get(`/classes/${classId || selectedClass}/students`);
             setStudents(data);
-            setAbsentStudents([]);
+            if (!editId) setAbsentStudents([]);
         } catch (error) {
             toast.error('Failed to load students');
         }
     };
+
+    const loadEditData = async () => {
+        try {
+            const { data } = await api.get(`/attendance/${editId}`);
+            setSelectedClass(data.classId?.toString() || '');
+            setSelectedDate(data.date);
+            setSelectedSession(data.session);
+            
+            // load students for that class
+            const { data: studentsData } = await api.get(`/classes/${data.classId}/students`);
+            setStudents(studentsData);
+
+            // Populate absentees
+            const absent = data.records
+                .filter((r: any) => r.status === 'absent')
+                .map((r: any) => ({
+                    id: r.studentId,
+                    reason: r.reason || ''
+                }));
+            setAbsentStudents(absent);
+        } catch (error) {
+            toast.error('Failed to load edit data');
+        }
+    }
 
     const checkDuplicate = async () => {
         try {
@@ -129,23 +158,30 @@ export default function TakeAttendancePage() {
             return;
         }
 
-        if (duplicateError) {
+        if (duplicateError && !editId) {
             toast.error('Attendance already taken for this session');
             return;
         }
 
         setIsSubmitting(true);
         try {
-            await api.post('/attendance', {
-                class_id: selectedClass,
-                date: selectedDate,
-                session: selectedSession,
-                absent_students: absentStudents
-            });
-            toast.success('Attendance submitted successfully');
+            if (editId) {
+                await api.put(`/attendance/${editId}`, {
+                    absent_students: absentStudents
+                });
+                toast.success('Attendance updated successfully');
+            } else {
+                await api.post('/attendance', {
+                    class_id: selectedClass,
+                    date: selectedDate,
+                    session: selectedSession,
+                    absent_students: absentStudents
+                });
+                toast.success('Attendance submitted successfully');
+            }
             navigate('/attendance');
         } catch (error) {
-            toast.error('Failed to submit attendance');
+            toast.error(editId ? 'Failed to update attendance' : 'Failed to submit attendance');
         } finally {
             setIsSubmitting(false);
         }
@@ -174,7 +210,7 @@ export default function TakeAttendancePage() {
                 {/* Class Selection */}
                 <div className="space-y-2">
                     <Label>Select Class</Label>
-                    <Select value={selectedClass} onValueChange={setSelectedClass}>
+                    <Select value={selectedClass} onValueChange={setSelectedClass} disabled={!!editId}>
                         <SelectTrigger>
                             <SelectValue placeholder="Choose a class" />
                         </SelectTrigger>
@@ -194,6 +230,7 @@ export default function TakeAttendancePage() {
                     <Input
                         type="date"
                         value={selectedDate}
+                        disabled={!!editId}
                         onChange={(e) => setSelectedDate(e.target.value)}
                     />
                 </div>
@@ -205,6 +242,7 @@ export default function TakeAttendancePage() {
                         <Button
                             variant={selectedSession === 'morning' ? 'default' : 'outline'}
                             className="h-14"
+                            disabled={!!editId}
                             onClick={() => setSelectedSession('morning')}
                         >
                             <Sun className="w-5 h-5 mr-2" />
@@ -213,6 +251,7 @@ export default function TakeAttendancePage() {
                         <Button
                             variant={selectedSession === 'afternoon' ? 'default' : 'outline'}
                             className="h-14"
+                            disabled={!!editId}
                             onClick={() => setSelectedSession('afternoon')}
                         >
                             <Sunset className="w-5 h-5 mr-2" />
@@ -222,7 +261,7 @@ export default function TakeAttendancePage() {
                 </div>
 
                 {/* Duplicate Error */}
-                {duplicateError && (
+                {duplicateError && !editId && (
                     <Card className="border-destructive bg-destructive/10">
                         <CardContent className="p-4 flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 text-destructive" />
@@ -234,7 +273,7 @@ export default function TakeAttendancePage() {
                 )}
 
                 {/* Mark Absent Section */}
-                {selectedClass && !duplicateError && (
+                {selectedClass && (!duplicateError || !!editId) && (
                     <>
                         <Card variant="elevated">
                             <CardContent className="p-4">
@@ -338,10 +377,10 @@ export default function TakeAttendancePage() {
                             variant="touch"
                             className="w-full"
                             onClick={handleSubmit}
-                            disabled={isSubmitting || duplicateError}
+                            disabled={isSubmitting || (duplicateError && !editId)}
                         >
                             <Check className="w-5 h-5 mr-2" />
-                            {isSubmitting ? 'Submitting...' : 'Submit Attendance'}
+                            {isSubmitting ? (editId ? 'Updating...' : 'Submitting...') : (editId ? 'Update Attendance' : 'Submit Attendance')}
                         </Button>
                     </>
                 )}
