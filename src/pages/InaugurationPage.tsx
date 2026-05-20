@@ -45,18 +45,18 @@ const InaugurationPage = () => {
         requestAnimationFrame(frame);
       }
     };
-    
+
     frame();
   };
 
   const handleLaunch = () => {
     setStep('bismillah');
-    
+
     // Bismillah screen for 3 seconds
     setTimeout(() => {
       setStep('loading');
       triggerConfetti();
-      
+
       // Loading progress 0-100 over 3.5 seconds
       let currentProgress = 0;
       const interval = setInterval(() => {
@@ -64,7 +64,7 @@ const InaugurationPage = () => {
         if (currentProgress >= 100) {
           currentProgress = 100;
           clearInterval(interval);
-          
+
           setTimeout(() => {
             setStep('done');
             localStorage.setItem('dhic_portal_inaugurated', 'true');
@@ -76,7 +76,7 @@ const InaugurationPage = () => {
         }
         setProgress(currentProgress);
       }, 80);
-      
+
     }, 3000);
   };
 
@@ -84,7 +84,7 @@ const InaugurationPage = () => {
     <div className="min-h-screen bg-[#f3f2eb] dark:bg-background text-foreground flex flex-col items-center justify-center relative overflow-hidden font-sans select-none">
       <AnimatePresence mode="wait">
         {step === 'idle' && (
-          <motion.div 
+          <motion.div
             key="idle"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -94,7 +94,7 @@ const InaugurationPage = () => {
           >
             {/* Top/Center content container */}
             <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-16 gap-12 lg:gap-20">
-              
+
               {/* Left Column */}
               <div className="flex-1 flex flex-col items-start text-left max-w-2xl">
                 {/* Logo Area */}
@@ -116,18 +116,18 @@ const InaugurationPage = () => {
                 <div className="uppercase tracking-[0.25em] text-[#0f766e] font-bold text-xs mb-5">
                   Digital Inauguration
                 </div>
-                
+
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-[#1a202c] dark:text-white mb-6 leading-[1.1] tracking-tight">
                   Official Launching<br />Ceremony
                 </h1>
-                
+
                 <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-lg leading-relaxed">
                   Witness the digital transformation of DHIC Portal infrastructure, officially inaugurated by:
                 </p>
 
                 {/* Inaugurator Card */}
                 <div className="bg-white dark:bg-card border-l-[3px] border-l-[#0f766e] rounded-xl shadow-sm py-5 px-6 flex flex-col w-full max-w-md">
-                  <h3 className="text-xl font-bold text-[#1a202c] dark:text-white">Sayyid Ali Ba'alawi Thangal</h3>
+                  <h3 className="text-xl font-bold text-[#1a202c] dark:text-white">Sayyid Ali Ba'alawi Nadwi Thangal</h3>
                   <p className="text-[13px] text-slate-500 font-semibold mt-1">Principal, Darul Hasanath Islamic College</p>
                 </div>
               </div>
@@ -136,8 +136,8 @@ const InaugurationPage = () => {
               <div className="flex-1 flex justify-center lg:justify-end w-full relative">
                 <div className="relative w-full max-w-[420px] aspect-[4/4.5] rounded-[2rem] overflow-hidden bg-slate-100 border-[6px] border-white dark:border-card shadow-xl flex items-center justify-center">
                   {/* Image */}
-                  <img src="/principal.jpg" alt="Sayyid Ali Ba'alawi Thangal" className="w-full h-full object-cover" />
-                  
+                  <img src="/principal.jpeg" alt="Sayyid Ali Ba'alawi Thangal" className="w-full h-full object-cover" />
+
                   {/* Badge */}
                   <div className="absolute bottom-6 left-6 bg-white dark:bg-card px-4 py-2 rounded-full shadow-md flex items-center gap-2">
                     <ShieldCheck className="w-[14px] h-[14px] text-[#0f766e]" />
@@ -153,7 +153,7 @@ const InaugurationPage = () => {
               <p className="text-[10px] font-bold tracking-[0.25em] text-slate-500 mb-5 uppercase">
                 Proceed to the Digital Interface
               </p>
-              
+
               <Button
                 onClick={handleLaunch}
                 className="group bg-[#14b8a6] hover:bg-[#0d9488] text-white px-14 py-8 rounded-full text-xl font-bold shadow-xl shadow-[#14b8a6]/25 transition-all hover:scale-105"
@@ -206,19 +206,19 @@ const InaugurationPage = () => {
             className="absolute inset-0 flex flex-col items-center justify-center bg-[#f3f2eb] dark:bg-background z-50"
           >
             <div className="w-full max-w-md px-8 flex flex-col items-center">
-              <motion.div 
+              <motion.div
                 animate={{ scale: [1, 1.05, 1], boxShadow: ["0 0 0 rgba(20,184,166,0)", "0 0 20px rgba(20,184,166,0.3)", "0 0 0 rgba(20,184,166,0)"] }}
                 transition={{ repeat: Infinity, duration: 2 }}
                 className="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center mb-10"
               >
                 <span className="text-4xl font-bold text-[#0f766e]">DH</span>
               </motion.div>
-              
+
               <h2 className="text-2xl md:text-3xl font-black text-[#1a202c] dark:text-white mb-3">DHIC Portal is Loading</h2>
               <p className="text-slate-500 font-medium tracking-wide mb-10">Preparing your digital ecosystem...</p>
-              
+
               <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 mb-6 overflow-hidden relative shadow-inner">
-                <motion.div 
+                <motion.div
                   className="h-full bg-[#14b8a6] rounded-full relative overflow-hidden"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
@@ -227,7 +227,7 @@ const InaugurationPage = () => {
                   <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent)', backgroundSize: '1rem 1rem' }}></div>
                 </motion.div>
               </div>
-              
+
               <div className="text-5xl font-black text-[#0f766e] tabular-nums tracking-tighter">
                 {progress}%
               </div>
