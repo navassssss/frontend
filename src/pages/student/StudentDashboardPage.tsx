@@ -8,6 +8,8 @@ import { useStudentAuth } from '@/contexts/StudentAuthContext';
 import StudentLayout from '@/components/student/StudentLayout';
 import api from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
+import { usePWA } from '@/hooks/usePWA';
+import { NotificationToggle, InstallButton } from '@/components/pwa/PWAPrompt';
 
 
 interface Achievement {
@@ -25,6 +27,7 @@ export default function StudentDashboardPage() {
     const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([]);
     const [pendingCount, setPendingCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const { notificationPermission, isInstallable, isInstalled } = usePWA();
 
     useEffect(() => {
         (async () => {
@@ -160,6 +163,25 @@ export default function StudentDashboardPage() {
                         ))}
                     </div>
                 </div>
+
+                {/* ═══════════════════════════════════════
+                    DEVICE SETUP (Shown only if needed)
+                ═══════════════════════════════════════ */}
+                {(notificationPermission === 'default' || (isInstallable && !isInstalled)) && (
+                    <div className="bg-amber-50/50 rounded-2xl p-4 border border-amber-100 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="flex h-2 w-2 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                            </span>
+                            <h3 className="font-black text-amber-900 text-sm uppercase tracking-widest">Device Setup Recommended</h3>
+                        </div>
+                        <div className="space-y-2">
+                            {notificationPermission === 'default' && <NotificationToggle />}
+                            {isInstallable && !isInstalled && <InstallButton />}
+                        </div>
+                    </div>
+                )}
 
                 {/* ═══════════════════════════════════════
                     PROGRESS TO NEXT STAR

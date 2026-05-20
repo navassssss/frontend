@@ -9,7 +9,6 @@ import { format } from 'date-fns';
 import api from '@/lib/api';
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
 
-const POINTS_PER_STAR = 20;
 type FilterType = 'all' | 'approved' | 'pending' | 'rejected';
 
 interface Achievement {
@@ -50,6 +49,10 @@ export default function StudentAchievementsPage() {
     const filtered = achievements.filter(a => filter === 'all' || a.status === filter);
     const totalPoints = student?.totalPoints || 0;
     const stars = student?.stars || 0;
+    
+    const sp = student?.starProgress;
+    const pointsToNext = sp?.pointsToNextStar ?? (20 - (totalPoints % 20));
+    const progressPct = sp?.progressPct ?? Math.round(((totalPoints % 20) / 20) * 100);
 
     const filters: { value: FilterType; label: string; count: number }[] = [
         { value: 'all',      label: 'All',      count: achievements.length },
@@ -79,7 +82,7 @@ export default function StudentAchievementsPage() {
                             <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200">Total Points Earned</p>
                             <p className="text-4xl font-black mt-1">{totalPoints}</p>
                             <p className="text-[11px] text-emerald-100 mt-2">
-                                {POINTS_PER_STAR - (totalPoints % POINTS_PER_STAR)} more pts to next star
+                                {pointsToNext} more pts to next star
                             </p>
                         </div>
                         <div className="flex gap-1">
@@ -93,7 +96,7 @@ export default function StudentAchievementsPage() {
                     <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-white rounded-full transition-all duration-1000"
-                            style={{ width: `${Math.round(((totalPoints % POINTS_PER_STAR) / POINTS_PER_STAR) * 100)}%` }}
+                            style={{ width: `${progressPct}%` }}
                         />
                     </div>
                 </div>

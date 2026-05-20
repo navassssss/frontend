@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
+import { NotificationToggle, InstallButton } from '@/components/pwa/PWAPrompt';
 
 interface Transaction {
   id: number;
@@ -157,6 +158,16 @@ export default function StudentProfilePage() {
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </CardContent>
           </Card>
+        </div>
+
+        {/* Settings & Preferences */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground px-1">SETTINGS</h3>
+          
+          <div className="space-y-3">
+            <NotificationToggle />
+            <InstallButton />
+          </div>
         </div>
 
         {/* Logout */}

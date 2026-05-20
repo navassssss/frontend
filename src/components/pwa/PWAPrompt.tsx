@@ -116,34 +116,7 @@ export function PWAPrompt() {
         </div>
       )}
 
-      {/* ── Push Notification Prompt ── */}
-      {notificationPermission === 'default' && !notifDismissed && (
-        <div className="fixed bottom-24 left-4 right-4 z-[200] animate-slide-up">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl flex gap-3 items-center">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
-              <BellRing className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-black text-sm text-slate-800">Enable Notifications</p>
-              <p className="text-xs text-slate-500">Stay updated with tasks, duties & announcements</p>
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <button
-                onClick={() => setNotifDismissed(true)}
-                className="text-xs text-slate-500 hover:text-slate-700 font-semibold px-2"
-              >
-                Skip
-              </button>
-              <button
-                onClick={requestPushPermission}
-                className="text-xs bg-blue-600 text-white font-black px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors"
-              >
-                Allow
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Push Notification Prompt removed to prevent spam blocking ── */}
 
       {/* ── Notification enabled confirmation ── */}
       {notificationPermission === 'granted' && isInstalled && !notifDismissed && (
