@@ -1,8 +1,9 @@
-import { Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText, BookOpen, IndianRupee, GraduationCap, LayoutDashboard, Calendar, DoorOpen } from 'lucide-react';
+import { Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText, BookOpen, IndianRupee, GraduationCap, LayoutDashboard, Calendar, DoorOpen, Stethoscope, Menu } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import api from '@/lib/api';
 
 interface NavItem {
@@ -45,13 +46,27 @@ export function BottomNav() {
   if (isPrincipal) navItems = principalNavItems;
   if (isManager) navItems = managerNavItems;
 
-  // Plain class teachers get a "My Class" shortcut in the bottom bar
+  // Plain class teachers logic
   const isPlainTeacher = user?.role === 'teacher' && !user?.is_vice_principal;
   if (isPlainTeacher) {
-    navItems = [
-      ...baseNavItems.slice(0, 4),
-      { icon: Users, label: 'My Class', path: '/classes' },
+    const hasPermission = (name: string) => (user as any)?.permissions?.some((p: any) => p.name === name) || false;
+
+    let items = [
+      { icon: Home, label: 'Home', path: '/dashboard' },
+      { icon: Calendar, label: 'Attendance', path: '/attendance' },
+      { icon: BookOpen, label: 'CCE', path: '/cce/works' },
     ];
+
+    if ((user as any)?.is_class_teacher) items.push({ icon: Users, label: 'My Class', path: '/classes' });
+    if (hasPermission('manage_medical')) items.push({ icon: Stethoscope, label: 'Medical', path: '/medical' });
+    if (hasPermission('manage_outpasses')) items.push({ icon: DoorOpen, label: 'Outpasses', path: '/outpasses' });
+    if (hasPermission('manage_attendance')) items.push({ icon: FileText, label: 'Reports', path: '/attendance/reports' });
+
+    // Fill remaining slots with default items up to 5 if needed
+    if (items.length < 5) items.push({ icon: CheckSquare, label: 'Tasks', path: '/tasks' });
+    if (items.length < 5) items.push({ icon: AlertCircle, label: 'Issues', path: '/issues' });
+
+    navItems = items;
   }
 
 
@@ -91,7 +106,7 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border bottom-nav-height z-50">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
-        {navItems.map((item) => (
+        {navItems.slice(0, navItems.length > 5 ? 4 : 5).map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -110,6 +125,37 @@ export function BottomNav() {
             )}
           </NavLink>
         ))}
+
+        {navItems.length > 5 && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className={cn(
+                "flex flex-col items-center justify-center flex-1 h-full py-2 px-1 rounded-xl transition-all duration-200 relative",
+                "text-muted-foreground hover:text-primary focus:outline-none"
+              )}>
+                <Menu className="w-6 h-6 mb-1" />
+                <span className="text-[10px] font-medium">Menu</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-[2rem] p-6 pb-12 sm:max-w-md mx-auto h-[60vh] max-h-[400px]">
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-left text-xl font-bold">More Modules</SheetTitle>
+              </SheetHeader>
+              <div className="grid grid-cols-4 gap-4">
+                {navItems.slice(4).map(item => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-emerald-50 transition-colors"
+                  >
+                    <item.icon className="w-6 h-6 text-slate-600" strokeWidth={1.5} />
+                    <span className="text-[11px] font-semibold text-slate-700 text-center">{item.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
     </nav>
   );

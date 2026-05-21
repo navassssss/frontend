@@ -76,7 +76,7 @@ export default function MedicalPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const canView = user?.role === 'principal' || user?.role === 'teacher';
-  const canManage = user?.role === 'principal' ||
+  const canDelete = user?.role === 'principal' ||
     (user as any)?.permissions?.some((p: any) => p.name === 'manage_medical');
 
   /* data */
@@ -263,7 +263,7 @@ export default function MedicalPage() {
             >
               <Filter className="w-5 h-5" />
             </Button>
-            {canManage && (
+            {canView && (
               <Button
                 id="btn-add-medical"
                 onClick={() => setShowForm(true)}
@@ -360,7 +360,7 @@ export default function MedicalPage() {
                     key={rec.id}
                     record={rec}
                     loading={actionId === rec.id}
-                    canManage={canManage}
+                    canManage={canView}
                     onRecover={() => handleRecover(rec.id)}
                     onSentHome={() => handleSentHome(rec.id)}
                     onToggleDoctor={() => handleToggleDoctor(rec.id)}
@@ -489,7 +489,7 @@ export default function MedicalPage() {
                           </div>
                         </div>
                       </div>
-                      {canManage && (
+                      {canDelete && (
                         <Button
                           variant="ghost"
                           size="icon"

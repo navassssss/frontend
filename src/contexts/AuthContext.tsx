@@ -13,6 +13,7 @@ interface User {
   department?: string;
   bio?: string;
   is_vice_principal?: boolean;
+  is_class_teacher?: boolean;
   permissions?: { id: number, name: string, label: string }[];
 }
 

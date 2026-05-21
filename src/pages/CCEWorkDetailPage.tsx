@@ -82,6 +82,7 @@ interface WorkDetail {
     week: number;
     subjectName: string;
     className: string;
+    teacherId: number;
     toolMethod: string;
     issuedDate: string;
     dueDate: string;
@@ -135,7 +136,9 @@ export default function CCEWorkDetailPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const { user } = useAuth();
-    const canManage = user?.role === 'principal' || user?.role === 'teacher' || (user as any)?.permissions?.some((p: any) => p.name === 'manage_cce');
+    const canManage = user?.role === 'principal' || 
+        (user as any)?.permissions?.some((p: any) => p.name === 'manage_cce') || 
+        (user?.role === 'teacher' && work?.teacherId === user?.id);
 
     // Filter & Sort State
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'evaluated'>('all');

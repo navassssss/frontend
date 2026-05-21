@@ -118,10 +118,11 @@ export function Sidebar() {
         if (hasPermission('manage_teachers')) extendedItems.push({ icon: Briefcase, label: 'Staff', path: '/teachers' });
         if (hasPermission('manage_cce')) extendedItems.push({ icon: BookOpen, label: 'Subjects', path: '/subjects' });
         if (hasPermission('manage_reports')) extendedItems.push({ icon: FileText, label: 'Reports', path: '/reports' });
+        if (hasPermission('manage_attendance')) extendedItems.push({ icon: Calendar, label: 'Attendance Reports', path: '/attendance/reports' });
         if (hasPermission('manage_announcements')) extendedItems.push({ icon: Megaphone, label: 'Announcements', path: '/announcements' });
         if (hasPermission('manage_medical')) extendedItems.push({ icon: Stethoscope, label: 'Medical', path: '/medical' });
         if (hasPermission('manage_outpasses')) extendedItems.push({ icon: DoorOpen, label: 'Outpasses', path: '/outpasses' });
-        extendedItems.push({ icon: Building2, label: 'My Class', path: '/classes' });
+        if ((user as any)?.is_class_teacher) extendedItems.push({ icon: Building2, label: 'My Class', path: '/classes' });
 
         navItems.splice(navItems.length, 0, ...extendedItems);
     }
