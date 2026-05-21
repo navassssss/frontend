@@ -77,7 +77,7 @@ export default function AttendanceReportsPage() {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Operational Attendance</h1>
+                        <h1 className="text-2xl font-bold text-foreground">Attendance Reports</h1>
                         <p className="text-[11px] text-muted-foreground mt-0.5">Principal Control Panel</p>
                     </div>
                 </div>
@@ -114,7 +114,7 @@ export default function AttendanceReportsPage() {
 
                 {/* 6/6 Split Layout for Sections 2 & 3 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                    
+
                     {/* Section 2: Official Attendance */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between mb-1">
@@ -126,7 +126,7 @@ export default function AttendanceReportsPage() {
                                 Approved Absences Only
                             </Badge>
                         </div>
-                        
+
                         <div className="bg-card border rounded-md shadow-sm overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-sm">
@@ -176,7 +176,7 @@ export default function AttendanceReportsPage() {
                                     Action Layer
                                 </Badge>
                             </div>
-                            
+
                             <Tabs value={session} onValueChange={(v) => setSession(v as 'FN' | 'AN')} className="w-fit">
                                 <TabsList className="grid w-[90px] grid-cols-2 h-7 p-0.5">
                                     <TabsTrigger value="FN" className="text-[11px] font-bold h-full">FN</TabsTrigger>
@@ -184,7 +184,7 @@ export default function AttendanceReportsPage() {
                                 </TabsList>
                             </Tabs>
                         </div>
-                        
+
                         <div className="bg-card border rounded-md shadow-sm divide-y divide-border/60">
                             {classAttendance.length === 0 ? (
                                 <div className="p-5 text-center text-[12px] text-muted-foreground">
@@ -206,11 +206,10 @@ export default function AttendanceReportsPage() {
                                                 <div key={student.id} className="flex items-center justify-between text-[13px] py-1 border-b border-border/20 last:border-0">
                                                     <span className="font-medium text-foreground">{student.name}</span>
                                                     {/* Subtle Indicator Marker */}
-                                                    <span className={`w-[22px] h-[22px] flex items-center justify-center rounded-sm text-[10px] font-bold shrink-0 ${
-                                                        student.marker === 'M' ? 'bg-blue-50 text-blue-700 border border-blue-200/50' :
-                                                        student.marker === 'O' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' :
-                                                        'bg-red-50 text-red-700 border border-red-200/50'
-                                                    }`}>
+                                                    <span className={`w-[22px] h-[22px] flex items-center justify-center rounded-sm text-[10px] font-bold shrink-0 ${student.marker === 'M' ? 'bg-blue-50 text-blue-700 border border-blue-200/50' :
+                                                            student.marker === 'O' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' :
+                                                                'bg-red-50 text-red-700 border border-red-200/50'
+                                                        }`}>
                                                         {student.marker}
                                                     </span>
                                                 </div>
@@ -220,7 +219,7 @@ export default function AttendanceReportsPage() {
                                 ))
                             )}
                         </div>
-                        
+
                         {/* Compact Marker Legend */}
                         <div className="flex items-center gap-4 mt-3 px-1 text-[9px] text-muted-foreground font-bold uppercase tracking-wider">
                             <span className="flex items-center gap-1.5">
