@@ -17,6 +17,7 @@ import {
   GraduationCap,
   ArrowRight,
   Activity,
+  DoorOpen,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -48,6 +49,7 @@ const teacherQuickActions = [
   { title: 'Attendance', description: 'Mark daily attendance', icon: Calendar, path: '/attendance', color: 'text-blue-500', bg: 'bg-blue-50' },
   { title: 'CCE Works', description: 'Manage assignments', icon: BookOpen, path: '/cce/works', color: 'text-amber-500', bg: 'bg-amber-50' },
   { title: 'Medical', description: 'Manage sick bay', icon: Activity, path: '/medical', color: 'text-rose-500', bg: 'bg-rose-50' },
+  { title: 'Outpasses', description: 'View gate passes', icon: DoorOpen, path: '/outpasses', color: 'text-sky-500', bg: 'bg-sky-50' },
   { title: 'My Duties', description: '3 active duties', icon: ClipboardList, path: '/duties', color: 'text-primary', bg: 'bg-primary/10' },
   { title: 'My Tasks', description: '5 pending today', icon: CheckSquare, path: '/tasks', color: 'text-emerald-500', bg: 'bg-emerald-50' },
   { title: 'Raise Issue', description: 'Report a problem', icon: AlertCircle, path: '/issues/new', color: 'text-red-500', bg: 'bg-red-50' },
@@ -69,6 +71,18 @@ const principalQuickActions = [
 const managerQuickActions = [
   { title: 'Donations', description: 'Manage fees', icon: TrendingUp, path: '/fees', color: 'text-emerald-500', bg: 'bg-emerald-50' },
   { title: 'All Issues', description: 'Open issues', icon: AlertCircle, path: '/issues', color: 'text-red-500', bg: 'bg-red-50' },
+];
+
+const principalMobileQuickActions = [
+  { title: 'Subjects', description: 'Manage subjects', icon: BookOpen, path: '/subjects', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { title: 'Classes', description: 'Manage classes', icon: Users, path: '/classes', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { title: 'CCE Works', description: 'Manage assignments', icon: BookOpen, path: '/cce/works', color: 'text-amber-500', bg: 'bg-amber-50' },
+  { title: 'Student Marks', description: 'View CCE marks', icon: Award, path: '/cce/student-marks', color: 'text-primary', bg: 'bg-primary/10' },
+  { title: 'Teachers', description: 'Manage staff', icon: Users, path: '/teachers', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+  { title: 'Create Duty', description: 'Add new duty', icon: ClipboardList, path: '/duties/new', color: 'text-orange-500', bg: 'bg-orange-50' },
+  { title: 'Achievements', description: 'Review students', icon: Trophy, path: '/student-achievements', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+  { title: 'Medical', description: 'Manage sick bay', icon: Activity, path: '/medical', color: 'text-rose-500', bg: 'bg-rose-50' },
+  { title: 'Donations', description: 'Manage fees', icon: TrendingUp, path: '/fees', color: 'text-emerald-500', bg: 'bg-emerald-50' },
 ];
 
 const getIcon = (iconName: string) => {
@@ -159,7 +173,7 @@ export default function DashboardPage() {
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</h3>
           <div className="grid grid-cols-3 gap-3">
-            {quickActions.slice(0, 6).map((action) => (
+            {(isPrincipal ? principalMobileQuickActions : quickActions.slice(0, 6)).map((action) => (
               <button
                 key={action.title}
                 onClick={() => navigate(action.path)}

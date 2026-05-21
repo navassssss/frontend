@@ -25,6 +25,7 @@ const principalNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: GraduationCap, label: 'Students', path: '/students' },
   { icon: DoorOpen, label: 'Outpasses', path: '/outpasses' },
+  { icon: Calendar, label: 'Att. Reports', path: '/attendance/reports' },
   { icon: AlertCircle, label: 'Issues', path: '/issues', showBadge: true },
   { icon: FileText, label: 'Reports', path: '/reports' },
 ];
