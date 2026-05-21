@@ -75,7 +75,8 @@ const statusCfg = {
 export default function MedicalPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const canAccess = user?.role === 'principal' ||
+  const canView = user?.role === 'principal' || user?.role === 'teacher';
+  const canManage = user?.role === 'principal' ||
     (user as any)?.permissions?.some((p: any) => p.name === 'manage_medical');
 
   /* data */
@@ -121,7 +122,7 @@ export default function MedicalPage() {
     }).then(r => setHistory(Array.isArray(r.data) ? r.data : (r.data?.data ?? []))), [histSearch, historySort, historyFilter]);
 
   useEffect(() => {
-    if (!canAccess) return;
+    if (!canView) return;
     Promise.all([
       loadActive(),
       api.get('/students', { params: { per_page: 200 } }).then(r => {
@@ -136,11 +137,11 @@ export default function MedicalPage() {
     ])
       .catch(() => toast.error('Failed to load data'))
       .finally(() => setLoading(false));
-  }, [canAccess]);
+  }, [canView]);
 
   useEffect(() => {
-    if (tab === 'history' && canAccess) loadHistory();
-  }, [tab, histSearch, historySort, historyFilter, canAccess]);
+    if (tab === 'history' && canView) loadHistory();
+  }, [tab, histSearch, historySort, historyFilter, canView]);
 
   /* ── Submit new record ── */
   const handleSubmit = async () => {
@@ -227,7 +228,7 @@ export default function MedicalPage() {
   ).slice(0, 8);
 
   /* ── Access guard ── */
-  if (!canAccess) {
+  if (!canView) {
     return (
       <AppLayout title="Medical">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
@@ -262,13 +263,15 @@ export default function MedicalPage() {
             >
               <Filter className="w-5 h-5" />
             </Button>
-            <Button
-              id="btn-add-medical"
-              onClick={() => setShowForm(true)}
-              className="h-12 px-6 rounded-2xl gap-2 bg-[#00865B] hover:bg-[#00704c] text-white shadow-md border-0 transition-all font-semibold"
-            >
-              <Plus className="w-5 h-5" /> Add Record
-            </Button>
+            {canManage && (
+              <Button
+                id="btn-add-medical"
+                onClick={() => setShowForm(true)}
+                className="h-12 px-6 rounded-2xl gap-2 bg-[#00865B] hover:bg-[#00704c] text-white shadow-md border-0 transition-all font-semibold"
+              >
+                <Plus className="w-5 h-5" /> Add Record
+              </Button>
+            )}
           </div>
         </div>
 
@@ -357,6 +360,7 @@ export default function MedicalPage() {
                     key={rec.id}
                     record={rec}
                     loading={actionId === rec.id}
+                    canManage={canManage}
                     onRecover={() => handleRecover(rec.id)}
                     onSentHome={() => handleSentHome(rec.id)}
                     onToggleDoctor={() => handleToggleDoctor(rec.id)}
@@ -485,16 +489,18 @@ export default function MedicalPage() {
                           </div>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteHistory(rec.id)}
-                        disabled={actionId === rec.id}
-                        className="h-10 w-10 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-xl shrink-0 transition-colors ml-auto"
-                        title="Delete Record"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </Button>
+                      {canManage && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteHistory(rec.id)}
+                          disabled={actionId === rec.id}
+                          className="h-10 w-10 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-xl shrink-0 transition-colors ml-auto"
+                          title="Delete Record"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -664,10 +670,11 @@ export default function MedicalPage() {
 
 /* ─────────────────────── ActiveCard (Matched to Screenshot) ─────────────────────── */
 function ActiveCard({
-  record, loading, onRecover, onSentHome, onToggleDoctor, delay
+  record, loading, canManage, onRecover, onSentHome, onToggleDoctor, delay
 }: {
   record: MedicalRecord;
   loading: boolean;
+  canManage: boolean;
   onRecover: () => void;
   onSentHome: () => void;
   onToggleDoctor: () => void;
@@ -695,12 +702,14 @@ function ActiveCard({
       <div className="flex-1 min-w-0 lg:col-span-3 flex flex-col gap-2 border-t lg:border-t-0 border-slate-50 pt-3 lg:pt-0">
         <p className="text-[14px] font-bold text-slate-900 truncate" title={record.illness_name}>{record.illness_name}</p>
         <div className={`flex items-center gap-1.5 w-fit pl-2 pr-3 py-1.5 rounded-lg border transition-colors ${record.went_to_doctor ? 'bg-[#00865B]/5 border-[#00865B]/20' : 'bg-slate-50 border-slate-200'}`}>
-          <Switch
-            checked={record.went_to_doctor}
-            onCheckedChange={onToggleDoctor}
-            disabled={loading}
-            className="scale-[0.8] origin-left data-[state=checked]:bg-[#00865B] shadow-sm -ml-0.5"
-          />
+          {canManage && (
+            <Switch
+              checked={record.went_to_doctor}
+              onCheckedChange={onToggleDoctor}
+              disabled={loading}
+              className="scale-[0.8] origin-left data-[state=checked]:bg-[#00865B] shadow-sm -ml-0.5"
+            />
+          )}
           <span className={`text-[10px] font-extrabold uppercase tracking-widest ${record.went_to_doctor ? 'text-[#00865B]' : 'text-slate-500'}`}>
             {record.went_to_doctor ? 'CONSULTED' : 'NOT CONSULTED'}
           </span>
@@ -734,25 +743,33 @@ function ActiveCard({
 
       {/* RIGHT SECTION - Actions */}
       <div className="flex items-center gap-3 lg:col-span-3 border-t lg:border-t-0 border-slate-50 pt-4 lg:pt-0 shrink-0">
-        <Button
-          id={`recover-${record.id}`}
-          size="sm"
-          disabled={loading}
-          onClick={onRecover}
-          className="flex-1 lg:flex-none h-10 px-4 rounded-xl bg-[#00865B] hover:bg-[#00704c] text-white text-[13px] font-bold shadow-sm"
-        >
-          Recovered
-        </Button>
-        <Button
-          id={`sent-home-${record.id}`}
-          size="sm"
-          disabled={loading}
-          onClick={onSentHome}
-          variant="outline"
-          className="flex-1 lg:flex-none h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-[13px] font-bold bg-white"
-        >
-          Sent Home
-        </Button>
+        {canManage ? (
+          <>
+            <Button
+              id={`recover-${record.id}`}
+              size="sm"
+              disabled={loading}
+              onClick={onRecover}
+              className="flex-1 lg:flex-none h-10 px-4 rounded-xl bg-[#00865B] hover:bg-[#00704c] text-white text-[13px] font-bold shadow-sm"
+            >
+              Recovered
+            </Button>
+            <Button
+              id={`sent-home-${record.id}`}
+              size="sm"
+              disabled={loading}
+              onClick={onSentHome}
+              variant="outline"
+              className="flex-1 lg:flex-none h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-[13px] font-bold bg-white"
+            >
+              Sent Home
+            </Button>
+          </>
+        ) : (
+          <div className="flex-1 lg:flex-none text-[12px] font-bold text-slate-400">
+            View Only
+          </div>
+        )}
       </div>
     </div>
   );

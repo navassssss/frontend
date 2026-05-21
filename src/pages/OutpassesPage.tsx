@@ -309,9 +309,10 @@ interface OutpassCardProps {
     loadingActionId: number | null;
     delay: number;
     tab: 'active' | 'history';
+    canManage: boolean;
 }
 
-function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, delay, tab }: OutpassCardProps) {
+function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, delay, tab, canManage }: OutpassCardProps) {
     const isActionable = outpass.status !== 'returned';
     const isProcessing = loadingActionId === outpass.id;
 
@@ -417,39 +418,41 @@ function OutpassCard({ outpass, onCheckin, onRevert, onDelete, loadingActionId, 
 
             {/* RIGHT SECTION - Actions */}
             <div className="flex items-center justify-end gap-2 lg:col-span-2 border-t lg:border-t-0 border-slate-50 pt-4 lg:pt-0 shrink-0">
-                {isActionable ? (
-                    <Button
-                        size="sm"
-                        disabled={isProcessing}
-                        onClick={() => onCheckin(outpass.id)}
-                        className="w-full lg:w-auto h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold shadow-sm"
-                    >
-                        <LogIn className="w-4 h-4 mr-2" />
-                        {isProcessing ? 'Saving...' : 'Return'}
-                    </Button>
-                ) : (
-                    <div className="flex items-center justify-end gap-2 w-full">
+                {canManage && (
+                    isActionable ? (
                         <Button
-                            variant="outline"
-                            size="icon"
-                            title="Revert to Active"
+                            size="sm"
                             disabled={isProcessing}
-                            onClick={() => onRevert(outpass.id)}
-                            className="h-10 w-10 text-amber-600 bg-amber-50 hover:bg-amber-100 hover:text-amber-700 border-0 rounded-xl shrink-0 transition-colors"
+                            onClick={() => onCheckin(outpass.id)}
+                            className="w-full lg:w-auto h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold shadow-sm"
                         >
-                            <Undo2 className="w-5 h-5" />
+                            <LogIn className="w-4 h-4 mr-2" />
+                            {isProcessing ? 'Saving...' : 'Return'}
                         </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Delete Record"
-                            disabled={isProcessing}
-                            onClick={() => onDelete(outpass.id)}
-                            className="h-10 w-10 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-xl shrink-0 transition-colors"
-                        >
-                            <Trash2 className="w-5 h-5" />
-                        </Button>
-                    </div>
+                    ) : (
+                        <div className="flex items-center justify-end gap-2 w-full">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                title="Revert to Active"
+                                disabled={isProcessing}
+                                onClick={() => onRevert(outpass.id)}
+                                className="h-10 w-10 text-amber-600 bg-amber-50 hover:bg-amber-100 hover:text-amber-700 border-0 rounded-xl shrink-0 transition-colors"
+                            >
+                                <Undo2 className="w-5 h-5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Delete Record"
+                                disabled={isProcessing}
+                                onClick={() => onDelete(outpass.id)}
+                                className="h-10 w-10 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-xl shrink-0 transition-colors"
+                            >
+                                <Trash2 className="w-5 h-5" />
+                            </Button>
+                        </div>
+                    )
                 )}
             </div>
         </div>
@@ -737,6 +740,7 @@ export default function OutpassesPage() {
                                     key={rec.id}
                                     outpass={rec}
                                     tab={tab}
+                                    canManage={canCreate}
                                     loadingActionId={loadingActionId}
                                     onCheckin={handleCheckin}
                                     onRevert={handleRevert}
