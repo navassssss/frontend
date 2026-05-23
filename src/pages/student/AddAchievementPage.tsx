@@ -168,7 +168,7 @@ export default function AddAchievementPage() {
                   <SelectTrigger className="h-auto min-h-[3rem] py-3 [&>span]:line-clamp-none">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[250px]" sideOffset={4}>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id.toString()} className="items-start py-2">
                         <div className="flex flex-col gap-1 text-left whitespace-normal break-words max-w-full">
