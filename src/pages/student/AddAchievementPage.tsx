@@ -57,7 +57,7 @@ export default function AddAchievementPage() {
         toast.error('You can only upload a maximum of 3 files.');
         return;
       }
-      
+
       const validFiles = newFiles.filter(file => {
         if (file.size > 10 * 1024 * 1024) { // 10MB limit
           toast.error(`File ${file.name} exceeds 10MB limit`);
@@ -76,6 +76,7 @@ export default function AddAchievementPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     if (!formData.title.trim()) {
       toast.error('Please enter a title');

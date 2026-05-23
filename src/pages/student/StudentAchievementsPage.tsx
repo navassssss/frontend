@@ -41,7 +41,9 @@ export default function StudentAchievementsPage() {
             try {
                 const res = await api.get('/student/achievements');
                 setAchievements(res.data);
-            } catch { /* silent */ }
+            } catch (err) {
+                console.error('Failed to fetch achievements:', err);
+            }
             finally { setIsLoading(false); }
         })();
     }, []);
