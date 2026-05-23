@@ -165,22 +165,22 @@ export default function AddAchievementPage() {
                   value={formData.categoryId}
                   onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
                 >
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger className="h-auto min-h-[3rem] py-3 [&>span]:line-clamp-none">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name} ({category.points} pts)
+                      <SelectItem key={category.id} value={category.id.toString()} className="items-start py-2">
+                        <div className="flex flex-col gap-1 text-left whitespace-normal break-words max-w-full">
+                          <span className="font-medium">{category.name} ({category.points} pts)</span>
+                          {category.description && (
+                            <span className="text-xs text-muted-foreground leading-snug">{category.description}</span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {selectedCategory && (
-                  <p className="text-xs text-muted-foreground mt-1 ml-1">
-                    {selectedCategory.description}
-                  </p>
-                )}
               </div>
 
               <div className="space-y-2">
