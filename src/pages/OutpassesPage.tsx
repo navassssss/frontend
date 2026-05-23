@@ -476,53 +476,76 @@ export default function OutpassesPage() {
     const [filterDate, setFilterDate] = useState('');
     const [searchStudent, setSearchStudent] = useState('');
 
+    // Pagination state
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        per_page: 20,
+        total: 0,
+    });
+
     const canCreate = user?.role === 'principal'
         || (user?.role === 'teacher' && user?.is_vice_principal)
         || user?.permissions?.some((p: any) => p.name === 'manage_outpasses');
 
-    const loadData = useCallback(async (silent = false) => {
+    const loadData = useCallback(async (page = 1, silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const params: Record<string, string> = {};
+            const params: Record<string, string> = {
+                page: String(page),
+                status: tab === 'active' ? 'outside' : 'returned',
+            };
             if (filterClass !== 'all') params.class_id = filterClass;
             if (filterDate) params.date = filterDate;
+            if (searchStudent.trim()) params.search = searchStudent.trim();
 
             const [statsRes, listRes, classesRes] = await Promise.all([
                 api.get('/outpasses/dashboard'),
-                api.get('/outpasses', { params }), // Fetching all (up to paginate limit)
+                api.get('/outpasses', { params }),
                 api.get('/attendance/classes'),
             ]);
 
             setStats(statsRes.data);
-            const raw: Outpass[] = listRes.data.data ?? listRes.data;
+            const paginatedData = listRes.data;
+            const raw: Outpass[] = paginatedData.data ?? paginatedData;
+
             const order = { overdue: 0, outside: 1, returned: 2 };
             raw.sort((a, b) => {
-                // Active cases come first when mixed
                 if (order[a.status] !== order[b.status]) {
                     return order[a.status] - order[b.status];
                 }
-                // If both are returned, sort by actual_in_time DESC (latest first)
                 if (a.status === 'returned') {
                     return new Date(b.actual_in_time!).getTime() - new Date(a.actual_in_time!).getTime();
                 }
-                // If active, oldest out_time first
-                return new Date(a.out_time).getTime() - new Date(b.out_time).getTime();
+                return new Date(b.out_time).getTime() - new Date(a.out_time).getTime();
             });
+
             setOutpasses(raw);
             setClasses(classesRes.data);
+
+            if (paginatedData.current_page) {
+                setPagination({
+                    current_page: paginatedData.current_page,
+                    last_page: paginatedData.last_page,
+                    per_page: paginatedData.per_page,
+                    total: paginatedData.total,
+                });
+            }
         } catch {
             if (!silent) toast.error('Failed to load outpasses');
         } finally {
             setLoading(false);
         }
-    }, [filterClass, filterDate]);
-
-    useEffect(() => { loadData(); }, [loadData]);
+    }, [tab, filterClass, filterDate, searchStudent]);
 
     useEffect(() => {
-        const id = setInterval(() => loadData(true), 60_000);
-        return () => clearInterval(id);
+        loadData(1);
     }, [loadData]);
+
+    useEffect(() => {
+        const id = setInterval(() => loadData(pagination.current_page, true), 60_000);
+        return () => clearInterval(id);
+    }, [loadData, pagination.current_page]);
 
     const handleCheckin = async (id: number) => {
         if (!window.confirm('Mark this student as returned?')) return;
@@ -530,7 +553,7 @@ export default function OutpassesPage() {
         try {
             await api.put(`/outpasses/${id}/checkin`);
             toast.success('Student marked as returned');
-            loadData();
+            loadData(pagination.current_page);
         } catch {
             toast.error('Failed to check in student');
         } finally {
@@ -544,7 +567,7 @@ export default function OutpassesPage() {
         try {
             await api.put(`/outpasses/${id}/revert`);
             toast.success('Check-in reverted successfully');
-            loadData();
+            loadData(pagination.current_page);
         } catch {
             toast.error('Failed to revert status');
         } finally {
@@ -558,7 +581,7 @@ export default function OutpassesPage() {
         try {
             await api.delete(`/outpasses/${id}`);
             toast.success('Outpass deleted successfully');
-            loadData();
+            loadData(pagination.current_page);
         } catch {
             toast.error('Failed to delete outpass');
         } finally {
@@ -566,17 +589,7 @@ export default function OutpassesPage() {
         }
     };
 
-    const filteredOutpasses = outpasses.filter(op => {
-        if (tab === 'active' && op.status === 'returned') return false;
-        if (tab === 'history' && op.status !== 'returned') return false;
-
-        if (!searchStudent) return true;
-        const q = searchStudent.toLowerCase();
-        return (
-            op.student?.user?.name?.toLowerCase().includes(q) ||
-            op.student?.roll_number?.includes(q)
-        );
-    });
+    const filteredOutpasses = outpasses;
 
     return (
         <AppLayout title="Outpasses">
@@ -749,11 +762,66 @@ export default function OutpassesPage() {
                                 />
                             ))}
                             
-                            <div className="pt-8 pb-4 text-center">
-                                <span className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">
-                                    End of current outpasses
-                                </span>
-                            </div>
+                            {pagination.last_page > 1 ? (
+                                <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-2 animate-fade-in border-t border-slate-100 mt-4">
+                                    <p className="text-[11px] font-semibold text-slate-500">
+                                        Showing <span className="text-slate-900">{(pagination.current_page - 1) * pagination.per_page + 1}</span> to <span className="text-slate-900">{Math.min(pagination.current_page * pagination.per_page, pagination.total)}</span> of <span className="text-slate-900 font-bold">{pagination.total}</span> entries
+                                    </p>
+
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => loadData(pagination.current_page - 1)}
+                                            disabled={pagination.current_page === 1}
+                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold"
+                                        >
+                                            &lt;
+                                        </button>
+
+                                        {Array.from({ length: Math.min(5, pagination.last_page) }).map((_, idx) => {
+                                            const p = idx + 1;
+                                            const isActive = p === pagination.current_page;
+                                            return (
+                                                <button
+                                                    key={p}
+                                                    onClick={() => loadData(p)}
+                                                    className={`w-8 h-8 flex flex-col items-center justify-center rounded-full font-bold text-xs transition-colors ${isActive
+                                                        ? 'bg-amber-600 text-white shadow-sm'
+                                                        : 'bg-transparent text-slate-700 hover:bg-slate-100'
+                                                        }`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            );
+                                        })}
+
+                                        {pagination.last_page > 5 && (
+                                            <>
+                                                <span className="px-1 text-slate-400 font-black tracking-widest text-xs">...</span>
+                                                <button
+                                                    onClick={() => loadData(pagination.last_page)}
+                                                    className={`w-8 h-8 flex flex-col items-center justify-center rounded-full font-bold text-xs transition-colors bg-transparent text-slate-700 hover:bg-slate-100`}
+                                                >
+                                                    {pagination.last_page}
+                                                </button>
+                                            </>
+                                        )}
+
+                                        <button
+                                            onClick={() => loadData(pagination.current_page + 1)}
+                                            disabled={pagination.current_page === pagination.last_page}
+                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold"
+                                        >
+                                            &gt;
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="pt-8 pb-4 text-center">
+                                    <span className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">
+                                        End of current outpasses
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
