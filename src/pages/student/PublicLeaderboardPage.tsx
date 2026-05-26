@@ -271,18 +271,18 @@ export default function PublicLeaderboardPage() {
                                                     )
                                                 })
                                         ) : (
-                                            classData.slice(3)
+                                            classData
                                                 .filter(cls =>
                                                     searchQuery === '' ||
                                                     cls.class_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                                     cls.department?.toLowerCase().includes(searchQuery.toLowerCase())
                                                 )
                                                 .slice(0, isExpanded ? undefined : 10)
-                                                .map((cls, idx) => {
-                                                    const rankNumber = idx + 4;
+                                                .map((cls) => {
+                                                    const rankNumber = cls.rank;
                                                     const isUp = cls.growth >= 0;
                                                     return (
-                                                        <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                                                        <tr key={cls.rank} className="hover:bg-slate-50 transition-colors group">
                                                             <td className="py-4 px-6 text-[14px] font-medium text-slate-300 group-hover:text-slate-400 transition-colors">
                                                                 {rankNumber.toString().padStart(2, '0')}
                                                             </td>
