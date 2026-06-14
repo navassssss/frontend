@@ -101,6 +101,7 @@ export default function StudentAchievementReviewPage() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(searchQuery);
+            setCurrentPage(1);
         }, 300);
         return () => clearTimeout(timer);
     }, [searchQuery]);
@@ -118,7 +119,6 @@ export default function StudentAchievementReviewPage() {
                 }
             });
             setAchievements(response.data.achievements.data);
-            setCurrentPage(response.data.achievements.current_page);
             setLastPage(response.data.achievements.last_page);
             setTotal(response.data.achievements.total);
             setPendingCount(response.data.pending_count);
@@ -139,11 +139,6 @@ export default function StudentAchievementReviewPage() {
             setIsLoading(false);
         }
     };
-
-    // Reset page to 1 when filters or search term changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filter, sort, debouncedSearch, studentId]);
 
     // Fetch achievements when page or filters change
     useEffect(() => {
@@ -284,7 +279,10 @@ export default function StudentAchievementReviewPage() {
                                 key={status}
                                 variant={filter === status ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={() => setFilter(status)}
+                                onClick={() => {
+                                    setCurrentPage(1);
+                                    setFilter(status);
+                                }}
                                 className="capitalize rounded-full px-4"
                             >
                                 {status}
@@ -309,10 +307,22 @@ export default function StudentAchievementReviewPage() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setSort('date_desc')}>Newest First</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSort('date_asc')}>Oldest First</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSort('points_desc')}>High Points</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSort('points_asc')}>Low Points</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                    setCurrentPage(1);
+                                    setSort('date_desc');
+                                }}>Newest First</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                    setCurrentPage(1);
+                                    setSort('date_asc');
+                                }}>Oldest First</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                    setCurrentPage(1);
+                                    setSort('points_desc');
+                                }}>High Points</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                    setCurrentPage(1);
+                                    setSort('points_asc');
+                                }}>Low Points</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
