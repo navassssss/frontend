@@ -135,7 +135,17 @@ export default function PublicLeaderboardPage() {
                                         <h3 className="text-[17px] font-black text-slate-800 mb-1">{studentData[1].name}</h3>
                                         <p className="text-[12px] font-bold text-slate-400 mb-5">{studentData[1].class_name}</p>
                                         <p className="text-2xl font-black text-[#00a67e]">{studentData[1].points.toLocaleString()}</p>
-                                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">MERIT POINTS</p>
+                                        {studentData[1].stars > 0 && (
+                                            <div className="flex items-center justify-center gap-0.5 mt-1.5 mb-0.5">
+                                                {[...Array(Math.min(studentData[1].stars, 5))].map((_, i) => (
+                                                    <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />
+                                                ))}
+                                                {studentData[1].stars > 5 && (
+                                                    <span className="text-[10px] font-bold text-amber-600 ml-1">+{studentData[1].stars - 5}</span>
+                                                )}
+                                            </div>
+                                        )}
+                                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">STAR POINTS</p>
                                     </div>
                                 </div>
 
@@ -157,7 +167,17 @@ export default function PublicLeaderboardPage() {
                                         <h3 className="text-2xl font-black tracking-tight mb-2">{studentData[0].name}</h3>
                                         <p className="text-[13px] font-semibold text-emerald-100 mb-6">{studentData[0].class_name}</p>
                                         <p className="text-[34px] font-black text-white leading-none shadow-sm">{studentData[0].points.toLocaleString()}</p>
-                                        <p className="text-[9px] font-black text-emerald-200 uppercase tracking-widest mt-2">TOTAL MERIT POINTS</p>
+                                        {studentData[0].stars > 0 && (
+                                            <div className="flex items-center justify-center gap-0.5 mt-2 mb-0.5">
+                                                {[...Array(Math.min(studentData[0].stars, 5))].map((_, i) => (
+                                                    <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />
+                                                ))}
+                                                {studentData[0].stars > 5 && (
+                                                    <span className="text-[10px] font-bold text-yellow-300 ml-1">+{studentData[0].stars - 5}</span>
+                                                )}
+                                            </div>
+                                        )}
+                                        <p className="text-[9px] font-black text-emerald-200 uppercase tracking-widest mt-2">TOTAL STAR POINTS</p>
                                     </div>
                                     <Building className="w-6 h-6 text-slate-300 mt-6" />
                                 </div>
@@ -177,7 +197,17 @@ export default function PublicLeaderboardPage() {
                                         <h3 className="text-[17px] font-black text-slate-800 mb-1">{studentData[2].name}</h3>
                                         <p className="text-[12px] font-bold text-slate-400 mb-5">{studentData[2].class_name}</p>
                                         <p className="text-2xl font-black text-[#00a67e]">{studentData[2].points.toLocaleString()}</p>
-                                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">MERIT POINTS</p>
+                                        {studentData[2].stars > 0 && (
+                                            <div className="flex items-center justify-center gap-0.5 mt-1.5 mb-0.5">
+                                                {[...Array(Math.min(studentData[2].stars, 5))].map((_, i) => (
+                                                    <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" />
+                                                ))}
+                                                {studentData[2].stars > 5 && (
+                                                    <span className="text-[10px] font-bold text-amber-600 ml-1">+{studentData[2].stars - 5}</span>
+                                                )}
+                                            </div>
+                                        )}
+                                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1">STAR POINTS</p>
                                     </div>
                                 </div>
                             </div>
@@ -210,9 +240,12 @@ export default function PublicLeaderboardPage() {
                                     <thead>
                                         <tr>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 w-24">RANK</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">STUDENT</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden md:table-cell">CLASS</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden sm:table-cell text-center">PROGRESS</th>
+                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                                                {leaderboardType === 'students' ? 'STUDENT' : 'CLASS'}
+                                            </th>
+                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden md:table-cell">
+                                                {leaderboardType === 'students' ? 'CLASS' : 'DEPARTMENT'}
+                                            </th>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">STAR POINTS</th>
                                         </tr>
                                     </thead>
@@ -227,8 +260,6 @@ export default function PublicLeaderboardPage() {
                                                 )
                                                 .slice(0, isExpanded ? undefined : 10)
                                                 .map((student) => {
-                                                    const isUp = student.growth >= 0;
-                                                    return (
                                                         <tr key={student.rank} className="hover:bg-slate-50 transition-colors group">
                                                             <td className="py-4 px-6 text-[14px] font-medium text-slate-300 group-hover:text-slate-400 transition-colors">
                                                                 {student.rank.toString().padStart(2, '0')}
@@ -247,28 +278,22 @@ export default function PublicLeaderboardPage() {
                                                             <td className="py-4 px-6 hidden md:table-cell">
                                                                 <p className="text-[12px] font-bold text-slate-500">{student.class_name}</p>
                                                             </td>
-                                                            <td className="py-4 px-6 hidden sm:table-cell text-center">
-                                                                <div className="flex flex-col items-center">
-                                                                    <span className={`text-[11px] font-black flex items-center gap-0.5 ${isUp ? 'text-[#00a67e]' : 'text-slate-400'}`}>
-                                                                        {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                                                        {isUp ? '+' : ''}{student.growth}%
-                                                                    </span>
-                                                                    {isUp ? (
-                                                                        <svg className="w-10 h-3 mt-1" viewBox="0 0 40 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path d="M1 10C5 10 8 4 12 4C16 4 19 8 23 8C27 8 30 2 34 2C36 2 38 2 39 4" stroke="#00a67e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
-                                                                        </svg>
-                                                                    ) : (
-                                                                        <svg className="w-10 h-3 mt-1" viewBox="0 0 40 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path d="M1 6H39" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
-                                                                        </svg>
+                                                            <td className="py-4 px-6 text-right">
+                                                                <div className="flex flex-col items-end gap-1">
+                                                                    <span className="text-[15px] font-black text-slate-800">{student.points.toLocaleString()}</span>
+                                                                    {student.stars > 0 && (
+                                                                        <div className="flex items-center gap-0.5">
+                                                                            {[...Array(Math.min(student.stars, 5))].map((_, i) => (
+                                                                                <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-500" />
+                                                                            ))}
+                                                                            {student.stars > 5 && (
+                                                                                <span className="text-[9px] font-black text-amber-600 ml-1">+{student.stars - 5}</span>
+                                                                            )}
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </td>
-                                                            <td className="py-4 px-6 text-right">
-                                                                <span className="text-[15px] font-black text-slate-800">{student.points.toLocaleString()}</span>
-                                                            </td>
                                                         </tr>
-                                                    )
                                                 })
                                         ) : (
                                             classData
@@ -299,14 +324,6 @@ export default function PublicLeaderboardPage() {
                                                             </td>
                                                             <td className="py-4 px-6 hidden md:table-cell">
                                                                 <p className="text-[12px] font-bold text-slate-500">{cls.department}</p>
-                                                            </td>
-                                                            <td className="py-4 px-6 hidden sm:table-cell text-center">
-                                                                <div className="flex flex-col items-center">
-                                                                    <span className={`text-[11px] font-black flex items-center gap-0.5 ${isUp ? 'text-[#00a67e]' : 'text-slate-400'}`}>
-                                                                        {isUp ? <ArrowUpRight className="w-3 h-3" /> : null}
-                                                                        {isUp ? '+' : ''}{cls.growth}%
-                                                                    </span>
-                                                                </div>
                                                             </td>
                                                             <td className="py-4 px-6 text-right">
                                                                 <span className="text-[15px] font-black text-slate-800">{cls.points.toLocaleString()}</span>
