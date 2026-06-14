@@ -260,6 +260,7 @@ export default function PublicLeaderboardPage() {
                                                 )
                                                 .slice(0, isExpanded ? undefined : 10)
                                                 .map((student) => {
+                                                    return (
                                                         <tr key={student.rank} className="hover:bg-slate-50 transition-colors group">
                                                             <td className="py-4 px-6 text-[14px] font-medium text-slate-300 group-hover:text-slate-400 transition-colors">
                                                                 {student.rank.toString().padStart(2, '0')}
@@ -294,6 +295,7 @@ export default function PublicLeaderboardPage() {
                                                                 </div>
                                                             </td>
                                                         </tr>
+                                                    );
                                                 })
                                         ) : (
                                             classData
