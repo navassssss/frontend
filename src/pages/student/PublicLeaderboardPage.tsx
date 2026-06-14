@@ -76,10 +76,10 @@ export default function PublicLeaderboardPage() {
 
                 {/* Title Section */}
                 <div className="text-center mt-6 mb-16 animate-in slide-in-from-bottom-4 duration-700">
-                    <h4 className="text-[#008f6c] text-[10px] uppercase font-black tracking-[0.3em] mb-4">CIVIC ACADEMY ELITE</h4>
-                    <h1 className="text-4xl md:text-[44px] font-black text-slate-800 tracking-tight leading-none mb-4">Scholarly Excellence Leaderboard</h1>
+                    <h4 className="text-[#008f6c] text-[10px] uppercase font-black tracking-[0.3em] mb-4">STUDENT STAR SYSTEM</h4>
+                    <h1 className="text-4xl md:text-[44px] font-black text-slate-800 tracking-tight leading-none mb-4">Excellence Leaderboard</h1>
                     <p className="text-[14px] font-medium text-slate-500 max-w-xl mx-auto leading-relaxed">
-                        Celebrating the intellectual rigor and civic contribution of our top-tier researchers and students.
+                        Recognizing student achievement in academics, co-curricular activities, leadership, creativity, and personal growth.
                     </p>
 
                     <div className="flex justify-center mt-8 inline-flex bg-white rounded-full p-1 shadow-sm border border-slate-100 mx-auto">
@@ -131,7 +131,7 @@ export default function PublicLeaderboardPage() {
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-[2rem] w-full p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] pt-12 -mt-16 relative z-10 border border-white/60">
-                                        <span className="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-full mb-3">HONOR SCHOLAR</span>
+                                        <span className="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-full mb-3">#2 TOP STUDENT</span>
                                         <h3 className="text-[17px] font-black text-slate-800 mb-1">{studentData[1].name}</h3>
                                         <p className="text-[12px] font-bold text-slate-400 mb-5">{studentData[1].class_name}</p>
                                         <p className="text-2xl font-black text-[#00a67e]">{studentData[1].points.toLocaleString()}</p>
@@ -153,7 +153,7 @@ export default function PublicLeaderboardPage() {
                                         </div>
                                     </div>
                                     <div className="bg-[#008f6c] rounded-[2rem] w-full p-8 text-center shadow-[0_20px_40px_rgb(0,143,108,0.2)] pt-14 -mt-20 relative z-10 text-white">
-                                        <span className="inline-block px-4 py-1.5 bg-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-full mb-4 backdrop-blur-sm shadow-sm border border-white/20">🏆 MASTER AMBASSADOR</span>
+                                        <span className="inline-block px-4 py-1.5 bg-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-full mb-4 backdrop-blur-sm shadow-sm border border-white/20">🏆 #1 TOP STUDENT</span>
                                         <h3 className="text-2xl font-black tracking-tight mb-2">{studentData[0].name}</h3>
                                         <p className="text-[13px] font-semibold text-emerald-100 mb-6">{studentData[0].class_name}</p>
                                         <p className="text-[34px] font-black text-white leading-none shadow-sm">{studentData[0].points.toLocaleString()}</p>
@@ -173,7 +173,7 @@ export default function PublicLeaderboardPage() {
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-[2rem] w-full p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] pt-12 -mt-16 relative z-10 border border-white/60">
-                                        <span className="inline-block px-3 py-1 bg-red-50 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-full mb-3">HONOR SCHOLAR</span>
+                                        <span className="inline-block px-3 py-1 bg-red-50 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-full mb-3">#3 TOP STUDENT</span>
                                         <h3 className="text-[17px] font-black text-slate-800 mb-1">{studentData[2].name}</h3>
                                         <p className="text-[12px] font-bold text-slate-400 mb-5">{studentData[2].class_name}</p>
                                         <p className="text-2xl font-black text-[#00a67e]">{studentData[2].points.toLocaleString()}</p>
@@ -190,7 +190,7 @@ export default function PublicLeaderboardPage() {
                                 <div className="relative flex-1 sm:w-64">
                                     <input
                                         type="text"
-                                        placeholder="Filter by name, department or class..."
+                                        placeholder="Search by student name or class..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full bg-white border border-slate-200 text-slate-600 text-[13px] font-medium rounded-xl pl-4 pr-10 py-2.5 focus:outline-none focus:border-[#00a67e] shadow-sm"
@@ -210,10 +210,10 @@ export default function PublicLeaderboardPage() {
                                     <thead>
                                         <tr>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 w-24">RANK</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">SCHOLAR IDENTITY</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden md:table-cell">DEPARTMENT</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden sm:table-cell text-center">GROWTH</th>
-                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">TOTAL POINTS</th>
+                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">STUDENT</th>
+                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden md:table-cell">CLASS</th>
+                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden sm:table-cell text-center">PROGRESS</th>
+                                            <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">STAR POINTS</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
@@ -240,7 +240,7 @@ export default function PublicLeaderboardPage() {
                                                                     </Avatar>
                                                                     <div>
                                                                         <p className="text-[13px] font-black text-slate-800">{student.name}</p>
-                                                                        <p className="text-[11px] font-medium text-slate-400 mt-0.5">Scholar / {student.username}</p>
+                                                                        <p className="text-[11px] font-medium text-slate-400 mt-0.5">ID / {student.username}</p>
                                                                     </div>
                                                                 </div>
                                                             </td>
