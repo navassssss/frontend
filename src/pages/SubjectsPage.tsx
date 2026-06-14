@@ -49,6 +49,7 @@ interface Subject {
     isLocked: boolean;
     assignmentScope?: 'full_class' | 'selected_students' | 'department';
     department?: string;
+    department_id?: number;
     completion_percent?: number;
 }
 
@@ -109,8 +110,9 @@ export default function SubjectsPage() {
         teacher_id: '',
         final_max_marks: '30',
         assignment_scope: 'full_class' as 'full_class' | 'selected_students' | 'department',
-        department: '',
+        department_id: '',
     });
+    const [departments, setDepartments] = useState<{ id: number; name: string }[]>([]);
     const [classStudents, setClassStudents] = useState<StudentOption[]>([]);
     const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
     const [studentSearch, setStudentSearch] = useState('');
@@ -122,14 +124,16 @@ export default function SubjectsPage() {
 
     const loadData = async () => {
         try {
-            const [subjectsRes, classesRes, teachersRes] = await Promise.all([
+            const [subjectsRes, classesRes, teachersRes, departmentsRes] = await Promise.all([
                 api.get('/subjects'),
                 api.get('/attendance/classes'),
-                api.get('/teachers')
+                api.get('/teachers'),
+                api.get('/departments')
             ]);
             setSubjects(subjectsRes.data);
             setClasses(classesRes.data);
             setTeachers(teachersRes.data);
+            setDepartments(departmentsRes.data);
             // Start all class sections collapsed
             const allClassNames: string[] = Array.from(
                 new Set((subjectsRes.data as Subject[]).map((s) => s.className || 'Unassigned'))
@@ -165,7 +169,7 @@ export default function SubjectsPage() {
 
     const openCreateDialog = () => {
         setEditingId(null);
-        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class', department: '' });
+        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class', department_id: '' });
         setSelectedStudentIds([]);
         setClassStudents([]);
         setStudentSearch('');
@@ -181,7 +185,7 @@ export default function SubjectsPage() {
             teacher_id: subject.teacherId ? subject.teacherId.toString() : '',
             final_max_marks: subject.finalMaxMarks.toString(),
             assignment_scope: subject.assignmentScope || 'full_class',
-            department: subject.department || '',
+            department_id: subject.department_id ? subject.department_id.toString() : '',
         });
         setSelectedStudentIds([]);
         setStudentSearch('');
@@ -211,19 +215,20 @@ export default function SubjectsPage() {
             toast.error('Select at least one student for selected-students scope');
             return;
         }
-        if (formData.assignment_scope === 'department' && !formData.department) {
+        if (formData.assignment_scope === 'department' && !formData.department_id) {
             toast.error('Please select a department');
             return;
         }
-        const payload: any = { ...formData };
-        if (formData.assignment_scope === 'selected_students') {
-            payload.student_ids = selectedStudentIds;
-            payload.department = null;
-        } else if (formData.assignment_scope === 'department') {
-            payload.department = formData.department;
-        } else {
-            payload.department = null;
-        }
+        const payload: any = {
+            name: formData.name,
+            code: formData.code,
+            class_id: parseInt(formData.class_id),
+            teacher_id: parseInt(formData.teacher_id),
+            final_max_marks: parseInt(formData.final_max_marks),
+            assignment_scope: formData.assignment_scope,
+            department_id: formData.assignment_scope === 'department' ? parseInt(formData.department_id) : null,
+            student_ids: formData.assignment_scope === 'selected_students' ? selectedStudentIds : [],
+        };
         try {
             if (editingId) {
                 await api.put(`/subjects/${editingId}`, payload);
@@ -234,7 +239,7 @@ export default function SubjectsPage() {
             }
             setShowDialog(false);
             setEditingId(null);
-            setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class', department: '' });
+            setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class', department_id: '' });
             setSelectedStudentIds([]);
             setClassStudents([]);
             loadData();
@@ -717,67 +722,73 @@ export default function SubjectsPage() {
                                         </div>
 
                                         {/* Progressive: Department picker */}
-                                        {formData.assignment_scope === 'department' && (
-                                            <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                <div className="space-y-1.5">
-                                                    <Label className="text-[12px] font-semibold text-slate-600">Department <span className="text-rose-500">*</span></Label>
-                                                    <div className="relative">
-                                                        <select
-                                                            required
-                                                            value={formData.department}
-                                                            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                                            className="
-                                                                w-full h-9 px-3 pr-8
-                                                                text-[13px] font-medium text-slate-700
-                                                                bg-slate-50 border border-slate-200 rounded-lg
-                                                                appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white
-                                                                transition-colors
-                                                            "
-                                                        >
-                                                            <option value="">Select a department…</option>
-                                                            <option value="Civilizational Studies">Civilizational Studies</option>
-                                                            <option value="Hadith & Related Sciences">Hadith & Related Sciences</option>
-                                                        </select>
-                                                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Students matching this department in the selected class */}
-                                                {formData.department && (
-                                                    <div className="space-y-1.5 animate-in fade-in duration-200">
-                                                        <Label className="text-[12px] font-semibold text-slate-600 flex items-center gap-1.5">
-                                                            <Users className="w-3.5 h-3.5" />
-                                                            Students in {formData.department}
-                                                            {formData.class_id && (
-                                                                <span className="ml-auto text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">
-                                                                    {classStudents.filter(s => s.department === formData.department).length} matching
-                                                                </span>
-                                                            )}
-                                                        </Label>
-                                                        {!formData.class_id ? (
-                                                            <p className="text-[12px] text-slate-400 bg-slate-50 rounded-lg px-3 py-2.5 border border-dashed border-slate-200">
-                                                                Select a class first to load students.
-                                                            </p>
-                                                        ) : loadingStudents ? (
-                                                            <p className="text-[12px] text-slate-400 animate-pulse px-3 py-2">Loading students…</p>
-                                                        ) : (
-                                                            <div className="border border-slate-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto divide-y divide-slate-50 bg-white">
-                                                                {classStudents.filter(s => s.department === formData.department).map(s => (
-                                                                    <div key={s.id} className="flex items-center gap-3 px-3 py-2 bg-slate-50/40">
-                                                                        <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-                                                                        <span className="text-[12px] font-medium text-slate-700 truncate flex-1">{s.name}</span>
-                                                                        <span className="text-[11px] text-slate-400 font-mono shrink-0">#{s.username}</span>
-                                                                    </div>
+                                        {formData.assignment_scope === 'department' && (() => {
+                                            const selectedDeptName = departments.find(d => d.id.toString() === formData.department_id)?.name || '';
+                                            return (
+                                                <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-[12px] font-semibold text-slate-600">Department <span className="text-rose-500">*</span></Label>
+                                                        <div className="relative">
+                                                            <select
+                                                                required
+                                                                value={formData.department_id}
+                                                                onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
+                                                                className="
+                                                                    w-full h-9 px-3 pr-8
+                                                                    text-[13px] font-medium text-slate-700
+                                                                    bg-slate-50 border border-slate-200 rounded-lg
+                                                                    appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white
+                                                                    transition-colors
+                                                                "
+                                                            >
+                                                                <option value="">Select a department…</option>
+                                                                {departments.map((dept) => (
+                                                                    <option key={dept.id} value={dept.id.toString()}>
+                                                                        {dept.name}
+                                                                    </option>
                                                                 ))}
-                                                                {classStudents.filter(s => s.department === formData.department).length === 0 && (
-                                                                    <p className="text-center text-[12px] text-slate-400 py-5">No students in this department for the selected class.</p>
-                                                                )}
-                                                            </div>
-                                                        )}
+                                                            </select>
+                                                            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                                                        </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                        )}
+
+                                                    {/* Students matching this department in the selected class */}
+                                                    {formData.department_id && (
+                                                        <div className="space-y-1.5 animate-in fade-in duration-200">
+                                                            <Label className="text-[12px] font-semibold text-slate-600 flex items-center gap-1.5">
+                                                                <Users className="w-3.5 h-3.5" />
+                                                                Students in {selectedDeptName}
+                                                                {formData.class_id && (
+                                                                    <span className="ml-auto text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">
+                                                                        {classStudents.filter(s => s.department === selectedDeptName).length} matching
+                                                                    </span>
+                                                                )}
+                                                            </Label>
+                                                            {!formData.class_id ? (
+                                                                <p className="text-[12px] text-slate-400 bg-slate-50 rounded-lg px-3 py-2.5 border border-dashed border-slate-200">
+                                                                    Select a class first to load students.
+                                                                </p>
+                                                            ) : loadingStudents ? (
+                                                                <p className="text-[12px] text-slate-400 animate-pulse px-3 py-2">Loading students…</p>
+                                                            ) : (
+                                                                <div className="border border-slate-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto divide-y divide-slate-50 bg-white">
+                                                                    {classStudents.filter(s => s.department === selectedDeptName).map(s => (
+                                                                        <div key={s.id} className="flex items-center gap-3 px-3 py-2 bg-slate-50/40">
+                                                                            <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                                                                            <span className="text-[12px] font-medium text-slate-700 truncate flex-1">{s.name}</span>
+                                                                            <span className="text-[11px] text-slate-400 font-mono shrink-0">#{s.username}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                    {classStudents.filter(s => s.department === selectedDeptName).length === 0 && (
+                                                                        <p className="text-center text-[12px] text-slate-400 py-5">No students in this department for the selected class.</p>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
 
                                         {/* Progressive: Student picker */}
                                         {formData.assignment_scope === 'selected_students' && (
