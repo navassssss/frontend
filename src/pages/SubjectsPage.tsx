@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -47,7 +47,8 @@ interface Subject {
     teacherId: number;
     finalMaxMarks: number;
     isLocked: boolean;
-    assignmentScope?: 'full_class' | 'selected_students';
+    assignmentScope?: 'full_class' | 'selected_students' | 'department';
+    department?: string;
     completion_percent?: number;
 }
 
@@ -106,7 +107,8 @@ export default function SubjectsPage() {
         class_id: '',
         teacher_id: '',
         final_max_marks: '30',
-        assignment_scope: 'full_class' as 'full_class' | 'selected_students',
+        assignment_scope: 'full_class' as 'full_class' | 'selected_students' | 'department',
+        department: '',
     });
     const [classStudents, setClassStudents] = useState<StudentOption[]>([]);
     const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
@@ -161,7 +163,7 @@ export default function SubjectsPage() {
 
     const openCreateDialog = () => {
         setEditingId(null);
-        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class' });
+        setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class', department: '' });
         setSelectedStudentIds([]);
         setClassStudents([]);
         setStudentSearch('');
@@ -177,6 +179,7 @@ export default function SubjectsPage() {
             teacher_id: subject.teacherId ? subject.teacherId.toString() : '',
             final_max_marks: subject.finalMaxMarks.toString(),
             assignment_scope: subject.assignmentScope || 'full_class',
+            department: subject.department || '',
         });
         setSelectedStudentIds([]);
         setStudentSearch('');
@@ -206,9 +209,18 @@ export default function SubjectsPage() {
             toast.error('Select at least one student for selected-students scope');
             return;
         }
+        if (formData.assignment_scope === 'department' && !formData.department) {
+            toast.error('Please select a department');
+            return;
+        }
         const payload: any = { ...formData };
         if (formData.assignment_scope === 'selected_students') {
             payload.student_ids = selectedStudentIds;
+            payload.department = null;
+        } else if (formData.assignment_scope === 'department') {
+            payload.department = formData.department;
+        } else {
+            payload.department = null;
         }
         try {
             if (editingId) {
@@ -220,7 +232,7 @@ export default function SubjectsPage() {
             }
             setShowDialog(false);
             setEditingId(null);
-            setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class' });
+            setFormData({ name: '', code: '', class_id: '', teacher_id: '', final_max_marks: '30', assignment_scope: 'full_class', department: '' });
             setSelectedStudentIds([]);
             setClassStudents([]);
             loadData();
@@ -491,7 +503,14 @@ export default function SubjectsPage() {
                                                 {classSubjects.map((subject) => (
                                                     <tr key={subject.id} className="group hover:bg-slate-50/50 transition-colors">
                                                         <td className="py-4 px-4">
-                                                            <p className="font-extrabold text-slate-800 text-[14px]">{subject.name}</p>
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <p className="font-extrabold text-slate-800 text-[14px]">{subject.name}</p>
+                                                                {subject.assignmentScope === 'department' && subject.department && (
+                                                                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-[10px] font-bold py-0.5 px-2 rounded-full shrink-0">
+                                                                        Dept: {subject.department}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
                                                             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{subject.code}</p>
                                                         </td>
                                                         <td className="py-4 px-4">
@@ -675,8 +694,8 @@ export default function SubjectsPage() {
                                         {/* Scope toggle */}
                                         <div className="space-y-1.5">
                                             <Label className="text-[12px] font-semibold text-slate-600">Assignment Scope</Label>
-                                            <div className="flex gap-2">
-                                                {(['full_class', 'selected_students'] as const).map((scope) => (
+                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                {(['full_class', 'selected_students', 'department'] as const).map((scope) => (
                                                     <button
                                                         key={scope}
                                                         type="button"
@@ -689,11 +708,37 @@ export default function SubjectsPage() {
                                                             }
                                                         `}
                                                     >
-                                                        {scope === 'full_class' ? '⊞ Full Class' : '☑ Selected Students'}
+                                                        {scope === 'full_class' ? '⊞ Full Class' : scope === 'selected_students' ? '☑ Selected Students' : '🎓 Department'}
                                                     </button>
                                                 ))}
                                             </div>
                                         </div>
+
+                                        {/* Progressive: Department picker */}
+                                        {formData.assignment_scope === 'department' && (
+                                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <Label className="text-[12px] font-semibold text-slate-600">Department <span className="text-rose-500">*</span></Label>
+                                                <div className="relative">
+                                                    <select
+                                                        required
+                                                        value={formData.department}
+                                                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                                        className="
+                                                            w-full h-9 px-3 pr-8
+                                                            text-[13px] font-medium text-slate-700
+                                                            bg-slate-50 border border-slate-200 rounded-lg
+                                                            appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 focus:bg-white
+                                                            transition-colors
+                                                        "
+                                                    >
+                                                        <option value="">Select a department…</option>
+                                                        <option value="Civilizational Studies">Civilizational Studies</option>
+                                                        <option value="Hadith & Related Sciences">Hadith & Related Sciences</option>
+                                                    </select>
+                                                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Progressive: Student picker */}
                                         {formData.assignment_scope === 'selected_students' && (

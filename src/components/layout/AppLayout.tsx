@@ -4,6 +4,7 @@ import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
 import { DesktopHeader } from './DesktopHeader';
 import { PWAPrompt } from '../pwa/PWAPrompt';
+import { useSEO } from '@/hooks/useSEO';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -14,6 +15,13 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, title, hideNav = false, showBack = false, onBack }: AppLayoutProps) {
+  const fullTitle = title ? `${title} | DHIC Staff Portal` : 'DHIC Staff Portal';
+  
+  useSEO({ 
+    title: fullTitle,
+    description: 'Official staff portal for DHIC (Darul Hasanath Islamic College) e-governance, managing attendance, tasks, reports, and student data.'
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <PWAPrompt />

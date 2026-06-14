@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useBlocker } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -22,6 +22,7 @@ interface StudentRow {
     name: string;
     roll_number: string;
     class_id: string; // Will store the ID of the class
+    department?: string;
 }
 
 export default function AddStudentsPage() {
@@ -54,7 +55,8 @@ export default function AddStudentsPage() {
                     id: `existing_${s.id}`,
                     name: s.user?.name || s.name || '',
                     roll_number: s.roll_number || '',
-                    class_id: String(s.class_room?.id || s.class_id || '')
+                    class_id: String(s.class_room?.id || s.class_id || ''),
+                    department: s.department || ''
                 }));
 
                 // Apply initial sorting (Ascending)
@@ -162,11 +164,13 @@ export default function AddStudentsPage() {
                         }
                     }
 
+                    const department = String(row['Department'] || row['department'] || '').trim();
                     return {
                         id: `imported_${Date.now()}_${index}`,
                         name,
                         roll_number,
-                        class_id: classId
+                        class_id: classId,
+                        department: department
                     };
                 }).filter(s => s.name || s.roll_number); // Filter out completely empty rows
 
@@ -182,9 +186,9 @@ export default function AddStudentsPage() {
 
     const downloadTemplate = () => {
         const wsData = [
-            ['Name', 'Admission No', 'Class'],
-            ['John Doe', '1001', classes[0]?.name || 'Class 10'],
-            ['Jane Smith', '1002', classes[1]?.name || 'Class 9']
+            ['Name', 'Admission No', 'Class', 'Department'],
+            ['John Doe', '1001', classes[0]?.name || 'Class 10', 'Civilizational Studies'],
+            ['Jane Smith', '1002', classes[1]?.name || 'Class 9', 'Hadith & Related Sciences']
         ];
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         
@@ -192,7 +196,8 @@ export default function AddStudentsPage() {
         ws['!cols'] = [
             { wch: 30 }, // Name
             { wch: 20 }, // Admission No
-            { wch: 20 }  // Class
+            { wch: 20 }, // Class
+            { wch: 25 }  // Department
         ];
 
         const wb = XLSX.utils.book_new();
@@ -212,7 +217,7 @@ export default function AddStudentsPage() {
         const newId = `new_${Date.now()}`;
         setStudents(prev => [
             ...prev,
-            { id: newId, name: '', roll_number: '', class_id: '' }
+            { id: newId, name: '', roll_number: '', class_id: '', department: '' }
         ]);
 
         setTimeout(() => {
@@ -313,7 +318,8 @@ export default function AddStudentsPage() {
                 id: s.id.startsWith('existing_') ? Number(s.id.replace('existing_', '')) : null,
                 name: s.name,
                 roll_number: s.roll_number,
-                class_id: Number(s.class_id)
+                class_id: Number(s.class_id),
+                department: s.department ? s.department.trim() : null
             }));
 
             await api.post('/students/bulk', { students: payload });
@@ -421,14 +427,15 @@ export default function AddStudentsPage() {
                                     <th className="px-3 py-2 text-center font-semibold text-muted-foreground w-16 text-[11px]">#</th>
                                     <th className="px-3 py-2 text-left font-semibold text-muted-foreground text-[11px]">Name</th>
                                     <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-48 text-[11px]">Ad. No (Roll No)</th>
-                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-64 text-[11px]">Class</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-48 text-[11px]">Class</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-56 text-[11px]">Department</th>
                                     <th className="px-3 py-2 text-right font-semibold text-muted-foreground w-20 text-[11px]">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {students.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="p-12 text-center">
+                                        <td colSpan={6} className="p-12 text-center">
                                             <div className="flex flex-col items-center justify-center space-y-3 text-muted-foreground opacity-60">
                                                 <Upload className="w-12 h-12 mb-2" />
                                                 <p className="text-lg">No students found</p>
@@ -495,6 +502,21 @@ export default function AddStudentsPage() {
                                                     </Select>
                                                 </div>
                                                 {!student.class_id && <p className="text-[10px] text-destructive mt-1 px-1">Required</p>}
+                                            </td>
+                                            <td className="px-3 py-2 text-[13px]">
+                                                <div className="relative">
+                                                    <Input 
+                                                        value={student.department || ''} 
+                                                        onChange={(e) => handleFieldChange(student.id, 'department', e.target.value)}
+                                                        placeholder="e.g. Civilizational Studies"
+                                                        list="departments-list"
+                                                        className={`bg-transparent h-8 px-3 text-[13px] placeholder:text-muted/40 ${hasFieldChanged(student.id, 'department') ? 'border-amber-400 focus-visible:ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-transparent hover:border-input focus:border-input'}`}
+                                                    />
+                                                    <datalist id="departments-list">
+                                                        <option value="Civilizational Studies" />
+                                                        <option value="Hadith & Related Sciences" />
+                                                    </datalist>
+                                                </div>
                                             </td>
                                             <td className="px-3 py-2 text-right text-[13px]">
                                                 <Button 

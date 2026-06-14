@@ -14,6 +14,7 @@ import {
     Megaphone
 } from 'lucide-react';
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
+import { useSEO } from '@/hooks/useSEO';
 
 interface StudentLayoutProps {
     children: React.ReactNode;
@@ -28,6 +29,12 @@ export default function StudentLayout({ children, title, showBack = false, actio
     const { student, logout } = useStudentAuth();
     const [profileOpen, setProfileOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const fullTitle = title ? `${title} | DHIC Student Portal` : 'DHIC Student Portal';
+    useSEO({ 
+      title: fullTitle,
+      description: 'Official student portal for DHIC (Darul Hasanath Islamic College), enabling tracking of attendance, marks, achievements, and fees.'
+    });
 
     const handleLogout = async () => {
         setProfileOpen(false);

@@ -1,7 +1,7 @@
 {
-  "name": "DHIC Portal",
-  "short_name": "DHIC",
-  "description": "DHIC  System — Staff & Student Portal",
+  "name": "Darul Hasanath Islamic College Portal",
+  "short_name": "DHIC Portal",
+  "description": "Darul Hasanath Islamic College System — Staff & Student Portal",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

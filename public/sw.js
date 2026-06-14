@@ -7,7 +7,7 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox
 
 if (workbox) {
   console.log('[SW] Workbox loaded successfully');
-  
+
   const { registerRoute, setCatchHandler } = workbox.routing;
   const { NetworkFirst, StaleWhileRevalidate, CacheFirst } = workbox.strategies;
   const { CacheableResponsePlugin } = workbox.cacheableResponse;
@@ -95,7 +95,7 @@ self.addEventListener('push', (event) => {
   };
 
   const showPromise = self.registration.showNotification(data.title || 'DHIC Portal', options);
-  
+
   // Also send postMessage to open clients for immediate UI updates
   const messagePromise = self.clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(clientList => {
