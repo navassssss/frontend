@@ -481,70 +481,56 @@ export default function StudentAchievementReviewPage() {
 
                     {/* Pagination Controls */}
                     {lastPage > 1 && (
-                        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 sm:px-6 mt-6 bg-card rounded-xl border shadow-sm animate-fade-in">
-                            <div className="flex flex-1 justify-between sm:hidden">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-slate-100 px-4 py-4 sm:px-6 mt-6 bg-card rounded-xl border shadow-sm animate-fade-in">
+                            <div className="text-center sm:text-left">
+                                <p className="text-xs sm:text-sm text-muted-foreground">
+                                    Showing <span className="font-semibold">{(currentPage - 1) * 15 + 1}</span> to{' '}
+                                    <span className="font-semibold">
+                                        {Math.min(currentPage * 15, total)}
+                                    </span>{' '}
+                                    of <span className="font-semibold">{total}</span> results
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-1">
                                 <Button
                                     variant="outline"
-                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    size="sm"
+                                    onClick={() => setCurrentPage(1)}
                                     disabled={currentPage === 1}
+                                    className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                                 >
-                                    Previous
+                                    First
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, lastPage))}
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                    disabled={currentPage === 1}
+                                    className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
+                                >
+                                    Prev
+                                </Button>
+                                <span className="text-xs sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 rounded-lg bg-secondary/50">
+                                    Page {currentPage} of {lastPage}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
                                     disabled={currentPage === lastPage}
+                                    className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
                                 >
                                     Next
                                 </Button>
-                            </div>
-                            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        Showing <span className="font-semibold">{(currentPage - 1) * 15 + 1}</span> to{' '}
-                                        <span className="font-semibold">
-                                            {Math.min(currentPage * 15, total)}
-                                        </span>{' '}
-                                        of <span className="font-semibold">{total}</span> results
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(1)}
-                                        disabled={currentPage === 1}
-                                    >
-                                        First
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => prev - 1)}
-                                        disabled={currentPage === 1}
-                                    >
-                                        Previous
-                                    </Button>
-                                    <span className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-secondary/50">
-                                        Page {currentPage} of {lastPage}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => prev + 1)}
-                                        disabled={currentPage === lastPage}
-                                    >
-                                        Next
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(lastPage)}
-                                        disabled={currentPage === lastPage}
-                                    >
-                                        Last
-                                    </Button>
-                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(lastPage)}
+                                    disabled={currentPage === lastPage}
+                                    className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
+                                >
+                                    Last
+                                </Button>
                             </div>
                         </div>
                     )}
