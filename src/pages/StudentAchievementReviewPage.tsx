@@ -90,18 +90,46 @@ export default function StudentAchievementReviewPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [studentName, setStudentName] = useState<string>('');
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [pendingCount, setPendingCount] = useState(0);
+    const [studentPoints, setStudentPoints] = useState(0);
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     const fetchAchievements = async () => {
         setIsLoading(true);
         try {
-            const response = await api.get('/achievements');
-            setAchievements(response.data);
+            const response = await api.get('/achievements', {
+                params: {
+                    page: currentPage,
+                    status: filter,
+                    search: debouncedSearch,
+                    sort: sort,
+                    student_id: studentId || undefined,
+                }
+            });
+            setAchievements(response.data.achievements.data);
+            setCurrentPage(response.data.achievements.current_page);
+            setLastPage(response.data.achievements.last_page);
+            setTotal(response.data.achievements.total);
+            setPendingCount(response.data.pending_count);
 
             if (studentId) {
                 try {
                     const studentResponse = await api.get(`/students/${studentId}`);
                     setStudentName(studentResponse.data.name || studentResponse.data.user?.name || '');
+                    setStudentPoints(studentResponse.data.total_points || 0);
                 } catch (err) {
-                    console.error('Failed to fetch student name:', err);
+                    console.error('Failed to fetch student details:', err);
                 }
             }
         } catch (error) {
@@ -112,37 +140,15 @@ export default function StudentAchievementReviewPage() {
         }
     };
 
+    // Reset page to 1 when filters or search term changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter, sort, debouncedSearch, studentId]);
+
+    // Fetch achievements when page or filters change
     useEffect(() => {
         fetchAchievements();
-    }, [studentId]);
-
-    const filteredAndSortedAchievements = useMemo(() => {
-        let result = achievements.filter(a => {
-            // Filter by status
-            const statusMatch = filter === 'all' ? true : a.status === filter;
-            // Filter by student
-            const studentMatch = studentId ? a.student.id === parseInt(studentId) : true;
-            // Filter by search
-            const searchMatch = !searchQuery ||
-                a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                a.student.user.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-            return statusMatch && studentMatch && searchMatch;
-        });
-
-        // Sort
-        result.sort((a, b) => {
-            switch (sort) {
-                case 'date_desc': return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                case 'date_asc': return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                case 'points_desc': return b.points - a.points;
-                case 'points_asc': return a.points - b.points;
-                default: return 0;
-            }
-        });
-
-        return result;
-    }, [achievements, filter, studentId, searchQuery, sort]);
+    }, [currentPage, filter, sort, debouncedSearch, studentId]);
 
     const handleApprove = async (achievement: Achievement) => {
         try {
@@ -181,8 +187,6 @@ export default function StudentAchievementReviewPage() {
         }
     };
 
-    const pendingCount = achievements.filter(a => a.status === 'pending').length;
-
     const getStatusBadge = (status: Achievement['status']) => {
         switch (status) {
             case 'approved':
@@ -194,12 +198,7 @@ export default function StudentAchievementReviewPage() {
         }
     };
 
-    const totalPoints = useMemo(() => {
-        if (!studentId) return 0;
-        return achievements
-            .filter(a => a.student.id === parseInt(studentId) && a.status === 'approved')
-            .reduce((sum, a) => sum + a.points, 0);
-    }, [achievements, studentId]);
+    const totalPoints = studentPoints;
 
     return (
         <AppLayout title={studentId ? `Achievements` : "Review Achievements"} showBack={!!studentId}>
@@ -325,7 +324,7 @@ export default function StudentAchievementReviewPage() {
                         <div className="flex justify-center py-12">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
-                    ) : filteredAndSortedAchievements.length === 0 ? (
+                    ) : achievements.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Filter className="h-8 w-8 text-muted-foreground" />
@@ -334,7 +333,7 @@ export default function StudentAchievementReviewPage() {
                             <p className="text-muted-foreground">Try adjusting your search or filters</p>
                         </div>
                     ) : (
-                        filteredAndSortedAchievements.map((achievement) => (
+                        achievements.map((achievement) => (
                             <Card key={achievement.id} className="group overflow-hidden hover:shadow-md transition-all border-l-4" style={{
                                 borderLeftColor: achievement.status === 'approved' ? '#22c55e' : achievement.status === 'rejected' ? '#ef4444' : '#eab308'
                             }}>
@@ -468,6 +467,76 @@ export default function StudentAchievementReviewPage() {
                                 </CardContent>
                             </Card>
                         ))
+                    )}
+
+                    {/* Pagination Controls */}
+                    {lastPage > 1 && (
+                        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 sm:px-6 mt-6 bg-card rounded-xl border shadow-sm animate-fade-in">
+                            <div className="flex flex-1 justify-between sm:hidden">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, lastPage))}
+                                    disabled={currentPage === lastPage}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">
+                                        Showing <span className="font-semibold">{(currentPage - 1) * 15 + 1}</span> to{' '}
+                                        <span className="font-semibold">
+                                            {Math.min(currentPage * 15, total)}
+                                        </span>{' '}
+                                        of <span className="font-semibold">{total}</span> results
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(1)}
+                                        disabled={currentPage === 1}
+                                    >
+                                        First
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <span className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-secondary/50">
+                                        Page {currentPage} of {lastPage}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        disabled={currentPage === lastPage}
+                                    >
+                                        Next
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(lastPage)}
+                                        disabled={currentPage === lastPage}
+                                    >
+                                        Last
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
