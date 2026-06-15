@@ -24,17 +24,27 @@ interface ClassLeaderboardEntry {
     student_count?: number;
     points: number;
     growth: number;
+    average: number;
+}
+
+interface DepartmentLeaderboardEntry {
+    rank: number;
+    department_name: string;
+    student_count: number;
+    points: number;
+    growth: number;
 }
 
 export default function PublicLeaderboardPage() {
     const navigate = useNavigate();
-    const [leaderboardType, setLeaderboardType] = useState<'students' | 'classes'>('students');
+    const [leaderboardType, setLeaderboardType] = useState<'students' | 'classes' | 'departments'>('students');
     const [timeFilter, setTimeFilter] = useState<'monthly' | 'overall'>('monthly');
     const [searchQuery, setSearchQuery] = useState('');
     const [isExpanded, setIsExpanded] = useState(false);
 
     const [studentData, setStudentData] = useState<StudentLeaderboardEntry[]>([]);
     const [classData, setClassData] = useState<ClassLeaderboardEntry[]>([]);
+    const [departmentData, setDepartmentData] = useState<DepartmentLeaderboardEntry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -44,9 +54,12 @@ export default function PublicLeaderboardPage() {
                 if (leaderboardType === 'students') {
                     const response = await api.get(`/leaderboard/students?type=${timeFilter}`);
                     setStudentData(response.data);
-                } else {
+                } else if (leaderboardType === 'classes') {
                     const response = await api.get(`/leaderboard/classes?type=${timeFilter}`);
                     setClassData(response.data);
+                } else {
+                    const response = await api.get(`/leaderboard/departments?type=${timeFilter}`);
+                    setDepartmentData(response.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch public leaderboard:', error);
@@ -82,7 +95,7 @@ export default function PublicLeaderboardPage() {
                         Recognizing student achievement in academics, co-curricular activities, leadership, creativity, and personal growth.
                     </p>
 
-                    <div className="flex justify-center mt-8 inline-flex bg-white rounded-full p-1 shadow-sm border border-slate-100 mx-auto">
+                    <div className="flex justify-center mt-8 inline-flex bg-white rounded-full p-1 shadow-sm border border-slate-100 mx-auto font-sans">
                         <button
                             onClick={() => setLeaderboardType('students')}
                             className={`px-6 py-2 text-[11px] font-black uppercase tracking-wider rounded-full transition-all ${leaderboardType === 'students' ? 'bg-[#00a67e] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
@@ -94,6 +107,12 @@ export default function PublicLeaderboardPage() {
                             className={`px-6 py-2 text-[11px] font-black uppercase tracking-wider rounded-full transition-all ${leaderboardType === 'classes' ? 'bg-[#00a67e] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                         >
                             Classes
+                        </button>
+                        <button
+                            onClick={() => setLeaderboardType('departments')}
+                            className={`px-6 py-2 text-[11px] font-black uppercase tracking-wider rounded-full transition-all ${leaderboardType === 'departments' ? 'bg-[#00a67e] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                        >
+                            Departments
                         </button>
                     </div>
 
@@ -215,22 +234,24 @@ export default function PublicLeaderboardPage() {
 
                         {/* Directory Section */}
                         <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <h2 className="text-lg font-black text-slate-800 tracking-tight">Scholars Directory</h2>
+                            <h2 className="text-lg font-black text-slate-800 tracking-tight">
+                                {leaderboardType === 'students' ? 'Students Directory' : (leaderboardType === 'classes' ? 'Classes Directory' : 'Departments Directory')}
+                            </h2>
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <div className="relative flex-1 sm:w-64">
                                     <input
                                         type="text"
-                                        placeholder="Search by student name or class..."
+                                        placeholder={
+                                            leaderboardType === 'students' 
+                                                ? "Search by student name or class..." 
+                                                : (leaderboardType === 'classes' ? "Search by class name..." : "Search by department name...")
+                                        }
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full bg-white border border-slate-200 text-slate-600 text-[13px] font-medium rounded-xl pl-4 pr-10 py-2.5 focus:outline-none focus:border-[#00a67e] shadow-sm"
                                     />
                                     <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
                                 </div>
-                                <button className="h-10 px-5 bg-[#008f6c] hover:bg-[#007a5c] text-white rounded-xl text-[12px] font-black whitespace-nowrap shadow-sm flex items-center gap-2 transition-colors">
-                                    <Star className="w-3.5 h-3.5 fill-white" />
-                                    My Rank
-                                </button>
                             </div>
                         </div>
 
@@ -241,10 +262,10 @@ export default function PublicLeaderboardPage() {
                                         <tr>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 w-24">RANK</th>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                                                {leaderboardType === 'students' ? 'STUDENT' : 'CLASS'}
+                                                {leaderboardType === 'students' ? 'STUDENT' : (leaderboardType === 'classes' ? 'CLASS' : 'DEPARTMENT')}
                                             </th>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 hidden md:table-cell">
-                                                {leaderboardType === 'students' ? 'CLASS' : 'DEPARTMENT'}
+                                                {leaderboardType === 'students' ? 'CLASS' : (leaderboardType === 'classes' ? 'AVG STAR POINTS' : 'STUDENTS')}
                                             </th>
                                             <th className="py-5 px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">STAR POINTS</th>
                                         </tr>
@@ -297,38 +318,70 @@ export default function PublicLeaderboardPage() {
                                                         </tr>
                                                     );
                                                 })
-                                        ) : (
+                                        ) : leaderboardType === 'classes' ? (
                                             classData
                                                 .filter(cls =>
                                                     searchQuery === '' ||
-                                                    cls.class_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                                    cls.department?.toLowerCase().includes(searchQuery.toLowerCase())
+                                                    cls.class_name.toLowerCase().includes(searchQuery.toLowerCase())
                                                 )
                                                 .slice(0, isExpanded ? undefined : 10)
                                                 .map((cls) => {
                                                     const rankNumber = cls.rank;
-                                                    const isUp = cls.growth >= 0;
                                                     return (
-                                                        <tr key={cls.rank} className="hover:bg-slate-50 transition-colors group">
+                                                        <tr key={cls.class_name} className="hover:bg-slate-50 transition-colors group">
+                                                            <td className="py-4 px-6 text-[14px] font-medium text-slate-300 group-hover:text-slate-400 transition-colors">
+                                                                {rankNumber.toString().padStart(2, '0')}
+                                                            </td>
+                                                            <td className="py-4 px-6">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                                                        <School className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-[13px] font-black text-slate-800">{cls.class_name}</p>
+                                                                        <p className="text-[11px] font-medium text-slate-400 mt-0.5">{cls.student_count || 0} enrolled students</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-4 px-6 hidden md:table-cell">
+                                                                <p className="text-[12px] font-bold text-slate-500">{cls.average?.toFixed(2)} pts/student</p>
+                                                            </td>
+                                                            <td className="py-4 px-6 text-right">
+                                                                <span className="text-[15px] font-black text-slate-800">{cls.points.toLocaleString()}</span>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })
+                                        ) : (
+                                            departmentData
+                                                .filter(dept =>
+                                                    searchQuery === '' ||
+                                                    dept.department_name.toLowerCase().includes(searchQuery.toLowerCase())
+                                                )
+                                                .slice(0, isExpanded ? undefined : 10)
+                                                .map((dept) => {
+                                                    const rankNumber = dept.rank;
+                                                    return (
+                                                        <tr key={dept.department_name} className="hover:bg-slate-50 transition-colors group">
                                                             <td className="py-4 px-6 text-[14px] font-medium text-slate-300 group-hover:text-slate-400 transition-colors">
                                                                 {rankNumber.toString().padStart(2, '0')}
                                                             </td>
                                                             <td className="py-4 px-6">
                                                                 <div className="flex items-center gap-4">
                                                                     <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                                                                        <School className="w-5 h-5" />
+                                                                        <Building className="w-5 h-5" />
                                                                     </div>
                                                                     <div>
-                                                                        <p className="text-[13px] font-black text-slate-800">{cls.class_name}</p>
-                                                                        <p className="text-[11px] font-medium text-slate-400 mt-0.5">{cls.student_count || 0} enrolled scholars</p>
+                                                                        <p className="text-[13px] font-black text-slate-800">{dept.department_name}</p>
+                                                                        <p className="text-[11px] font-medium text-slate-400 mt-0.5">Academic Department</p>
                                                                     </div>
                                                                 </div>
                                                             </td>
                                                             <td className="py-4 px-6 hidden md:table-cell">
-                                                                <p className="text-[12px] font-bold text-slate-500">{cls.department}</p>
+                                                                <p className="text-[12px] font-bold text-slate-500">{dept.student_count || 0} students</p>
                                                             </td>
                                                             <td className="py-4 px-6 text-right">
-                                                                <span className="text-[15px] font-black text-slate-800">{cls.points.toLocaleString()}</span>
+                                                                <span className="text-[15px] font-black text-slate-800">{dept.points.toLocaleString()}</span>
                                                             </td>
                                                         </tr>
                                                     )
