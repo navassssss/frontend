@@ -78,6 +78,7 @@ import StudentCCEPage from "./pages/student/StudentCCEPage";
 import StudentAttendancePage from "./pages/student/StudentAttendancePage";
 import StudentFeePage from "./pages/student/StudentFeePage";
 import StudentAnnouncementsPage from "./pages/student/StudentAnnouncementsPage";
+import TvLeaderboardPage from "./pages/student/TvLeaderboardPage";
 
 const queryClient = new QueryClient();
 
@@ -505,6 +506,7 @@ function AppRoutes() {
 
       {/* Public Route - Leaderboard Only */}
       <Route path="/leaderboard" element={<PublicLeaderboardPage />} />
+      <Route path="/leaderboard/tv" element={<TvLeaderboardPage />} />
 
       {/* Student Portal Routes - All Protected */}
       <Route 
