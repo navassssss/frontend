@@ -80,7 +80,7 @@ export default function TvLeaderboardPage() {
     // Helper to calculate the next active slide based on current data
     const getNextSlide = (current: number, dataState: LeaderboardState): number => {
         let next = current;
-        const totalSlides = 11;
+        const totalSlides = 9;
         
         for (let i = 0; i < totalSlides; i++) {
             next = (next + 1) % totalSlides;
@@ -92,10 +92,8 @@ export default function TvLeaderboardPage() {
             if (next === 4 && dataState.classesOverall.length > 0) return 4;
             if (next === 5 && dataState.departmentsMonthly.length > 0) return 5;
             if (next === 6 && dataState.departmentsOverall.length > 0) return 6;
-            if (next === 7 && dataState.studentsMonthly.length > 0) return 7;
-            if (next === 8 && dataState.studentsOverall.length > 0) return 8;
-            if (next === 9 && dataState.classesMonthly.length > 0) return 9;
-            if (next === 10 && dataState.classesOverall.length > 0) return 10;
+            if (next === 7 && dataState.studentsOverall.length > 0) return 7;
+            if (next === 8 && dataState.classesOverall.length > 0) return 8;
         }
         
         return 0; // Fallback
@@ -239,7 +237,7 @@ export default function TvLeaderboardPage() {
                 <div className="flex items-center gap-8">
                     {/* Active Slide Indicator Dot Ring */}
                     <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-full border border-white/10">
-                        {[...Array(11)].map((_, i) => {
+                        {[...Array(9)].map((_, i) => {
                             const isActiveState = 
                                 i === 0 ||
                                 (i === 1 && data.studentsMonthly.length > 0) ||
@@ -248,10 +246,8 @@ export default function TvLeaderboardPage() {
                                 (i === 4 && data.classesOverall.length > 0) ||
                                 (i === 5 && data.departmentsMonthly.length > 0) ||
                                 (i === 6 && data.departmentsOverall.length > 0) ||
-                                (i === 7 && data.studentsMonthly.length > 0) ||
-                                (i === 8 && data.studentsOverall.length > 0) ||
-                                (i === 9 && data.classesMonthly.length > 0) ||
-                                (i === 10 && data.classesOverall.length > 0);
+                                (i === 7 && data.studentsOverall.length > 0) ||
+                                (i === 8 && data.classesOverall.length > 0);
 
                             if (!isActiveState) return null;
 
@@ -313,17 +309,22 @@ export default function TvLeaderboardPage() {
                     </div>
                 )}
 
-                {/* SLIDE 1: This Month Top 3 Students */}
+                {/* SLIDE 1: This Month Students Table */}
                 {displaySlide === 1 && (
-                    <PodiumView
+                    <TableView
                         title="Top performing students"
                         subtitle="Current Month"
-                        items={data.studentsMonthly.slice(0, 3)}
-                        itemType="student"
+                        headers={["Rank", "Student", "Class", "Star Points"]}
+                        rows={data.studentsMonthly.slice(0, 10).map(s => [
+                            s.rank.toString().padStart(2, '0'),
+                            { name: s.name, sub: `ID / ${s.username}` },
+                            s.class_name,
+                            s.points.toLocaleString()
+                        ])}
                     />
                 )}
 
-                {/* SLIDE 2: All Time Top 3 Students */}
+                {/* SLIDE 2: All Time Top 3 Students Podium */}
                 {displaySlide === 2 && (
                     <PodiumView
                         title="Top performing students"
@@ -333,17 +334,22 @@ export default function TvLeaderboardPage() {
                     />
                 )}
 
-                {/* SLIDE 3: This Month Top 3 Classes */}
+                {/* SLIDE 3: This Month Classes Table */}
                 {displaySlide === 3 && (
-                    <PodiumView
+                    <TableView
                         title="Top performing Classes"
                         subtitle="Current Month"
-                        items={data.classesMonthly.slice(0, 3)}
-                        itemType="class"
+                        headers={["Rank", "Class", "Average Score", "Total Star Points"]}
+                        rows={data.classesMonthly.slice(0, 10).map(c => [
+                            c.rank.toString().padStart(2, '0'),
+                            { name: c.class_name, sub: `${c.student_count || 0} enrolled students` },
+                            c.average?.toFixed(2),
+                            c.points.toLocaleString()
+                        ])}
                     />
                 )}
 
-                {/* SLIDE 4: All Time Top 3 Classes */}
+                {/* SLIDE 4: All Time Top 3 Classes Podium */}
                 {displaySlide === 4 && (
                     <PodiumView
                         title="Top performing Classes"
@@ -383,23 +389,8 @@ export default function TvLeaderboardPage() {
                     />
                 )}
 
-                {/* SLIDE 7: This Month Students Top 10 Table */}
+                {/* SLIDE 7: All Time Students Top 10 Table */}
                 {displaySlide === 7 && (
-                    <TableView
-                        title="Top performing students"
-                        subtitle="Current Month"
-                        headers={["Rank", "Student", "Class", "Star Points"]}
-                        rows={data.studentsMonthly.slice(0, 10).map(s => [
-                            s.rank.toString().padStart(2, '0'),
-                            { name: s.name, sub: `ID / ${s.username}` },
-                            s.class_name,
-                            s.points.toLocaleString()
-                        ])}
-                    />
-                )}
-
-                {/* SLIDE 8: All Time Students Top 10 Table */}
-                {displaySlide === 8 && (
                     <TableView
                         title="Top performing students"
                         subtitle="All Time"
@@ -413,23 +404,8 @@ export default function TvLeaderboardPage() {
                     />
                 )}
 
-                {/* SLIDE 9: This Month Classes Top 10 Table */}
-                {displaySlide === 9 && (
-                    <TableView
-                        title="Top performing Classes"
-                        subtitle="Current Month"
-                        headers={["Rank", "Class", "Average Score", "Total Star Points"]}
-                        rows={data.classesMonthly.slice(0, 10).map(c => [
-                            c.rank.toString().padStart(2, '0'),
-                            { name: c.class_name, sub: `${c.student_count || 0} enrolled students` },
-                            c.average?.toFixed(2),
-                            c.points.toLocaleString()
-                        ])}
-                    />
-                )}
-
-                {/* SLIDE 10: All Time Classes Top 10 Table */}
-                {displaySlide === 10 && (
+                {/* SLIDE 8: All Time Classes Top 10 Table */}
+                {displaySlide === 8 && (
                     <TableView
                         title="Top performing Classes"
                         subtitle="All Time"
