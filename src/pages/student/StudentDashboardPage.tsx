@@ -32,10 +32,9 @@ export default function StudentDashboardPage() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await api.get('/student/achievements');
-                const all: Achievement[] = res.data;
-                setRecentAchievements(all.filter(a => a.status === 'approved').slice(0, 4));
-                setPendingCount(all.filter(a => a.status === 'pending').length);
+                const res = await api.get('/student/achievements/summary');
+                setRecentAchievements(res.data.recent_achievements);
+                setPendingCount(res.data.pending_count);
             } catch { /* silent */ }
             finally { setIsLoading(false); }
         })();
