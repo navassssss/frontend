@@ -45,6 +45,8 @@ interface LeaderboardState {
 
 export default function TvLeaderboardPage() {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [displaySlide, setDisplaySlide] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
     const [isPlaying, setIsPlaying] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -73,6 +75,30 @@ export default function TvLeaderboardPage() {
             departmentsMonthly: (raw.departmentsMonthly || []).filter(d => d.points > 0),
             departmentsOverall: (raw.departmentsOverall || []).filter(d => d.points > 0),
         };
+    };
+
+    // Helper to calculate the next active slide based on current data
+    const getNextSlide = (current: number, dataState: LeaderboardState): number => {
+        let next = current;
+        const totalSlides = 11;
+        
+        for (let i = 0; i < totalSlides; i++) {
+            next = (next + 1) % totalSlides;
+            
+            if (next === 0) return 0; // Welcome slide is always active
+            if (next === 1 && dataState.studentsMonthly.length > 0) return 1;
+            if (next === 2 && dataState.studentsOverall.length > 0) return 2;
+            if (next === 3 && dataState.classesMonthly.length > 0) return 3;
+            if (next === 4 && dataState.classesOverall.length > 0) return 4;
+            if (next === 5 && dataState.departmentsMonthly.length > 0) return 5;
+            if (next === 6 && dataState.departmentsOverall.length > 0) return 6;
+            if (next === 7 && dataState.studentsMonthly.length > 0) return 7;
+            if (next === 8 && dataState.studentsOverall.length > 0) return 8;
+            if (next === 9 && dataState.classesMonthly.length > 0) return 9;
+            if (next === 10 && dataState.classesOverall.length > 0) return 10;
+        }
+        
+        return 0; // Fallback
     };
 
     // Initial Fetch
@@ -112,26 +138,33 @@ export default function TvLeaderboardPage() {
         if (!isPlaying) return;
 
         const interval = setInterval(() => {
-            setCurrentSlide((prev) => {
-                const totalSlides = 11;
-                const nextSlide = (prev + 1) % totalSlides;
+            // 1. Trigger transition out (fade out)
+            setIsTransitioning(true);
 
-                // When returning to slide 0, run background check and commit pending data if any
-                if (nextSlide === 0) {
-                    if (pendingData) {
-                        setData(pendingData);
-                        setPendingData(null);
+            // 2. Wait for fade out animation (500ms) to update slide content and fade back in
+            setTimeout(() => {
+                setCurrentSlide((prev) => {
+                    const nextSlide = getNextSlide(prev, data);
+
+                    // When returning to slide 0, run background check and commit pending data if any
+                    if (nextSlide === 0) {
+                        if (pendingData) {
+                            setData(pendingData);
+                            setPendingData(null);
+                        }
+                        // Fetch fresh data in the background for the next transition
+                        triggerBackgroundFetch();
                     }
-                    // Fetch fresh data in the background for the next transition
-                    triggerBackgroundFetch();
-                }
 
-                return nextSlide;
-            });
+                    setDisplaySlide(nextSlide);
+                    return nextSlide;
+                });
+                setIsTransitioning(false);
+            }, 500);
         }, slideDuration);
 
         return () => clearInterval(interval);
-    }, [isPlaying, pendingData]);
+    }, [isPlaying, pendingData, data]);
 
     const triggerBackgroundFetch = async () => {
         try {
@@ -206,15 +239,32 @@ export default function TvLeaderboardPage() {
                 <div className="flex items-center gap-8">
                     {/* Active Slide Indicator Dot Ring */}
                     <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-full border border-white/10">
-                        {[...Array(11)].map((_, i) => (
-                            <div
-                                key={i}
-                                className={`h-3.5 rounded-full transition-all duration-500 ${currentSlide === i
-                                    ? "w-10 bg-gradient-to-r from-[#00a67e] to-[#00f2ad]"
-                                    : "w-3.5 bg-white/20"
-                                    }`}
-                            />
-                        ))}
+                        {[...Array(11)].map((_, i) => {
+                            const isActiveState = 
+                                i === 0 ||
+                                (i === 1 && data.studentsMonthly.length > 0) ||
+                                (i === 2 && data.studentsOverall.length > 0) ||
+                                (i === 3 && data.classesMonthly.length > 0) ||
+                                (i === 4 && data.classesOverall.length > 0) ||
+                                (i === 5 && data.departmentsMonthly.length > 0) ||
+                                (i === 6 && data.departmentsOverall.length > 0) ||
+                                (i === 7 && data.studentsMonthly.length > 0) ||
+                                (i === 8 && data.studentsOverall.length > 0) ||
+                                (i === 9 && data.classesMonthly.length > 0) ||
+                                (i === 10 && data.classesOverall.length > 0);
+
+                            if (!isActiveState) return null;
+
+                            return (
+                                <div
+                                    key={i}
+                                    className={`h-3.5 rounded-full transition-all duration-500 ${displaySlide === i
+                                        ? "w-10 bg-gradient-to-r from-[#00a67e] to-[#00f2ad]"
+                                        : "w-3.5 bg-white/20"
+                                        }`}
+                                />
+                            );
+                        })}
                     </div>
 
                     {/* Controller Action buttons */}
@@ -236,10 +286,12 @@ export default function TvLeaderboardPage() {
             </div>
 
             {/* Dynamic Content Slides Viewport */}
-            <div className="flex-1 flex items-center justify-center p-12 z-10">
+            <div className={`flex-1 flex items-center justify-center p-12 z-10 transition-all duration-500 ease-in-out transform ${
+                isTransitioning ? "opacity-0 scale-98 translate-y-4" : "opacity-100 scale-100 translate-y-0"
+            }`}>
 
                 {/* SLIDE 0: Welcome Brand Introduction */}
-                {currentSlide === 0 && (
+                {displaySlide === 0 && (
                     <div className="text-center max-w-5xl space-y-10 animate-in fade-in zoom-in duration-700">
                         <div className="inline-flex p-8 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-[2.5rem] shadow-[0_0_60px_rgba(250,204,21,0.2)] animate-bounce">
                             <Sparkles className="w-24 h-24 text-slate-950" />
@@ -262,7 +314,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 1: This Month Top 3 Students */}
-                {currentSlide === 1 && (
+                {displaySlide === 1 && (
                     <PodiumView
                         title="Top performing students"
                         subtitle="Current Month"
@@ -272,7 +324,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 2: All Time Top 3 Students */}
-                {currentSlide === 2 && (
+                {displaySlide === 2 && (
                     <PodiumView
                         title="Top performing students"
                         subtitle="All Time"
@@ -282,7 +334,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 3: This Month Top 3 Classes */}
-                {currentSlide === 3 && (
+                {displaySlide === 3 && (
                     <PodiumView
                         title="Top performing Classes"
                         subtitle="Current Month"
@@ -292,7 +344,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 4: All Time Top 3 Classes */}
-                {currentSlide === 4 && (
+                {displaySlide === 4 && (
                     <PodiumView
                         title="Top performing Classes"
                         subtitle="All Time"
@@ -302,7 +354,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 5: This Month Top Departments */}
-                {currentSlide === 5 && (
+                {displaySlide === 5 && (
                     <TableView
                         title="Top performing Departments"
                         subtitle="Current Month"
@@ -317,7 +369,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 6: All Time Top Departments */}
-                {currentSlide === 6 && (
+                {displaySlide === 6 && (
                     <TableView
                         title="Top performing Departments"
                         subtitle="All Time"
@@ -332,7 +384,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 7: This Month Students Top 10 Table */}
-                {currentSlide === 7 && (
+                {displaySlide === 7 && (
                     <TableView
                         title="Top performing students"
                         subtitle="Current Month"
@@ -347,7 +399,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 8: All Time Students Top 10 Table */}
-                {currentSlide === 8 && (
+                {displaySlide === 8 && (
                     <TableView
                         title="Top performing students"
                         subtitle="All Time"
@@ -362,7 +414,7 @@ export default function TvLeaderboardPage() {
                 )}
 
                 {/* SLIDE 9: This Month Classes Top 10 Table */}
-                {currentSlide === 9 && (
+                {displaySlide === 9 && (
                     <TableView
                         title="Top performing Classes"
                         subtitle="Current Month"
@@ -370,14 +422,14 @@ export default function TvLeaderboardPage() {
                         rows={data.classesMonthly.slice(0, 10).map(c => [
                             c.rank.toString().padStart(2, '0'),
                             { name: c.class_name, sub: `${c.student_count || 0} enrolled students` },
-                            `${c.average?.toFixed(2)} pts/student`,
+                            c.average?.toFixed(2),
                             c.points.toLocaleString()
                         ])}
                     />
                 )}
 
                 {/* SLIDE 10: All Time Classes Top 10 Table */}
-                {currentSlide === 10 && (
+                {displaySlide === 10 && (
                     <TableView
                         title="Top performing Classes"
                         subtitle="All Time"
@@ -385,7 +437,7 @@ export default function TvLeaderboardPage() {
                         rows={data.classesOverall.slice(0, 10).map(c => [
                             c.rank.toString().padStart(2, '0'),
                             { name: c.class_name, sub: `${c.student_count || 0} enrolled students` },
-                            `${c.average?.toFixed(2)} pts/student`,
+                            c.average?.toFixed(2),
                             c.points.toLocaleString()
                         ])}
                     />
