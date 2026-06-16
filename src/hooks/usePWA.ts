@@ -5,7 +5,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import { useAuth } from '@/contexts/AuthContext';
 
 const DEV = import.meta.env.DEV;
 
@@ -23,7 +22,6 @@ export interface PWAState {
 }
 
 export function usePWA(): PWAState {
-  const { isAuthenticated } = useAuth();
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled]     = useState(false);
   const [isOnline, setIsOnline]           = useState(navigator.onLine);
@@ -104,10 +102,11 @@ export function usePWA(): PWAState {
   
   // ── Auto-subscribe if permission already granted ───────────
   useEffect(() => {
+    const isAuthenticated = !!localStorage.getItem("token");
     if (isAuthenticated && notificationPermission === 'granted' && swRegistration) {
       subscribeToPush(swRegistration);
     }
-  }, [isAuthenticated, notificationPermission, swRegistration]);
+  }, [notificationPermission, swRegistration]);
 
 
   // ── Prompt Install ───────────────────────────────────────────
@@ -126,6 +125,7 @@ export function usePWA(): PWAState {
 
   // ── Request Push Notification permission ─────────────────────
   const requestPushPermission = useCallback(async () => {
+    const isAuthenticated = !!localStorage.getItem("token");
     if (!isAuthenticated) {
       toast.error('You must be logged in to enable notifications');
       return;
@@ -146,7 +146,7 @@ export function usePWA(): PWAState {
     } else {
       toast.error('Notification permission denied');
     }
-  }, [swRegistration, isAuthenticated]);
+  }, [swRegistration]);
 
   const dismissIOSTip = useCallback(() => {
     setShowIOSInstallTip(false);
