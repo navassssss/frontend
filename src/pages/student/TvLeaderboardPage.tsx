@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-    Trophy, Star, School, Building, Sparkles, Medal,
+    Trophy, Star, School, Building, Sparkles,
     Maximize2, Minimize2, Play, Pause, Award
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -63,6 +63,18 @@ export default function TvLeaderboardPage() {
     // Background standby data
     const [pendingData, setPendingData] = useState<LeaderboardState | null>(null);
 
+    // Helper to filter out zero-point/zero-average entries
+    const filterData = (raw: LeaderboardState): LeaderboardState => {
+        return {
+            studentsMonthly: (raw.studentsMonthly || []).filter(s => s.points > 0),
+            studentsOverall: (raw.studentsOverall || []).filter(s => s.points > 0),
+            classesMonthly: (raw.classesMonthly || []).filter(c => c.points > 0 || c.average > 0),
+            classesOverall: (raw.classesOverall || []).filter(c => c.points > 0 || c.average > 0),
+            departmentsMonthly: (raw.departmentsMonthly || []).filter(d => d.points > 0),
+            departmentsOverall: (raw.departmentsOverall || []).filter(d => d.points > 0),
+        };
+    };
+
     // Initial Fetch
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -80,14 +92,14 @@ export default function TvLeaderboardPage() {
                     api.get('/leaderboard/departments?type=overall')
                 ]);
 
-                setData({
+                setData(filterData({
                     studentsMonthly: stMonthly.data,
                     studentsOverall: stOverall.data,
                     classesMonthly: clMonthly.data,
                     classesOverall: clOverall.data,
                     departmentsMonthly: dpMonthly.data,
                     departmentsOverall: dpOverall.data
-                });
+                }));
             } catch (error) {
                 console.error("Failed to load initial leaderboard data:", error);
             }
@@ -136,14 +148,14 @@ export default function TvLeaderboardPage() {
                 api.get('/leaderboard/departments?type=overall')
             ]);
 
-            setPendingData({
+            setPendingData(filterData({
                 studentsMonthly: stMonthly.data,
                 studentsOverall: stOverall.data,
                 classesMonthly: clMonthly.data,
                 classesOverall: clOverall.data,
                 departmentsMonthly: dpMonthly.data,
                 departmentsOverall: dpOverall.data
-            });
+            }));
         } catch (e) {
             console.warn("Failed background refresh (silent):", e);
         }
@@ -169,27 +181,6 @@ export default function TvLeaderboardPage() {
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
     }, []);
-
-    const getInitials = (name: string) => name ? name.charAt(0) : "S";
-
-    // Safe retrieval of Top 3 items
-    const getTop3 = (list: any[]) => {
-        const res = [...list];
-        while (res.length < 3) {
-            res.push({
-                rank: res.length + 1,
-                name: "---",
-                class_name: "---",
-                class_name_short: "---",
-                department_name: "---",
-                points: 0,
-                stars: 0,
-                average: 0
-            });
-        }
-        // Return structured as: [2nd Place, 1st Place, 3rd Place]
-        return [res[1], res[0], res[2]];
-    };
 
     return (
         <div
@@ -275,7 +266,7 @@ export default function TvLeaderboardPage() {
                     <PodiumView
                         title="Top performing students"
                         subtitle="Current Month"
-                        items={getTop3(data.studentsMonthly)}
+                        items={data.studentsMonthly.slice(0, 3)}
                         itemType="student"
                     />
                 )}
@@ -285,7 +276,7 @@ export default function TvLeaderboardPage() {
                     <PodiumView
                         title="Top performing students"
                         subtitle="All Time"
-                        items={getTop3(data.studentsOverall)}
+                        items={data.studentsOverall.slice(0, 3)}
                         itemType="student"
                     />
                 )}
@@ -295,7 +286,7 @@ export default function TvLeaderboardPage() {
                     <PodiumView
                         title="Top performing Classes"
                         subtitle="Current Month"
-                        items={getTop3(data.classesMonthly)}
+                        items={data.classesMonthly.slice(0, 3)}
                         itemType="class"
                     />
                 )}
@@ -305,12 +296,12 @@ export default function TvLeaderboardPage() {
                     <PodiumView
                         title="Top performing Classes"
                         subtitle="All Time"
-                        items={getTop3(data.classesOverall)}
+                        items={data.classesOverall.slice(0, 3)}
                         itemType="class"
                     />
                 )}
 
-                {/* SLIDE 5: This Month Top Departments (Table instead of Podium) */}
+                {/* SLIDE 5: This Month Top Departments */}
                 {currentSlide === 5 && (
                     <TableView
                         title="Top performing Departments"
@@ -325,7 +316,7 @@ export default function TvLeaderboardPage() {
                     />
                 )}
 
-                {/* SLIDE 6: All Time Top Departments (Table instead of Podium) */}
+                {/* SLIDE 6: All Time Top Departments */}
                 {currentSlide === 6 && (
                     <TableView
                         title="Top performing Departments"
@@ -424,16 +415,185 @@ function PodiumView({ title, subtitle, items, itemType }: {
     items: any[];
     itemType: 'student' | 'class' | 'department';
 }) {
-    // items should be [2nd Place, 1st Place, 3rd Place]
-    const second = items[0];
-    const first = items[1];
-    const third = items[2];
-
-    const getIcon = () => {
+    const getIcon = (item: any) => {
         if (itemType === 'class') return <School className="w-12 h-12 text-emerald-300" />;
         if (itemType === 'department') return <Building className="w-12 h-12 text-blue-300" />;
         return null;
     };
+
+    // Case 0: Empty podium (0 items qualify)
+    if (items.length === 0) {
+        return (
+            <div className="w-full max-w-4xl flex flex-col items-center justify-center p-16 text-center bg-[#0b1222]/80 border border-white/5 rounded-[2.5rem] shadow-2xl backdrop-blur-md space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div className="p-6 bg-gradient-to-tr from-emerald-500/10 to-teal-500/5 rounded-full border border-emerald-500/20 text-[#00f2ad] animate-pulse">
+                    <Sparkles className="w-16 h-16" />
+                </div>
+                <div className="space-y-3">
+                    <h2 className="text-4xl font-black text-white">Leaderboard Starting Fresh</h2>
+                    <p className="text-xl text-slate-400 max-w-lg mx-auto leading-relaxed">
+                        No active Star Points recorded for this period yet. Earn the first points to claim the top spot!
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Case 1: Exactly 1 item qualifies (Solo)
+    if (items.length === 1) {
+        const first = items[0];
+        return (
+            <div className="w-full max-w-7xl flex flex-col items-center space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div className="text-center space-y-4">
+                    <h2 className="text-[#00f2ad] text-2xl font-black tracking-[0.2em] uppercase">{title}</h2>
+                    <h1 className="text-6xl font-black text-white">{subtitle}</h1>
+                </div>
+
+                <div className="w-full flex items-end justify-center pt-12">
+                    <div className="w-full md:w-[380px] flex flex-col items-center relative z-20">
+                        <div className="absolute top-[-40px] animate-bounce">
+                            <Award className="w-14 h-14 text-yellow-400 fill-yellow-400/20" />
+                        </div>
+                        <div className="relative mb-6">
+                            {itemType === 'student' ? (
+                                <Avatar className="h-[180px] w-[180px] border-4 border-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.25)]">
+                                    <AvatarFallback className="bg-gradient-to-tr from-yellow-500 to-amber-300 text-5xl font-black text-slate-900">
+                                        {first.name ? first.name.charAt(0) : "S"}
+                                    </AvatarFallback>
+                                </Avatar>
+                            ) : (
+                                <div className="w-32 h-32 rounded-2xl bg-gradient-to-tr from-yellow-500/20 to-amber-400/20 border-2 border-yellow-400/50 shadow-[0_0_30px_rgba(234,179,8,0.15)] flex items-center justify-center">
+                                    {getIcon(first)}
+                                </div>
+                            )}
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-yellow-400 rounded-full border-4 border-[#070b15] shadow-md flex items-center justify-center text-base font-black text-slate-950">
+                                1
+                            </div>
+                        </div>
+                        <div className="w-full text-center space-y-2 mb-5">
+                            <h3 className="text-3xl font-black truncate px-2 text-yellow-400">{first.name || first.class_name || first.department_name}</h3>
+                            <p className="text-sm text-slate-400 font-bold">{first.class_name || first.department || ""}</p>
+                        </div>
+                        <div className="w-full bg-gradient-to-b from-yellow-950/20 to-transparent border-t-2 border-yellow-500/50 rounded-t-[2.5rem] py-16 text-center shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                            <p className="text-5xl font-black text-yellow-400">
+                                {itemType === 'class' ? `${first.average?.toFixed(1)}` : first.points.toLocaleString()}
+                            </p>
+                            <p className="text-xs font-black text-yellow-500/80 uppercase tracking-widest mt-2">
+                                {itemType === 'class' ? "Avg Star Points" : "Total Star Points"}
+                            </p>
+                            {itemType === 'student' && first.stars > 0 && (
+                                <div className="flex items-center justify-center gap-1 mt-3">
+                                    {[...Array(Math.min(first.stars, 5))].map((_, i) => (
+                                        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                                    ))}
+                                    {first.stars > 5 && (
+                                        <span className="text-xs font-black text-yellow-400 ml-1.5">+{first.stars - 5}</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Case 2: Exactly 2 items qualify (Duo)
+    if (items.length === 2) {
+        const first = items[0];
+        const second = items[1];
+        return (
+            <div className="w-full max-w-7xl flex flex-col items-center space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div className="text-center space-y-4">
+                    <h2 className="text-[#00f2ad] text-2xl font-black tracking-[0.2em] uppercase">{title}</h2>
+                    <h1 className="text-6xl font-black text-white">{subtitle}</h1>
+                </div>
+
+                <div className="w-full flex flex-col md:flex-row items-end justify-center gap-12 pt-12">
+                    {/* 2nd Place */}
+                    <div className="w-full md:w-[320px] flex flex-col items-center order-2 md:order-1">
+                        <div className="relative mb-6">
+                            {itemType === 'student' ? (
+                                <Avatar className="h-[150px] w-[150px] border-4 border-slate-400 shadow-2xl">
+                                    <AvatarFallback className="bg-gradient-to-tr from-slate-700 to-slate-500 text-4xl font-black text-white">
+                                        {second.name ? second.name.charAt(0) : "S"}
+                                    </AvatarFallback>
+                                </Avatar>
+                            ) : (
+                                <div className="w-28 h-28 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    {getIcon(second)}
+                                </div>
+                            )}
+                            <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-400 rounded-full border-2 border-[#070b15] shadow-md flex items-center justify-center text-sm font-black text-slate-950">
+                                2
+                            </div>
+                        </div>
+                        <div className="w-full text-center space-y-2 mb-4">
+                            <h3 className="text-2xl font-black truncate px-2 text-slate-100">{second.name || second.class_name || second.department_name}</h3>
+                            <p className="text-sm text-slate-400 font-bold">{second.class_name || second.department || ""}</p>
+                        </div>
+                        <div className="w-full bg-slate-800/40 border-t border-slate-600/50 rounded-t-[2rem] py-12 text-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md">
+                            <p className="text-4xl font-black text-slate-300">
+                                {itemType === 'class' ? `${second.average?.toFixed(1)}` : second.points.toLocaleString()}
+                            </p>
+                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">
+                                {itemType === 'class' ? "Avg Star Points" : "Total Star Points"}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* 1st Place */}
+                    <div className="w-full md:w-[360px] flex flex-col items-center order-1 md:order-2 -mt-12 relative z-20">
+                        <div className="absolute top-[-40px] animate-bounce">
+                            <Award className="w-14 h-14 text-yellow-400 fill-yellow-400/20" />
+                        </div>
+                        <div className="relative mb-6">
+                            {itemType === 'student' ? (
+                                <Avatar className="h-[180px] w-[180px] border-4 border-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.25)]">
+                                    <AvatarFallback className="bg-gradient-to-tr from-yellow-500 to-amber-300 text-5xl font-black text-slate-900">
+                                        {first.name ? first.name.charAt(0) : "S"}
+                                    </AvatarFallback>
+                                </Avatar>
+                            ) : (
+                                <div className="w-32 h-32 rounded-2xl bg-gradient-to-tr from-yellow-500/20 to-amber-400/20 border-2 border-yellow-400/50 shadow-[0_0_30px_rgba(234,179,8,0.15)] flex items-center justify-center">
+                                    {getIcon(first)}
+                                </div>
+                            )}
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-yellow-400 rounded-full border-4 border-[#070b15] shadow-md flex items-center justify-center text-base font-black text-slate-950">
+                                1
+                            </div>
+                        </div>
+                        <div className="w-full text-center space-y-2 mb-5">
+                            <h3 className="text-3xl font-black truncate px-2 text-yellow-400">{first.name || first.class_name || first.department_name}</h3>
+                            <p className="text-sm text-slate-400 font-bold">{first.class_name || first.department || ""}</p>
+                        </div>
+                        <div className="w-full bg-gradient-to-b from-yellow-950/20 to-transparent border-t-2 border-yellow-500/50 rounded-t-[2.5rem] py-16 text-center shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                            <p className="text-5xl font-black text-yellow-400">
+                                {itemType === 'class' ? `${first.average?.toFixed(1)}` : first.points.toLocaleString()}
+                            </p>
+                            <p className="text-xs font-black text-yellow-500/80 uppercase tracking-widest mt-2">
+                                {itemType === 'class' ? "Avg Star Points" : "Total Star Points"}
+                            </p>
+                            {itemType === 'student' && first.stars > 0 && (
+                                <div className="flex items-center justify-center gap-1 mt-3">
+                                    {[...Array(Math.min(first.stars, 5))].map((_, i) => (
+                                        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                                    ))}
+                                    {first.stars > 5 && (
+                                        <span className="text-xs font-black text-yellow-400 ml-1.5">+{first.stars - 5}</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Case 3: Standard 3+ items qualify (Trio)
+    const first = items[0];
+    const second = items[1];
+    const third = items[2];
 
     return (
         <div className="w-full max-w-7xl flex flex-col items-center space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -454,7 +614,7 @@ function PodiumView({ title, subtitle, items, itemType }: {
                             </Avatar>
                         ) : (
                             <div className="w-28 h-28 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                                {getIcon()}
+                                {getIcon(second)}
                             </div>
                         )}
                         <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-400 rounded-full border-2 border-[#070b15] shadow-md flex items-center justify-center text-sm font-black text-slate-950">
@@ -490,7 +650,7 @@ function PodiumView({ title, subtitle, items, itemType }: {
                             </Avatar>
                         ) : (
                             <div className="w-32 h-32 rounded-2xl bg-gradient-to-tr from-yellow-500/20 to-amber-400/20 border-2 border-yellow-400/50 shadow-[0_0_30px_rgba(234,179,8,0.15)] flex items-center justify-center">
-                                {getIcon()}
+                                {getIcon(first)}
                             </div>
                         )}
                         <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-yellow-400 rounded-full border-4 border-[#070b15] shadow-md flex items-center justify-center text-base font-black text-slate-950">
@@ -533,7 +693,7 @@ function PodiumView({ title, subtitle, items, itemType }: {
                             </Avatar>
                         ) : (
                             <div className="w-28 h-28 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                                {getIcon()}
+                                {getIcon(third)}
                             </div>
                         )}
                         <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-amber-600 rounded-full border-2 border-[#070b15] shadow-md flex items-center justify-center text-sm font-black text-slate-950">
@@ -566,6 +726,112 @@ function TableView({ title, subtitle, headers, rows }: {
     headers: string[];
     rows: any[][];
 }) {
+    // If no rows have active points/stars
+    if (rows.length === 0) {
+        return (
+            <div className="w-full max-w-4xl flex flex-col items-center justify-center p-16 text-center bg-[#0b1222]/80 border border-white/5 rounded-[2.5rem] shadow-2xl backdrop-blur-md space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div className="p-6 bg-gradient-to-tr from-emerald-500/10 to-teal-500/5 rounded-full border border-emerald-500/20 text-[#00f2ad] animate-pulse">
+                    <Sparkles className="w-16 h-16" />
+                </div>
+                <div className="space-y-3">
+                    <h2 className="text-4xl font-black text-white">Leaderboard Starting Fresh</h2>
+                    <p className="text-xl text-slate-400 max-w-lg mx-auto leading-relaxed">
+                        No active entries recorded for this period yet.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Widescreen Split-Table logic:
+    // If there are 6 or more items, split them to utilize width on 16:9 TVs.
+    // Otherwise, render a single centered table.
+    const isSplit = rows.length >= 6;
+    const leftRows = isSplit ? rows.slice(0, 5) : rows;
+    const rightRows = isSplit ? rows.slice(5, 10) : [];
+
+    const renderTableSegment = (segmentRows: any[][]) => (
+        <div className="bg-[#0b1222]/80 backdrop-blur-md rounded-3xl border border-white/5 shadow-2xl overflow-hidden flex-1 w-full">
+            <table className="w-full border-collapse text-left">
+                <thead>
+                    <tr className="border-b border-white/5 bg-white/5">
+                        {headers.map((h, i) => (
+                            <th
+                                key={i}
+                                className={`py-7 px-10 text-base font-black uppercase tracking-wider text-slate-400 ${i === headers.length - 1 ? "text-right" : ""
+                                    }`}
+                            >
+                                {h}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                    {segmentRows.map((row, rowIndex) => {
+                        // Safely determine true overall rank from the first cell value
+                        const rankVal = parseInt(row[0]) || (rowIndex + 1);
+                        const isTopThree = rankVal <= 3;
+                        const rankColors = [
+                            "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
+                            "text-slate-300 bg-slate-300/10 border-slate-300/20",
+                            "text-amber-600 bg-amber-600/10 border-amber-600/20"
+                        ];
+                        const rankColorClass = isTopThree ? rankColors[rankVal - 1] : "text-slate-500 bg-white/5 border-white/5";
+
+                        return (
+                            <tr
+                                key={rowIndex}
+                                className={`hover:bg-white/[0.02] transition-colors ${rankVal === 1 ? "bg-yellow-400/[0.01]" : ""
+                                    }`}
+                            >
+                                {row.map((cell, cellIndex) => {
+                                    // Rank Column formatting
+                                    if (cellIndex === 0) {
+                                        return (
+                                            <td key={cellIndex} className="py-6 px-10 font-black text-xl">
+                                                <span className={`inline-flex items-center justify-center w-12 h-12 rounded-full border text-lg ${rankColorClass}`}>
+                                                    {cell}
+                                                </span>
+                                            </td>
+                                        );
+                                    }
+
+                                    // Complex Name Column formatting
+                                    if (typeof cell === 'object' && cell !== null) {
+                                        return (
+                                            <td key={cellIndex} className="py-6 px-10">
+                                                <div>
+                                                    <p className={`font-black text-xl ${rankVal === 1 ? "text-yellow-400" : "text-slate-200"
+                                                        }`}>
+                                                        {cell.name}
+                                                    </p>
+                                                    <p className="text-sm text-slate-500 font-medium mt-1">{cell.sub}</p>
+                                                </div>
+                                            </td>
+                                        );
+                                    }
+
+                                    // Regular text/numeric columns
+                                    return (
+                                        <td
+                                            key={cellIndex}
+                                            className={`py-6 px-10 text-lg font-bold ${cellIndex === headers.length - 1
+                                                ? "text-right text-[#00f2ad] text-2xl font-black"
+                                                : "text-slate-400"
+                                                }`}
+                                        >
+                                            {cell}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+    );
+
     return (
         <div className="w-full max-w-7xl flex flex-col space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="text-center space-y-4">
@@ -573,91 +839,16 @@ function TableView({ title, subtitle, headers, rows }: {
                 <h1 className="text-6xl font-black text-white">{subtitle}</h1>
             </div>
 
-            <div className="bg-[#0b1222]/80 backdrop-blur-md rounded-3xl border border-white/5 shadow-2xl overflow-hidden">
-                <table className="w-full border-collapse text-left">
-                    <thead>
-                        <tr className="border-b border-white/5 bg-white/5">
-                            {headers.map((h, i) => (
-                                <th
-                                    key={i}
-                                    className={`py-7 px-10 text-base font-black uppercase tracking-wider text-slate-400 ${i === headers.length - 1 ? "text-right" : ""
-                                        }`}
-                                >
-                                    {h}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={headers.length} className="py-16 text-center text-slate-500 font-bold text-lg">
-                                    No records available
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((row, rowIndex) => {
-                                const isTopThree = rowIndex < 3;
-                                const rankColors = [
-                                    "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-                                    "text-slate-300 bg-slate-300/10 border-slate-300/20",
-                                    "text-amber-600 bg-amber-600/10 border-amber-600/20"
-                                ];
-
-                                return (
-                                    <tr
-                                        key={rowIndex}
-                                        className={`hover:bg-white/[0.02] transition-colors ${rowIndex === 0 ? "bg-yellow-400/[0.01]" : ""
-                                            }`}
-                                    >
-                                        {row.map((cell, cellIndex) => {
-                                            // 1. Rank Column formatting
-                                            if (cellIndex === 0) {
-                                                return (
-                                                    <td key={cellIndex} className="py-6 px-10 font-black text-xl">
-                                                        <span className={`inline-flex items-center justify-center w-12 h-12 rounded-full border text-lg ${isTopThree ? rankColors[rowIndex] : "text-slate-500 bg-white/5 border-white/5"
-                                                            }`}>
-                                                            {cell}
-                                                        </span>
-                                                    </td>
-                                                );
-                                            }
-
-                                            // 2. Complex name object formatting
-                                            if (typeof cell === 'object' && cell !== null) {
-                                                return (
-                                                    <td key={cellIndex} className="py-6 px-10">
-                                                        <div>
-                                                            <p className={`font-black text-xl ${rowIndex === 0 ? "text-yellow-400" : "text-slate-200"
-                                                                }`}>
-                                                                {cell.name}
-                                                            </p>
-                                                            <p className="text-sm text-slate-500 font-medium mt-1">{cell.sub}</p>
-                                                        </div>
-                                                    </td>
-                                                );
-                                            }
-
-                                            // 3. Regular Column formatting
-                                            return (
-                                                <td
-                                                    key={cellIndex}
-                                                    className={`py-6 px-10 text-lg font-bold ${cellIndex === headers.length - 1
-                                                        ? "text-right text-[#00f2ad] text-2xl font-black"
-                                                        : "text-slate-400"
-                                                        }`}
-                                                >
-                                                    {cell}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                );
-                            })
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {isSplit ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                    {renderTableSegment(leftRows)}
+                    {renderTableSegment(rightRows)}
+                </div>
+            ) : (
+                <div className="w-full flex justify-center">
+                    {renderTableSegment(leftRows)}
+                </div>
+            )}
         </div>
     );
 }
