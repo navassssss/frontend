@@ -154,11 +154,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
+    // Minimum 2 minutes between event-driven refreshes (tab switch, window focus).
+    // Push notifications from the Service Worker bypass this cooldown intentionally.
+    const TWO_MINUTES = 2 * 60 * 1000;
+
     const safeFetch = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         const last = parseInt(localStorage.getItem(CACHE_TIME_KEY) || '0', 10);
-        if (!last || Date.now() - last > 10000) {
+        if (!last || Date.now() - last > TWO_MINUTES) {
           fetchNotifications();
         }
       }, 300);

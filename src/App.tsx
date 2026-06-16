@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider, Routes, Route, Navigate } from "re
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { StudentAuthProvider, useStudentAuth } from "@/contexts/StudentAuthContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
+import { IssuesBadgeProvider } from "@/contexts/IssuesBadgeContext";
 import { PWAPrompt } from "@/components/pwa/PWAPrompt";
 
 // Landing Page
@@ -97,7 +98,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/select-role" replace />;
   }
 
-  return <>{children}</>;
+  // NotificationsProvider and IssuesBadgeProvider are mounted HERE — only for
+  // fully authenticated staff. This prevents 401s on public/login pages and
+  // ensures the issues badge count is shared (one fetch) across Sidebar + BottomNav.
+  return (
+    <NotificationsProvider>
+      <IssuesBadgeProvider>
+        {children}
+      </IssuesBadgeProvider>
+    </NotificationsProvider>
+  );
 }
 
 function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
@@ -629,9 +639,7 @@ const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <StudentAuthProvider>
-          <NotificationsProvider>
-            <AppRoutes />
-          </NotificationsProvider>
+          <AppRoutes />
         </StudentAuthProvider>
       </AuthProvider>
     ),

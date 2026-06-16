@@ -2,9 +2,8 @@ import { Home, ClipboardList, CheckSquare, AlertCircle, User, Users, FileText, B
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useIssuesBadge } from '@/contexts/IssuesBadgeContext';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import api from '@/lib/api';
 
 interface NavItem {
   icon: any;
@@ -41,7 +40,7 @@ export function BottomNav() {
   const { user } = useAuth();
   const isPrincipal = user?.role === 'principal' || (user?.role === 'teacher' && user?.is_vice_principal);
   const isManager = user?.role === 'manager';
-  const [openIssuesCount, setOpenIssuesCount] = useState(0);
+  const [openIssuesCount] = [useIssuesBadge().openIssuesCount]; // shared — no independent API call
 
   let navItems = baseNavItems;
   if (isPrincipal) navItems = principalNavItems;
@@ -71,38 +70,6 @@ export function BottomNav() {
   }
 
 
-  useEffect(() => {
-    if (!isPrincipal) return;
-
-    let lastFetch = 0;
-
-    const safeFetch = () => {
-      if (Date.now() - lastFetch < 60_000) return;
-      lastFetch = Date.now();
-      fetchOpenIssuesCount();
-    };
-
-    safeFetch();
-
-    const onVisible = () => { if (document.visibilityState === 'visible') safeFetch(); };
-    const onFocus   = () => safeFetch();
-
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('focus', onFocus);
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('focus', onFocus);
-    };
-  }, [isPrincipal]);
-
-  const fetchOpenIssuesCount = async () => {
-    try {
-      const { data } = await api.get('/issues?status=open&per_page=1');
-      setOpenIssuesCount(data.total ?? data.length ?? 0);
-    } catch {
-      // silently ignore
-    }
-  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border bottom-nav-height z-50">
