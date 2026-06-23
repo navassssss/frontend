@@ -100,6 +100,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     const [adjustments, setAdjustments] = useState<Record<string, string>>({});
     const [totalPendingFromBackend, setTotalPendingFromBackend] = useState(0);
 
+    const [studentMonthlyFee, setStudentMonthlyFee] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -185,6 +186,8 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         setLoading(true);
         try {
             const overview = await feeApi.getStudentOverview(parseInt(selectedStudent.id));
+            
+            setStudentMonthlyFee(overview.student?.monthly_fee ?? null);
 
             // Convert backend response to component format
             const monthlyStatus: MonthlyFeeStatus[] = overview.monthly_status.map((m: any) => ({
@@ -217,6 +220,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             // Fallback to empty arrays if API fails
             setMonthlyStatus([]);
             setMonthlyFees([]);
+            setStudentMonthlyFee(null);
         } finally {
             setLoading(false);
         }
@@ -232,6 +236,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         setAdjustments({});
         setMonthlyStatus([]);
         setMonthlyFees([]);
+        setStudentMonthlyFee(null);
     };
 
     // Calculate allocation preview based on current amount and adjustments
@@ -522,6 +527,17 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                     <div className="h-12 bg-muted rounded" />
                                 </CardContent>
                             </Card>
+                        )}
+
+                        {/* Zero Fee Warning */}
+                        {selectedStudent && !loading && studentMonthlyFee === 0 && (
+                            <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-400">
+                                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                                <div className="text-sm">
+                                    <p className="font-semibold">Zero Fixed Fee Student</p>
+                                    <p className="mt-1 opacity-90">This student's monthly fee is ₹0. Any amount entered here will be recorded as a one-time payment for the current month. It will not generate future monthly fees.</p>
+                                </div>
+                            </div>
                         )}
 
                         {/* Payment Details */}
