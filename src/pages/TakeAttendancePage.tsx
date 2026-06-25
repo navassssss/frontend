@@ -286,7 +286,7 @@ export default function TakeAttendancePage() {
                                                     </h3>
                                                 </div>
                                                 <p className="text-sm text-muted-foreground">
-                                                    Tap a student to toggle their attendance status
+                                                    Uncheck a student to mark them as absent.
                                                 </p>
                                             </div>
                                             <div className="flex gap-2 bg-muted/50 p-1.5 rounded-lg border">
@@ -301,116 +301,96 @@ export default function TakeAttendancePage() {
                                             </div>
                                         </div>
 
-                                        {/* Search/Filter for Grid */}
-                                        <div className="relative mb-6">
+                                        {/* Search/Filter for List */}
+                                        <div className="relative mb-4">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                             <Input
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                                 placeholder="Filter students by name or roll number..."
-                                                className="pl-10 bg-background"
+                                                className="pl-10 bg-background h-9"
                                             />
                                         </div>
 
-                                        {/* Students Grid */}
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {/* Compact Student List */}
+                                        <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1 rounded-md border p-1">
+                                            {/* Header Row */}
+                                            <div className="flex items-center px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/50 rounded-md sticky top-0 z-10 backdrop-blur-sm">
+                                                <div className="w-8 shrink-0 flex justify-center">Status</div>
+                                                <div className="w-12 shrink-0">Roll</div>
+                                                <div className="flex-1">Name</div>
+                                                <div className="w-1/3 min-w-[120px] hidden sm:block">Reason (if absent)</div>
+                                            </div>
+                                            
                                             {(searchQuery ? filteredStudents : students).map((student) => {
                                                 const isAbsent = absentStudents.some(abs => abs.id === student.id);
                                                 return (
-                                                    <button
-                                                        key={student.id}
-                                                        type="button"
-                                                        onClick={() => isAbsent ? removeAbsent(student.id) : addAbsent(student.id)}
-                                                        className={`relative p-3 rounded-xl border-2 transition-all flex flex-col items-center text-center gap-2 overflow-hidden ${
-                                                            isAbsent
-                                                                ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10'
-                                                                : 'border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/40'
+                                                    <div 
+                                                        key={student.id} 
+                                                        className={`flex flex-col sm:flex-row sm:items-center px-3 py-2 rounded-md transition-colors border-b last:border-0 ${
+                                                            isAbsent ? 'bg-destructive/5 hover:bg-destructive/10' : 'hover:bg-muted/50'
                                                         }`}
                                                     >
-                                                        <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${isAbsent ? 'bg-destructive' : 'bg-emerald-500'}`} />
-                                                        
-                                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mt-2 mb-1 transition-colors ${
-                                                            isAbsent ? 'bg-destructive/10 text-destructive' : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
-                                                        }`}>
-                                                            {isAbsent ? <X className="w-6 h-6" /> : <Check className="w-6 h-6" />}
-                                                        </div>
-                                                        
-                                                        <div className="w-full">
-                                                            <p className={`font-bold text-sm leading-tight truncate ${isAbsent ? 'text-destructive' : 'text-foreground'}`}>
+                                                        <div className="flex items-center w-full sm:w-auto flex-1">
+                                                            {/* Checkbox / Toggle */}
+                                                            <div className="w-8 shrink-0 flex justify-center cursor-pointer" onClick={() => isAbsent ? removeAbsent(student.id) : addAbsent(student.id)}>
+                                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                                                                    !isAbsent ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-input bg-background text-transparent'
+                                                                }`}>
+                                                                    <Check className="w-3.5 h-3.5" />
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Info */}
+                                                            <div className="w-12 shrink-0 text-sm font-medium text-muted-foreground ml-2 sm:ml-0">
+                                                                {student.roll_number || '-'}
+                                                            </div>
+                                                            <div className={`flex-1 text-sm font-medium ${isAbsent ? 'text-destructive line-through opacity-70' : 'text-foreground'}`}>
                                                                 {student.name}
-                                                            </p>
-                                                            <p className="text-[11px] text-muted-foreground mt-0.5">
-                                                                Roll: {student.roll_number || '-'}
-                                                            </p>
+                                                            </div>
                                                         </div>
-                                                    </button>
+                                                        
+                                                        {/* Inline Reason Input (Mobile shows below, Desktop shows inline) */}
+                                                        {isAbsent && (
+                                                            <div className="w-full sm:w-1/3 sm:min-w-[120px] mt-2 sm:mt-0 pl-10 sm:pl-0">
+                                                                <Input
+                                                                    placeholder="Reason (optional)..."
+                                                                    value={absentStudents.find(s => s.id === student.id)?.reason || ''}
+                                                                    onChange={(e) => updateReason(student.id, e.target.value)}
+                                                                    className="h-7 text-xs bg-background border-destructive/20 focus-visible:ring-destructive/30"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 );
                                             })}
+                                            
+                                            {students.length === 0 && (
+                                                <div className="text-center py-6 text-sm text-muted-foreground">
+                                                    No students found in this class.
+                                                </div>
+                                            )}
+                                            {searchQuery && filteredStudents.length === 0 && students.length > 0 && (
+                                                <div className="text-center py-6 text-sm text-muted-foreground">
+                                                    No students match your search.
+                                                </div>
+                                            )}
                                         </div>
-                                        
-                                        {students.length === 0 && (
-                                            <div className="text-center py-8 text-muted-foreground">
-                                                No students found in this class.
-                                            </div>
-                                        )}
-                                        {searchQuery && filteredStudents.length === 0 && students.length > 0 && (
-                                            <div className="text-center py-8 text-muted-foreground">
-                                                No students match your search.
-                                            </div>
-                                        )}
                                     </CardContent>
                                 </Card>
 
-                                {/* Absent Students List (for reasons) */}
-                                {absentStudentDetails.length > 0 && (
-                                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                        <div className="flex items-center gap-2 px-1">
-                                            <AlertCircle className="w-4 h-4 text-destructive" />
-                                            <Label className="text-destructive font-semibold">Absentee Details ({absentStudentDetails.length})</Label>
-                                        </div>
-                                        <div className="grid gap-2">
-                                            {absentStudentDetails.map((student) => (
-                                                <Card key={student.id} className="border-destructive/20 bg-destructive/5 overflow-hidden">
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3">
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-destructive truncate">{student.name}</p>
-                                                            <p className="text-[11px] text-muted-foreground">Roll: {student.roll_number}</p>
-                                                        </div>
-                                                        <div className="flex-1 max-w-md w-full relative">
-                                                            <Input
-                                                                placeholder="Reason for absence (Optional)"
-                                                                value={absentStudents.find(s => s.id === student.id)?.reason || ''}
-                                                                onChange={(e) => updateReason(student.id, e.target.value)}
-                                                                className="h-9 text-sm bg-background border-destructive/20 focus-visible:ring-destructive/30 pr-10"
-                                                            />
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => removeAbsent(student.id)}
-                                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                                            >
-                                                                <X className="w-3.5 h-3.5" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </Card>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                        {/* Submit Button */}
-                        <Button
-                            variant="touch"
-                            className="w-full"
-                            onClick={handleSubmit}
-                            disabled={isSubmitting || (duplicateError && !editId)}
-                        >
-                            <Check className="w-5 h-5 mr-2" />
-                            {isSubmitting ? (editId ? 'Updating...' : 'Submitting...') : (editId ? 'Update Attendance' : 'Submit Attendance')}
-                        </Button>
-                    </>
-                )}
+                                {/* Submit Button */}
+                                <Button
+                                    variant="touch"
+                                    className="w-full"
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting || (duplicateError && !editId)}
+                                >
+                                    <Check className="w-5 h-5 mr-2" />
+                                    {isSubmitting ? (editId ? 'Updating...' : 'Submitting...') : (editId ? 'Update Attendance' : 'Submit Attendance')}
+                                </Button>
+                            </>
+                        )}
             </div>
         </AppLayout>
     );
