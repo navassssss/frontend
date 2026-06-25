@@ -307,7 +307,7 @@ export default function TakeAttendancePage() {
                                             <Input
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                placeholder="Filter students by name or roll number..."
+                                                placeholder="Search student..."
                                                 className="pl-10 bg-background h-9"
                                             />
                                         </div>
@@ -315,7 +315,7 @@ export default function TakeAttendancePage() {
                                         {/* Compact Student List */}
                                         <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1 rounded-md border p-1">
                                             {/* Header Row */}
-                                            <div className="flex items-center px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/50 rounded-md sticky top-0 z-10 backdrop-blur-sm">
+                                            <div className="flex items-center px-3 py-2 text-xs font-semibold text-muted-foreground bg-secondary dark:bg-secondary/95 border-b rounded-md sticky top-0 z-10 shadow-sm">
                                                 <div className="w-8 shrink-0 flex justify-center">Status</div>
                                                 <div className="w-12 shrink-0">Roll</div>
                                                 <div className="flex-1">Name</div>
