@@ -272,105 +272,132 @@ export default function TakeAttendancePage() {
                     </Card>
                 )}
 
-                {/* Mark Absent Section */}
-                {selectedClass && (!duplicateError || !!editId) && (
-                    <>
-                        <Card variant="elevated">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-2">
-                                        <Users className="w-5 h-5 text-primary" />
-                                        <span className="font-medium text-foreground">
-                                            Class  {selectedClassInfo?.name}
-                                        </span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Badge variant="success">{presentCount} Present</Badge>
-                                        <Badge variant="destructive">{absentStudents.length} Absent</Badge>
-                                    </div>
-                                </div>
-                                <p className="text-[11px] text-muted-foreground">
-                                    By default, all students are marked present. Type names of absent students below.
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        {/* Search Input with Autocomplete */}
-                        <div className="space-y-2 relative">
-                            <Label>Mark Absent (type student name)</Label>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search by name or roll number..."
-                                    className="pl-10"
-                                />
-                            </div>
-
-                            {/* Autocomplete Dropdown */}
-                            {filteredStudents.length > 0 && (
-                                <Card className="absolute z-50 w-full mt-1 shadow-xl border-2 border-primary/20 bg-card">
-                                    <CardContent className="p-2 max-h-64 overflow-y-auto">
-                                        {filteredStudents.map((student) => (
-                                            <button
-                                                key={student.id}
-                                                type="button"
-                                                className={`w-full p-3 text-left rounded-lg flex items-center justify-between hover:bg-primary/10 transition-colors ${absentStudents.some(abs => abs.id === student.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                                                    }`}
-                                                onClick={() => addAbsent(student.id)}
-                                                disabled={absentStudents.some(abs => abs.id === student.id)}
-                                            >
-                                                <div>
-                                                    <p className="font-medium text-foreground">{student.name}</p>
-                                                    <p className="text-[11px] text-muted-foreground">Roll: {student.roll_number}</p>
+                        {/* Attendance Toggles Section */}
+                        {selectedClass && (!duplicateError || !!editId) && (
+                            <>
+                                <Card className="border-primary/20 shadow-md">
+                                    <CardContent className="p-4 sm:p-6">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Users className="w-5 h-5 text-primary" />
+                                                    <h3 className="text-lg font-bold text-foreground">
+                                                        Class {selectedClassInfo?.name}
+                                                    </h3>
                                                 </div>
-                                                {absentStudents.some(abs => abs.id === student.id) ? (
-                                                    <Badge variant="destructive">Already Absent</Badge>
-                                                ) : (
-                                                    <Badge variant="outline">Mark Absent</Badge>
-                                                )}
-                                            </button>
-                                        ))}
+                                                <p className="text-sm text-muted-foreground">
+                                                    Tap a student to toggle their attendance status
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2 bg-muted/50 p-1.5 rounded-lg border">
+                                                <div className="px-3 py-1.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium text-sm flex flex-col items-center min-w-[4rem]">
+                                                    <span className="text-lg font-bold leading-none mb-1">{presentCount}</span>
+                                                    <span className="text-[10px] uppercase tracking-wider">Present</span>
+                                                </div>
+                                                <div className="px-3 py-1.5 rounded-md bg-destructive/10 text-destructive font-medium text-sm flex flex-col items-center min-w-[4rem]">
+                                                    <span className="text-lg font-bold leading-none mb-1">{absentStudents.length}</span>
+                                                    <span className="text-[10px] uppercase tracking-wider">Absent</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Search/Filter for Grid */}
+                                        <div className="relative mb-6">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <Input
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                placeholder="Filter students by name or roll number..."
+                                                className="pl-10 bg-background"
+                                            />
+                                        </div>
+
+                                        {/* Students Grid */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            {(searchQuery ? filteredStudents : students).map((student) => {
+                                                const isAbsent = absentStudents.some(abs => abs.id === student.id);
+                                                return (
+                                                    <button
+                                                        key={student.id}
+                                                        type="button"
+                                                        onClick={() => isAbsent ? removeAbsent(student.id) : addAbsent(student.id)}
+                                                        className={`relative p-3 rounded-xl border-2 transition-all flex flex-col items-center text-center gap-2 overflow-hidden ${
+                                                            isAbsent
+                                                                ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10'
+                                                                : 'border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/40'
+                                                        }`}
+                                                    >
+                                                        <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${isAbsent ? 'bg-destructive' : 'bg-emerald-500'}`} />
+                                                        
+                                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mt-2 mb-1 transition-colors ${
+                                                            isAbsent ? 'bg-destructive/10 text-destructive' : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
+                                                        }`}>
+                                                            {isAbsent ? <X className="w-6 h-6" /> : <Check className="w-6 h-6" />}
+                                                        </div>
+                                                        
+                                                        <div className="w-full">
+                                                            <p className={`font-bold text-sm leading-tight truncate ${isAbsent ? 'text-destructive' : 'text-foreground'}`}>
+                                                                {student.name}
+                                                            </p>
+                                                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                                                Roll: {student.roll_number || '-'}
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        
+                                        {students.length === 0 && (
+                                            <div className="text-center py-8 text-muted-foreground">
+                                                No students found in this class.
+                                            </div>
+                                        )}
+                                        {searchQuery && filteredStudents.length === 0 && students.length > 0 && (
+                                            <div className="text-center py-8 text-muted-foreground">
+                                                No students match your search.
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
-                            )}
-                        </div>
 
-                        {/* Absent Students List */}
-                        {absentStudentDetails.length > 0 && (
-                            <div className="space-y-3">
-                                <Label>Absent Students ({absentStudentDetails.length})</Label>
-                                <div className="space-y-2">
-                                    {absentStudentDetails.map((student) => (
-                                        <Card key={student.id} className="border-destructive/30 bg-destructive/5">
-                                            <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-foreground">{student.name}</p>
-                                                    <p className="text-[11px] text-muted-foreground">Roll: {student.roll_number}</p>
-                                                </div>
-                                                <div className="flex-1 max-w-sm">
-                                                    <Input
-                                                        placeholder="Reason (Optional)"
-                                                        value={absentStudents.find(s => s.id === student.id)?.reason || ''}
-                                                        onChange={(e) => updateReason(student.id, e.target.value)}
-                                                        className="h-8 text-sm"
-                                                    />
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => removeAbsent(student.id)}
-                                                    className="shrink-0"
-                                                >
-                                                    <X className="w-4 h-4 text-destructive" />
-                                                </Button>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                                {/* Absent Students List (for reasons) */}
+                                {absentStudentDetails.length > 0 && (
+                                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                        <div className="flex items-center gap-2 px-1">
+                                            <AlertCircle className="w-4 h-4 text-destructive" />
+                                            <Label className="text-destructive font-semibold">Absentee Details ({absentStudentDetails.length})</Label>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            {absentStudentDetails.map((student) => (
+                                                <Card key={student.id} className="border-destructive/20 bg-destructive/5 overflow-hidden">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-destructive truncate">{student.name}</p>
+                                                            <p className="text-[11px] text-muted-foreground">Roll: {student.roll_number}</p>
+                                                        </div>
+                                                        <div className="flex-1 max-w-md w-full relative">
+                                                            <Input
+                                                                placeholder="Reason for absence (Optional)"
+                                                                value={absentStudents.find(s => s.id === student.id)?.reason || ''}
+                                                                onChange={(e) => updateReason(student.id, e.target.value)}
+                                                                className="h-9 text-sm bg-background border-destructive/20 focus-visible:ring-destructive/30 pr-10"
+                                                            />
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => removeAbsent(student.id)}
+                                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            >
+                                                                <X className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                         {/* Submit Button */}
                         <Button
