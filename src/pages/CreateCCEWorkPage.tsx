@@ -150,9 +150,9 @@ export default function CreateCCEWorkPage() {
                     <div className="lg:col-span-8 space-y-6">
 
                         {/* Card 1: Academic Context */}
-                        <Card className="border-0 shadow-sm rounded-3xl overflow-hidden bg-white">
+                        <Card className="border border-slate-200 shadow-sm rounded-3xl overflow-hidden bg-white">
                             <div className="p-6 md:p-8">
-                                <div className="flex items-center gap-2 mb-6">
+                                <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-[#00a67e] rounded-full"></div>
                                     <h2 className="text-lg font-bold text-slate-800">Primary Details</h2>
                                 </div>
@@ -245,9 +245,9 @@ export default function CreateCCEWorkPage() {
                         </Card>
 
                         {/* Card 2: Assessment Details */}
-                        <Card className="border-0 shadow-sm rounded-3xl overflow-hidden bg-white">
+                        <Card className="border border-slate-200 shadow-sm rounded-3xl overflow-hidden bg-white">
                             <div className="p-6 md:p-8">
-                                <div className="flex items-center gap-2 mb-6">
+                                <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-[#00a67e] rounded-full"></div>
                                     <h2 className="text-lg font-bold text-slate-800">Assessment Details</h2>
                                 </div>
@@ -319,9 +319,9 @@ export default function CreateCCEWorkPage() {
                     <div className="lg:col-span-4 space-y-6">
 
                         {/* Card 3: Scheduling */}
-                        <Card className="border-0 shadow-sm rounded-3xl overflow-hidden bg-white">
+                        <Card className="border border-slate-200 shadow-sm rounded-3xl overflow-hidden bg-white">
                             <div className="p-6">
-                                <div className="flex items-center gap-2 mb-6">
+                                <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-[#00a67e] rounded-full"></div>
                                     <h2 className="text-lg font-bold text-slate-800">Scheduling</h2>
                                 </div>
@@ -368,9 +368,9 @@ export default function CreateCCEWorkPage() {
                         </Card>
 
                         {/* Card 4: Submission Format */}
-                        <Card className="border-0 shadow-sm rounded-3xl overflow-hidden bg-white">
+                        <Card className="border border-slate-200 shadow-sm rounded-3xl overflow-hidden bg-white">
                             <div className="p-6">
-                                <div className="flex items-center gap-2 mb-6">
+                                <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-[#00a67e] rounded-full"></div>
                                     <h2 className="text-lg font-bold text-slate-800">Submission Format</h2>
                                 </div>
