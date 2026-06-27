@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     Sun,
-    Sunset,
     Search,
     X,
     Check,
@@ -50,6 +49,16 @@ interface StudentData {
 const getCurrentSession = (): 'morning' | 'afternoon' => {
     const currentHour = new Date().getHours();
     return (currentHour >= 6 && currentHour < 13) ? 'morning' : 'afternoon';
+};
+
+const toTitleCase = (str: string) => {
+    if (!str) return str;
+    return str.replace(
+        /\w\S*/g,
+        function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }
+    );
 };
 
 export default function TakeAttendancePage() {
@@ -317,7 +326,7 @@ export default function TakeAttendancePage() {
                                                                 {student.roll_number || '-'}
                                                             </div>
                                                             <div className={`flex-1 text-[15px] font-bold transition-colors ${isAbsent ? 'text-destructive' : 'text-foreground'}`}>
-                                                                {student.name}
+                                                                {toTitleCase(student.name)}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -380,7 +389,7 @@ export default function TakeAttendancePage() {
                                     {students.filter(s => absentStudents.some(abs => abs.id === s.id)).map(student => (
                                         <div key={student.id} className="p-3 flex gap-3 items-center bg-background hover:bg-muted/50 transition-colors">
                                             <span className="w-8 shrink-0 text-sm font-bold text-muted-foreground text-right">{student.roll_number || '-'}</span>
-                                            <span className="font-bold text-[15px] text-destructive flex-1">{student.name}</span>
+                                            <span className="font-bold text-[15px] text-destructive flex-1">{toTitleCase(student.name)}</span>
                                             <X className="w-4 h-4 text-destructive shrink-0" />
                                         </div>
                                     ))}

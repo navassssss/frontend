@@ -7,7 +7,7 @@ import {
     ChevronLeft,
     Clock,
     Sun,
-    Sunset,
+    Moon,
     CheckCircle,
     XCircle,
     Plus,
@@ -23,6 +23,16 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, addDays, subDays } from 'date-fns';
 import api from '@/lib/api';
+
+const toTitleCase = (str: string) => {
+    if (!str) return str;
+    return str.replace(
+        /\w\S*/g,
+        function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }
+    );
+};
 
 interface AttendanceRecord {
     id: number;
@@ -200,7 +210,7 @@ export default function AttendancePage() {
                     </div>
                 )}
 
-                <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start flex flex-col gap-6">
+                <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start flex flex-col gap-10">
                     {/* Main Content Area: Submission History */}
                     <div className="lg:col-span-8 xl:col-span-9 space-y-3 order-2 lg:order-1">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -228,7 +238,7 @@ export default function AttendancePage() {
                                     onClick={() => setSessionFilter('afternoon')}
                                     className="h-7 rounded-md"
                                 >
-                                    <Sunset className="w-3 h-3 mr-1.5" /> Afternoon
+                                    <Moon className="w-3 h-3 mr-1.5" /> Afternoon
                                 </Button>
                             </div>
                         </div>
@@ -237,16 +247,16 @@ export default function AttendancePage() {
                         <div className={`grid grid-cols-2 gap-3`}>
                             {(sessionFilter === 'morning') && (
                                 <>
-                                    {/* Morning Present - Amber theme */}
-                                    <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-100 shadow-sm hover:shadow-md transition-all">
+                                    {/* Morning Present - Emerald theme */}
+                                    <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-100 shadow-sm hover:shadow-md transition-all">
                                         <CardContent className="p-3 flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                                <Sun className="w-4 h-4" />
+                                            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                                <CheckCircle className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Present</p>
+                                                <p className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider">Present</p>
                                                 <div className="flex items-baseline gap-2">
-                                                    <span className="text-xl font-bold text-amber-700">{todayStats.morningPresent}</span>
+                                                    <span className="text-xl font-bold text-emerald-700">{todayStats.morningPresent}</span>
                                                     <span className="text-[11px] text-teal-600 font-semibold">Students</span>
                                                 </div>
                                             </div>
@@ -256,8 +266,8 @@ export default function AttendancePage() {
                                     {/* Morning Absent - Pink theme */}
                                     <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100 shadow-sm hover:shadow-md transition-all">
                                         <CardContent className="p-3 flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                                <Sun className="w-4 h-4" />
+                                            <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                                                <XCircle className="w-4 h-4" />
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-pink-900 uppercase tracking-wider">Absent</p>
@@ -273,16 +283,16 @@ export default function AttendancePage() {
 
                             {(sessionFilter === 'afternoon') && (
                                 <>
-                                    {/* Afternoon Present - Amber theme */}
-                                    <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-100 shadow-sm hover:shadow-md transition-all">
+                                    {/* Afternoon Present - Emerald theme */}
+                                    <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-100 shadow-sm hover:shadow-md transition-all">
                                         <CardContent className="p-3 flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                                <Sunset className="w-4 h-4" />
+                                            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                                <CheckCircle className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Present</p>
+                                                <p className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider">Present</p>
                                                 <div className="flex items-baseline gap-2">
-                                                    <span className="text-xl font-bold text-amber-700">{todayStats.afternoonPresent}</span>
+                                                    <span className="text-xl font-bold text-emerald-700">{todayStats.afternoonPresent}</span>
                                                     <span className="text-[11px] text-teal-600 font-semibold">Students</span>
                                                 </div>
                                             </div>
@@ -292,8 +302,8 @@ export default function AttendancePage() {
                                     {/* Afternoon Absent - Pink theme */}
                                     <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100 shadow-sm hover:shadow-md transition-all">
                                         <CardContent className="p-3 flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                                                <Sunset className="w-4 h-4" />
+                                            <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                                                <XCircle className="w-4 h-4" />
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-pink-900 uppercase tracking-wider">Absent</p>
@@ -345,9 +355,9 @@ export default function AttendancePage() {
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${record.session === 'morning'
                                                             ? 'bg-amber-100 text-amber-600'
-                                                            : 'bg-amber-100 text-amber-600'
+                                                            : 'bg-indigo-100 text-indigo-600'
                                                             }`}>
-                                                            {record.session === 'morning' ? <Sun className="w-4 h-4" /> : <Sunset className="w-4 h-4" />}
+                                                            {record.session === 'morning' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                                                         </div>
                                                         <div>
                                                             <div className="flex items-center gap-2">
@@ -395,7 +405,7 @@ export default function AttendancePage() {
                                                             {(Array.isArray(record.absentStudents) ? record.absentStudents : []).map((student) => (
                                                                 <div key={student.id} className="flex flex-col md:flex-row md:items-center gap-2 p-2.5 bg-background rounded-lg border border-border/50 text-sm shadow-sm">
                                                                     <div className="flex items-center justify-between md:w-auto md:shrink-0">
-                                                                        <span className="font-medium text-foreground md:min-w-[120px] pr-2">{student.name}</span>
+                                                                        <span className="font-medium text-foreground md:min-w-[120px] pr-2">{toTitleCase(student.name)}</span>
                                                                         <Badge variant="secondary" className="text-[10px] md:hidden">
                                                                             Roll #{student.roll_number}
                                                                         </Badge>

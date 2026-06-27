@@ -7,6 +7,16 @@ import { FileText, Users, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
 
+const toTitleCase = (str: string) => {
+    if (!str) return str;
+    return str.replace(
+        /\w\S*/g,
+        function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }
+    );
+};
+
 interface SummaryData {
     totalStudents: number;
     fnAttendance: number;
@@ -211,7 +221,7 @@ export default function AttendanceReportsPage() {
                                         {officialAbsences.map(abs => (
                                             <tr key={abs.id} className="hover:bg-muted/20 transition-colors">
                                                 <td className="px-4 py-2.5 font-medium text-foreground">{abs.class}</td>
-                                                <td className="px-4 py-2.5 text-foreground">{abs.student}</td>
+                                                <td className="px-4 py-2.5 text-foreground">{toTitleCase(abs.student)}</td>
                                                 <td className="px-4 py-2.5">
                                                     <span className="text-[11px] font-medium text-muted-foreground">
                                                         {abs.reason}
