@@ -189,36 +189,16 @@ export default function AttendancePage() {
         <AppLayout title="Attendance">
             <div className="p-4 lg:p-6 space-y-6">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    {studentId && studentName && (
+                {studentId && studentName && (
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                         <div className="text-center md:text-left">
                             <h1 className="text-lg font-bold text-foreground">Attendance Records</h1>
                             <p className="text-muted-foreground text-[11px]">
                                 Viewing records for {studentName}
                             </p>
                         </div>
-                    )}
-
-                    {/* Improved Date Navigation */}
-                    <div className="flex items-center justify-center bg-card border border-border rounded-xl p-1 shadow-sm mx-auto md:mx-0 w-fit">
-                        <Button variant="ghost" size="icon" onClick={() => changeDate(-1)} className="h-8 w-8 shrink-0">
-                            <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                        <div className="flex items-center justify-center gap-2 px-2 sm:px-3 border-x border-border mx-1 min-w-[120px]">
-                            <CalendarIcon className="w-3.5 h-3.5 text-primary shrink-0" />
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                className="bg-transparent border-none focus:ring-0 text-[13px] font-medium w-auto cursor-pointer p-0"
-                            />
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => changeDate(1)} className="h-8 w-8 shrink-0">
-                            <ChevronRight className="w-4 h-4" />
-                        </Button>
                     </div>
-
-                </div>
+                )}
 
                 <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start flex flex-col gap-6">
                     {/* Main Content Area: Submission History */}
@@ -472,33 +452,25 @@ export default function AttendancePage() {
                     {/* Class Status Overview - Sidebar */}
                     {!studentId && classStatuses.length > 0 && (
                         <div className="lg:col-span-4 xl:col-span-3 space-y-3 order-1 lg:order-2 lg:sticky lg:top-6">
-                            <h2 className="text-[13px] font-semibold flex items-center gap-2">
+                            <h2 className="text-[14px] font-semibold flex items-center gap-2 mb-2">
                                 <CalendarIcon className="w-4 h-4 text-primary" />
-                                Select Class to Mark Attendance
+                                Select Class
                             </h2>
-                            <Card className="h-fit shadow-sm">
-                                <CardContent className="p-3 pt-3">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-1 gap-3">
-                                        {classStatuses.map((cls) => {
-                                            return (
-                                                <button
-                                                    key={cls.id}
-                                                    onClick={() => navigate(`/attendance/take?class=${cls.id}`)}
-                                                    className="p-3 rounded-xl border flex items-center justify-between transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95 cursor-pointer w-full text-left group bg-card hover:bg-muted/50 border-border"
-                                                    title={`Click to mark attendance for ${cls.name}`}
-                                                >
-                                                    <div className="flex items-center gap-3 overflow-hidden">
-                                                        <div className="w-8 h-8 shrink-0 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors text-primary">
-                                                            <Plus className="w-4 h-4" />
-                                                        </div>
-                                                        <span className="text-[13px] font-bold truncate text-foreground">{cls.name}</span>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-1 gap-3">
+                                {classStatuses.map((cls) => {
+                                    return (
+                                        <button
+                                            key={cls.id}
+                                            onClick={() => navigate(`/attendance/take?class=${cls.id}`)}
+                                            className="p-3 rounded-xl border flex items-center justify-between transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95 cursor-pointer w-full text-left group bg-card hover:bg-muted/50 border-border"
+                                            title={`Click to mark attendance for ${cls.name}`}
+                                        >
+                                            <span className="text-[14px] font-bold truncate text-foreground pl-1">{cls.name}</span>
+                                            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>
