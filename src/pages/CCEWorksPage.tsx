@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Plus,
-    ChevronDown,
-    MoreVertical,
-    BookOpen
+    BookOpen,
+    Search
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
 import api from '@/lib/api';
 
 interface SubjectSummary {
@@ -16,55 +14,10 @@ interface SubjectSummary {
     subject_name: string;
     max_marks: number;
     class_name: string;
+    teacher_name?: string;
     total_works: number;
     completed_works: number;
 }
-
-interface CCEWork {
-    id: number;
-    title: string;
-    description: string;
-    level: number;
-    week: number;
-    subjectId: string;
-    subjectName: string;
-    className: string;
-    teacherName: string;
-    toolMethod: string;
-    issuedDate: string;
-    dueDate: string;
-    maxMarks: number;
-    submissionType: string;
-    submissionsCount: number;
-    evaluatedCount: number;
-}
-
-const getStage = (classStr: string) => {
-    const num = parseInt(classStr.replace(/\D/g, ''));
-    if (isNaN(num)) return "General Segment";
-    if (num <= 6) return "Secondary";
-    if (num <= 8) return "Senior Secondary";
-    return "Degree";
-};
-
-const getSubjectTagStyle = (index: number) => {
-    const styles = [
-        "bg-emerald-100 text-emerald-800",
-        "bg-blue-100 text-blue-800",
-        "bg-amber-100 text-amber-800",
-        "bg-rose-100 text-rose-800",
-        "bg-violet-100 text-violet-800"
-    ];
-    return styles[index % styles.length];
-};
-
-const getTypeStyle = (type: string) => {
-    const t = type.toUpperCase();
-    if (t.includes('QUIZ') || t.includes('TEST')) return "bg-emerald-100 text-emerald-800";
-    if (t.includes('PROJECT')) return "bg-rose-100 text-rose-800";
-    if (t.includes('ASSIGN')) return "bg-blue-100 text-blue-800";
-    return "bg-slate-100 text-slate-800";
-};
 
 export default function CCEWorksPage() {
     const navigate = useNavigate();
@@ -72,9 +25,9 @@ export default function CCEWorksPage() {
     const isPrincipal = user?.role === 'principal';
 
     const [subjectsSummary, setSubjectsSummary] = useState<SubjectSummary[]>([]);
-    const [works, setWorks] = useState<CCEWork[]>([]);
     const [loading, setLoading] = useState(true);
     const [subjectFilter, setSubjectFilter] = useState<'my' | 'all'>('my');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         loadData();
@@ -85,9 +38,7 @@ export default function CCEWorksPage() {
             const [worksRes] = await Promise.all([
                 api.get(`/cce/works?filter=${subjectFilter}`)
             ]);
-            setWorks(worksRes.data.works || worksRes.data);
             setSubjectsSummary(worksRes.data.subjects_summary || []);
-
         } catch (error) {
             console.error('Failed to load data', error);
         } finally {
@@ -95,19 +46,38 @@ export default function CCEWorksPage() {
         }
     };
 
+    const filteredSubjects = subjectsSummary.filter(sub => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+            sub.subject_name.toLowerCase().includes(q) ||
+            sub.class_name.toLowerCase().includes(q) ||
+            (sub.teacher_name && sub.teacher_name.toLowerCase().includes(q))
+        );
+    });
+
     return (
         <AppLayout title="CCE Works">
             <div className="p-4 lg:p-6 max-w-7xl mx-auto space-y-6 pb-24 min-h-screen">
 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 animate-fade-in">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">CCE Works Management</h1>
-                        <p className="text-sm text-muted-foreground mt-1">Expand classes to manage subject-specific evaluation rubrics.</p>
+                {/* Header Section */}
+                <div className="mb-6 animate-fade-in space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">CCE Works</h1>
+                            <p className="text-sm text-slate-500 mt-1 hidden sm:block">Manage evaluation rubrics across classes.</p>
+                        </div>
+                        <button
+                            onClick={() => navigate('/cce/works/new')}
+                            className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm px-4 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
+                        >
+                            <Plus className="w-4 h-4" strokeWidth={3} /> <span className="hidden sm:inline">New Assessment</span><span className="sm:hidden">New</span>
+                        </button>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        {isPrincipal && (
-                            <div className="flex bg-slate-100/80 p-1 rounded-full border border-slate-200">
+
+                    {isPrincipal && (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <div className="flex bg-slate-100/80 p-1 rounded-full border border-slate-200 shrink-0">
                                 <button
                                     onClick={() => setSubjectFilter('my')}
                                     className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
@@ -129,14 +99,23 @@ export default function CCEWorksPage() {
                                     All Subjects
                                 </button>
                             </div>
-                        )}
-                        <button
-                            onClick={() => navigate('/cce/works/new')}
-                            className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm px-4 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
-                        >
-                            <Plus className="w-4 h-4" strokeWidth={3} /> New Assessment
-                        </button>
-                    </div>
+
+                            {subjectFilter === 'all' && (
+                                <div className="flex-1 w-full sm:w-auto relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Search className="h-4 w-4 text-slate-400" />
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search subject, class, or teacher..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Subject Cards Grid */}
@@ -147,39 +126,62 @@ export default function CCEWorksPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {subjectsSummary.map(subject => {
+                            {filteredSubjects.map(subject => {
                                 const classPercent = subject.total_works > 0 ? Math.round((subject.completed_works / subject.total_works) * 100) : 0;
                                 
                                 return (
                                     <div 
                                         key={subject.subject_id} 
                                         onClick={() => navigate(`/cce/subjects/${subject.subject_id}`)}
-                                        className="bg-white p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+                                        className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                                     >
-                                        <div>
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                                                    <BookOpen className="w-5 h-5" />
-                                                </div>
-                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md line-clamp-1 max-w-[150px]">
-                                                    {subject.class_name}
-                                                </span>
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+                                                <BookOpen className="w-5 h-5" />
                                             </div>
-                                            <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">{subject.subject_name}</h3>
-                                            <p className="text-sm text-slate-500 mt-1">{subject.total_works} Assessments Configured</p>
+                                            <div className="flex-1 min-w-0 pt-0.5">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <h3 className="text-base font-bold text-slate-900 leading-tight truncate group-hover:text-emerald-700 transition-colors">
+                                                        {subject.subject_name}
+                                                    </h3>
+                                                    <span className="text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md shrink-0">
+                                                        {subject.class_name.includes('Class') ? subject.class_name.replace('Class', 'Grade') : subject.class_name}
+                                                    </span>
+                                                </div>
+                                                
+                                                {isPrincipal && subjectFilter === 'all' ? (
+                                                    <p className="text-xs text-slate-500 mt-1 truncate">
+                                                        Teacher: <span className="font-semibold text-slate-700">{subject.teacher_name || 'Unassigned'}</span>
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-xs font-semibold text-slate-500 mt-1">
+                                                        {subject.total_works === 0 ? 'No Assessments' : `${subject.total_works} Assessment${subject.total_works > 1 ? 's' : ''}`}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                         
-                                        <div className="mt-5">
-                                            <div className="flex justify-between items-end mb-1.5">
-                                                <span className="text-xs font-semibold text-slate-600">Evaluation Progress</span>
-                                                <span className="text-xs font-bold text-emerald-600">{classPercent}%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-1.5">
-                                                <div 
-                                                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
-                                                    style={{ width: `${classPercent}%` }}
-                                                />
-                                            </div>
+                                        <div className="mt-4">
+                                            {subject.total_works === 0 ? (
+                                                <div className="text-xs font-bold text-slate-400 bg-slate-50 py-1.5 px-3 rounded-lg text-center border border-slate-100">
+                                                    No assessments yet
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="flex justify-between items-end mb-1.5">
+                                                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                                            {isPrincipal && subjectFilter === 'all' ? `${subject.total_works} Assessments` : 'Progress'}
+                                                        </span>
+                                                        <span className="text-[11px] font-bold text-emerald-600">{classPercent}%</span>
+                                                    </div>
+                                                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                        <div 
+                                                            className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+                                                            style={{ width: `${classPercent}%` }}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -187,11 +189,11 @@ export default function CCEWorksPage() {
                         </div>
                     )}
                     
-                    {!loading && subjectsSummary.length === 0 && (
+                    {!loading && filteredSubjects.length === 0 && (
                         <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200">
                             <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                             <h3 className="text-lg font-semibold text-slate-900">No Subjects Found</h3>
-                            <p className="text-slate-500 mt-1">No subjects match the current filter.</p>
+                            <p className="text-slate-500 mt-1">No subjects match your current filters or search.</p>
                         </div>
                     )}
                 </div>
@@ -199,4 +201,3 @@ export default function CCEWorksPage() {
         </AppLayout>
     );
 }
-
