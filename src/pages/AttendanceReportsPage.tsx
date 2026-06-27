@@ -57,7 +57,7 @@ export default function AttendanceReportsPage() {
         const fetchReport = async () => {
             setLoading(true);
             try {
-                const response = await api.get(`/attendance/reports/operational?session=${session}`);
+                const response = await api.get(`/attendance/reports/operational?session=${session}&_t=${Date.now()}`);
                 setSummary(response.data.summary);
                 setOfficialAbsences(response.data.officialAbsences);
                 setClassAttendance(response.data.classAttendance);
@@ -76,7 +76,7 @@ export default function AttendanceReportsPage() {
             try {
                 const selectedDate = new Date().toISOString().split('T')[0];
                 const { data: classes } = await api.get('/attendance/classes');
-                const { data: attendanceData } = await api.get(`/attendance?date=${selectedDate}`);
+                const { data: attendanceData } = await api.get(`/attendance?date=${selectedDate}&_t=${Date.now()}`);
                 const attendanceRecords = attendanceData.records || attendanceData;
 
                 const statuses = classes.map((cls: any) => {

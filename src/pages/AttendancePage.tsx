@@ -94,7 +94,7 @@ export default function AttendancePage() {
         setLoading(true);
         try {
             if (studentId) {
-                const { data } = await api.get(`/students/${studentId}/attendance?date=${selectedDate}`);
+                const { data } = await api.get(`/students/${studentId}/attendance?date=${selectedDate}&_t=${Date.now()}`);
                 setStudentName(data.student.name);
 
                 const transformedRecords = data.records.length > 0 ? [{
@@ -120,7 +120,7 @@ export default function AttendancePage() {
                 setRecords(transformedRecords);
                 setTodayStats({ morningPresent: 0, morningAbsent: 0, afternoonPresent: 0, afternoonAbsent: 0 });
             } else {
-                const { data } = await api.get(`/attendance?date=${selectedDate}`);
+                const { data } = await api.get(`/attendance?date=${selectedDate}&_t=${Date.now()}`);
                 setRecords(data.records || data);
                 setTodayStats(data.todayStats || { morningPresent: 0, morningAbsent: 0, afternoonPresent: 0, afternoonAbsent: 0 });
             }
@@ -155,7 +155,7 @@ export default function AttendancePage() {
     const loadClassStatuses = async () => {
         try {
             const { data: classes } = await api.get('/attendance/classes');
-            const { data: attendanceData } = await api.get(`/attendance?date=${selectedDate}`);
+            const { data: attendanceData } = await api.get(`/attendance?date=${selectedDate}&_t=${Date.now()}`);
             const attendanceRecords = attendanceData.records || attendanceData;
 
             const statuses = classes.map((cls: any) => {
