@@ -206,7 +206,7 @@ export default function AttendancePage() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <h2 className="text-[13px] font-semibold flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-primary" />
-                                Attendance Records
+                                Today's Attendance
                                 <Badge variant="outline" className="text-[10px] font-normal ml-2">
                                     {records.filter(r => r.session === sessionFilter).length} Records Found
                                 </Badge>
@@ -234,7 +234,7 @@ export default function AttendancePage() {
                         </div>
 
                         {/* Stats Grid */}
-                        <div className={`grid grid-cols-1 md:grid-cols-2 gap-3`}>
+                        <div className={`grid grid-cols-2 gap-3`}>
                             {(sessionFilter === 'morning') && (
                                 <>
                                     {/* Morning Present - Amber theme */}
@@ -465,7 +465,9 @@ export default function AttendancePage() {
                                             className="p-3 rounded-xl border flex items-center justify-between transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95 cursor-pointer w-full text-left group bg-card hover:bg-muted/50 border-border"
                                             title={`Click to mark attendance for ${cls.name}`}
                                         >
-                                            <span className="text-[14px] font-bold truncate text-foreground pl-1">{cls.name}</span>
+                                            <span className="text-[14px] font-bold truncate text-foreground pl-1">
+                                                {cls.name.toLowerCase().startsWith('class') ? cls.name : `Class ${cls.name}`}
+                                            </span>
                                             <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                                         </button>
                                     );
