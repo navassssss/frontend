@@ -57,6 +57,7 @@ import CreateCCEWorkPage from "./pages/CreateCCEWorkPage";
 import CCEWorkDetailPage from "./pages/CCEWorkDetailPage";
 import CCEMarksPage from "./pages/CCEMarksPage";
 import CCESubjectDashboard from "./pages/CCESubjectDashboard";
+import SubjectsPage from "./pages/SubjectsPage";
 import StudentMarksPage from "./pages/StudentMarksPage";
 import ClassReportPage from "./pages/ClassReportPage";
 import AttendanceReportsPage from "./pages/AttendanceReportsPage";
