@@ -8,6 +8,7 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SubjectSummary {
     subject_id: string;
@@ -134,26 +135,35 @@ export default function CCEWorksPage() {
                                     className="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
                                 />
                             </div>
-                            <select
-                                value={classFilter}
-                                onChange={(e) => setClassFilter(e.target.value)}
-                                className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
-                            >
-                                <option value="all">All Classes</option>
-                                {uniqueClasses.map(c => (
-                                    <option key={c} value={c}>{c.match(/^\d+$/) ? `Class ${c}` : c}</option>
-                                ))}
-                            </select>
-                            <select
-                                value={teacherFilter}
-                                onChange={(e) => setTeacherFilter(e.target.value)}
-                                className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
-                            >
-                                <option value="all">All Teachers</option>
-                                {uniqueTeachers.map(t => (
-                                    <option key={t} value={t}>{t}</option>
-                                ))}
-                            </select>
+                            <div className="flex gap-2">
+                                <Select value={classFilter} onValueChange={setClassFilter}>
+                                    <SelectTrigger className="w-[140px] bg-white border border-slate-200 rounded-full h-[38px] text-sm focus:ring-1 focus:ring-emerald-500 shadow-sm font-medium">
+                                        <SelectValue placeholder="All Classes" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-slate-100 shadow-lg">
+                                        <SelectItem value="all" className="font-medium">All Classes</SelectItem>
+                                        {uniqueClasses.map(c => (
+                                            <SelectItem key={c} value={c} className="font-medium">
+                                                {c.match(/^\d+$/) ? `Class ${c}` : c}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={teacherFilter} onValueChange={setTeacherFilter}>
+                                    <SelectTrigger className="w-[140px] bg-white border border-slate-200 rounded-full h-[38px] text-sm focus:ring-1 focus:ring-emerald-500 shadow-sm font-medium">
+                                        <SelectValue placeholder="All Teachers" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-slate-100 shadow-lg">
+                                        <SelectItem value="all" className="font-medium">All Teachers</SelectItem>
+                                        {uniqueTeachers.map(t => (
+                                            <SelectItem key={t} value={t} className="font-medium">
+                                                {t}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     )}
                 </div>
