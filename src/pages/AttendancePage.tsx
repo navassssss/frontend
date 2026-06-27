@@ -511,11 +511,16 @@ export default function AttendancePage() {
                                                 <button
                                                     key={cls.id}
                                                     onClick={() => navigate(`/attendance/take?class=${cls.id}`)}
-                                                    className={`p-2 rounded-lg border-2 flex items-center justify-between transition-all hover:scale-105 hover:brightness-95 active:scale-95 cursor-pointer w-full text-left ${statusColor}`}
+                                                    className={`p-2 rounded-lg border-2 flex items-center justify-between transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95 cursor-pointer w-full text-left group ${statusColor}`}
                                                     title={`Click to mark attendance for ${cls.name}`}
                                                 >
-                                                    <span className="text-[11px] font-bold truncate pr-1">{cls.name}</span>
-                                                    <div className="flex gap-1 shrink-0">
+                                                    <div className="flex items-center gap-2 overflow-hidden">
+                                                        <div className="w-5 h-5 shrink-0 rounded-full bg-background/60 flex items-center justify-center group-hover:bg-background/90 transition-colors shadow-sm text-foreground/70">
+                                                            {isComplete ? <Edit className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                                                        </div>
+                                                        <span className="text-[12px] font-bold truncate pr-1">{cls.name}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 shrink-0 bg-background/40 px-1.5 py-1 rounded-full border border-background/20 shadow-inner">
                                                         <div className={`w-1.5 h-1.5 rounded-full ${cls.morningTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Morning"></div>
                                                         <div className={`w-1.5 h-1.5 rounded-full ${cls.afternoonTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Afternoon"></div>
                                                     </div>
