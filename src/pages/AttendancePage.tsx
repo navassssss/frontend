@@ -186,7 +186,7 @@ export default function AttendancePage() {
     };
 
     return (
-        <AppLayout title="Attendance" showBack>
+        <AppLayout title="Attendance">
             <div className="p-4 lg:p-6 space-y-6">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -477,60 +477,25 @@ export default function AttendancePage() {
                                 Select Class to Mark Attendance
                             </h2>
                             <Card className="h-fit shadow-sm">
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-center justify-between">
-                                        <CardTitle className="text-[13px] font-semibold">Classes</CardTitle>
-                                        <Badge variant="secondary">
-                                            {classStatuses.filter(c => c.morningTaken && c.afternoonTaken).length}/{classStatuses.length} Complete
-                                        </Badge>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="p-3">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-1 gap-2">
+                                <CardContent className="p-3 pt-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-1 gap-3">
                                         {classStatuses.map((cls) => {
-                                            const isComplete = cls.morningTaken && cls.afternoonTaken;
-                                            const isPartial = (cls.morningTaken || cls.afternoonTaken) && !isComplete;
-
-                                            // 3-color status system
-                                            let statusColor = "bg-red-100 text-red-700 border-red-300"; // Missing
-
-                                            if (isComplete) {
-                                                statusColor = "bg-emerald-100 text-emerald-700 border-emerald-300"; // Complete
-                                            } else if (isPartial) {
-                                                statusColor = "bg-amber-100 text-amber-700 border-amber-300"; // Partial
-                                            }
-
                                             return (
                                                 <button
                                                     key={cls.id}
                                                     onClick={() => navigate(`/attendance/take?class=${cls.id}`)}
-                                                    className={`p-2 rounded-lg border-2 flex items-center justify-between transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95 cursor-pointer w-full text-left group ${statusColor}`}
+                                                    className="p-3 rounded-xl border flex items-center justify-between transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95 cursor-pointer w-full text-left group bg-card hover:bg-muted/50 border-border"
                                                     title={`Click to mark attendance for ${cls.name}`}
                                                 >
-                                                    <div className="flex items-center gap-2 overflow-hidden">
-                                                        <div className="w-5 h-5 shrink-0 rounded-full bg-background/60 flex items-center justify-center group-hover:bg-background/90 transition-colors shadow-sm text-foreground/70">
-                                                            {isComplete ? <Edit className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                                                    <div className="flex items-center gap-3 overflow-hidden">
+                                                        <div className="w-8 h-8 shrink-0 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors text-primary">
+                                                            <Plus className="w-4 h-4" />
                                                         </div>
-                                                        <span className="text-[12px] font-bold truncate pr-1">{cls.name}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 shrink-0 bg-background/40 px-1.5 py-1 rounded-full border border-background/20 shadow-inner">
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${cls.morningTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Morning"></div>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${cls.afternoonTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Afternoon"></div>
+                                                        <span className="text-[13px] font-bold truncate text-foreground">{cls.name}</span>
                                                     </div>
                                                 </button>
                                             );
                                         })}
-                                    </div>
-                                    <div className="mt-3 pt-3 border-t flex flex-wrap gap-3 text-[10px] font-medium text-muted-foreground justify-center">
-                                        <div className="flex items-center gap-1">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-emerald-600"></div> Complete
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-amber-600"></div> Partial
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-red-400 border-2 border-red-500"></div> Missing
-                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
