@@ -39,6 +39,7 @@ interface SubjectDashboard {
         id: string;
         name: string;
         class_name: string;
+        department_name?: string;
         max_marks: number;
     };
     works: Work[];
@@ -104,6 +105,19 @@ export default function CCESubjectDashboard() {
         ? `Class ${subject.class_name}` 
         : subject.class_name;
 
+    const formatMark = (mark: any) => {
+        if (mark === undefined || mark === null) return '-';
+        return Number(mark);
+    };
+
+    const getExportTitle = () => {
+        let title = `${data?.subject.name} - ${formattedClassName}`;
+        if (data?.subject.department_name) {
+            title += ` (${data.subject.department_name})`;
+        }
+        return title;
+    };
+
     const handleExportExcel = () => {
         if (!data) return;
         const headers = ['Roll No.', 'Student Name'];
@@ -115,50 +129,102 @@ export default function CCESubjectDashboard() {
             let rawTotal = 0;
             data.works.forEach(w => {
                 const mark = s.marks[w.id];
-                row.push(mark !== undefined ? mark : '-');
-                if (mark !== undefined) rawTotal += mark;
+                row.push(formatMark(mark));
+                if (mark !== undefined && mark !== null) rawTotal += Number(mark);
             });
-            row.push(rawTotal, s.obtained, `${s.percentage}%`, s.grade);
+            row.push(rawTotal, Number(s.obtained), `${s.percentage}%`, s.grade);
             return row;
         });
 
         const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Performance");
-        XLSX.writeFile(wb, `${data.subject.name}_performance.xlsx`);
+        XLSX.writeFile(wb, `${getExportTitle()}.xlsx`);
     };
 
     const handleExportPDF = () => {
         if (!data) return;
-        const doc = new jsPDF('landscape');
-        
-        doc.text(`${data.subject.name} - Cumulative Performance`, 14, 15);
-        
-        const head = [['Roll No.', 'Student Name']];
-        data.works.forEach(w => head[0].push(`${w.title}\n(${w.maxMarks})`));
-        head[0].push('Total Raw', `Converted\n(${data.subject.max_marks})`, 'Percentage', 'Grade');
 
-        const body = data.students.map(s => {
-            const row: any[] = [s.roll_number, s.name];
+        let html = `
+        <html>
+        <head>
+            <title>${getExportTitle()}</title>
+            <style>
+                body { font-family: sans-serif; padding: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: center; }
+                th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
+                th { background-color: #f4f4f5; }
+                h2 { text-align: center; margin: 10px 0 20px; }
+                .arabic { direction: rtl; text-align: right; }
+            </style>
+        </head>
+        <body>
+            <h2>${getExportTitle()}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll No.</th>
+                        <th>Student Name</th>
+        `;
+
+        data.works.forEach(w => {
+            html += `<th>${w.title}<br/>(${w.maxMarks})</th>`;
+        });
+        
+        html += `
+                        <th>Total Raw</th>
+                        <th>Converted (${data.subject.max_marks})</th>
+                        <th>Percentage</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        data.students.forEach(s => {
             let rawTotal = 0;
+            let worksCols = '';
             data.works.forEach(w => {
                 const mark = s.marks[w.id];
-                row.push(mark !== undefined ? mark : '-');
-                if (mark !== undefined) rawTotal += mark;
+                if (mark !== undefined && mark !== null) {
+                    rawTotal += Number(mark);
+                    worksCols += `<td>${formatMark(mark)}</td>`;
+                } else {
+                    worksCols += `<td>-</td>`;
+                }
             });
-            row.push(rawTotal, s.obtained, `${s.percentage}%`, s.grade);
-            return row;
+
+            const isArabic = /[\u0600-\u06FF]/.test(s.name);
+            html += `
+                    <tr>
+                        <td>${s.roll_number}</td>
+                        <td style="text-align: ${isArabic ? 'right' : 'left'};" class="${isArabic ? 'arabic' : ''}">${s.name}</td>
+                        ${worksCols}
+                        <td>${rawTotal}</td>
+                        <td>${Number(s.obtained)}</td>
+                        <td>${s.percentage}%</td>
+                        <td><strong>${s.grade}</strong></td>
+                    </tr>
+            `;
         });
 
-        autoTable(doc, {
-            startY: 20,
-            head,
-            body,
-            styles: { fontSize: 8 },
-            headStyles: { fillColor: [10, 108, 91] }
-        });
+        html += `
+                </tbody>
+            </table>
+        </body>
+        </html>
+        `;
 
-        doc.save(`${data.subject.name}_performance.pdf`);
+        const printWindow = window.open('', '', 'width=1000,height=800');
+        if (printWindow) {
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
     };
 
     return (
@@ -325,7 +391,7 @@ export default function CCESubjectDashboard() {
                         {/* Roster Table */}
                         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <h2 className="font-bold text-slate-900 text-lg">Cumulative Performance</h2>
+                                <h2 className="font-bold text-slate-900 text-lg">Performance Data</h2>
                                 <div className="flex gap-2">
                                     <button onClick={handleExportExcel} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-colors">
                                         <Download className="w-3.5 h-3.5" /> Excel
@@ -355,26 +421,26 @@ export default function CCESubjectDashboard() {
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
                                         {students.map(student => {
-                                            const rawTotal = works.reduce((acc, w) => acc + (student.marks[w.id] || 0), 0);
+                                            const rawTotal = works.reduce((acc, w) => acc + (student.marks[w.id] !== undefined && student.marks[w.id] !== null ? Number(student.marks[w.id]) : 0), 0);
                                             const rawMax = works.reduce((acc, w) => acc + w.maxMarks, 0);
                                             return (
                                                 <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
                                                     <td className="px-6 py-4 font-bold text-slate-500 whitespace-nowrap">
                                                         {student.roll_number}
                                                     </td>
-                                                    <td className="px-6 py-4 font-bold text-slate-900 whitespace-nowrap">
+                                                    <td className="px-6 py-4 font-bold text-slate-900 whitespace-nowrap text-left" dir={/[\u0600-\u06FF]/.test(student.name) ? 'rtl' : 'ltr'}>
                                                         {student.name}
                                                     </td>
                                                     {works.map(w => (
                                                         <td key={w.id} className="px-4 py-4 text-center font-semibold text-slate-600 bg-white border-l border-r border-slate-50/50">
-                                                            {student.marks[w.id] !== undefined ? student.marks[w.id] : '-'}
+                                                            {formatMark(student.marks[w.id])}
                                                         </td>
                                                     ))}
                                                     <td className="px-6 py-4 text-center font-bold text-slate-700 bg-slate-50/50 border-l border-slate-100">
                                                         {rawTotal} / {rawMax}
                                                     </td>
                                                     <td className="px-6 py-4 text-center font-bold text-slate-900 bg-emerald-50/30">
-                                                        {student.obtained} / {student.total}
+                                                        {Number(student.obtained)} / {student.total}
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
                                                         <span className={`px-2 py-1 rounded-lg font-bold text-xs ${
