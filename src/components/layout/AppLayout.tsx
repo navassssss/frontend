@@ -10,11 +10,12 @@ interface AppLayoutProps {
   children: ReactNode;
   title?: string;
   hideNav?: boolean;
+  hideBottomNav?: boolean;
   showBack?: boolean;
   onBack?: () => void;
 }
 
-export function AppLayout({ children, title, hideNav = false, showBack = false, onBack }: AppLayoutProps) {
+export function AppLayout({ children, title, hideNav = false, hideBottomNav = false, showBack = false, onBack }: AppLayoutProps) {
   const fullTitle = title ? `${title} | DHIC Staff Portal` : 'DHIC Staff Portal';
   
   useSEO({ 
@@ -50,8 +51,8 @@ export function AppLayout({ children, title, hideNav = false, showBack = false, 
         </div>
       </main>
 
-      {/* Mobile Bottom Nav */}
-      {!hideNav && (
+      {/* Mobile Bottom Navigation */}
+      {!hideNav && !hideBottomNav && (
         <div className="lg:hidden">
           <BottomNav />
         </div>

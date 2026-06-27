@@ -207,8 +207,8 @@ export default function TakeAttendancePage() {
     const presentCount = selectedClassInfo ? selectedClassInfo.studentCount - absentStudents.length : 0;
 
     return (
-        <AppLayout title="Take Attendance" showBack={true}>
-            <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-2xl mx-auto">
+        <AppLayout title="Take Attendance" showBack={true} hideBottomNav={true}>
+            <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Session Selection */}
                 <div className="space-y-2">
                     <Label className="text-muted-foreground ml-1">Select Session</Label>
@@ -285,13 +285,12 @@ export default function TakeAttendancePage() {
                                         </div>
 
                                         {/* Compact Student List */}
-                                        <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1 rounded-md border p-1">
+                                        <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1 rounded-md border p-1" id="attendance-card">
                                             {/* Header Row */}
-                                            <div className="flex items-center px-3 py-2 text-xs font-semibold text-muted-foreground bg-secondary dark:bg-secondary/95 border-b rounded-md sticky top-0 z-10 shadow-sm">
-                                                <div className="w-8 shrink-0 flex justify-center">Status</div>
-                                                <div className="w-12 shrink-0 ml-2">Roll</div>
+                                            <div className="flex items-center px-3 py-2 text-xs font-semibold text-muted-foreground bg-secondary dark:bg-secondary/95 border-b rounded-md sticky top-0 z-10 shadow-sm gap-3">
+                                                <div className="w-6 shrink-0"></div>
+                                                <div className="w-10 shrink-0 text-right pr-2">Roll</div>
                                                 <div className="flex-1">Name</div>
-                                                
                                             </div>
                                             
                                             {(searchQuery ? filteredStudents : students).map((student) => {
@@ -299,29 +298,28 @@ export default function TakeAttendancePage() {
                                                 return (
                                                     <div 
                                                         key={student.id} 
-                                                        className={`flex flex-col sm:flex-row sm:items-center px-3 py-2 rounded-md transition-colors border-b last:border-0 ${
-                                                            isAbsent ? 'bg-destructive/5 hover:bg-destructive/10' : 'hover:bg-muted/50'
-                                                        }`}
+                                                        onClick={() => isAbsent ? removeAbsent(student.id) : addAbsent(student.id)}
+                                                        className="flex items-center px-3 py-2 rounded-md transition-colors border-b last:border-0 cursor-pointer hover:bg-muted/50 group"
                                                     >
-                                                        <div className="flex items-center w-full sm:w-auto flex-1">
+                                                        <div className="flex items-center w-full flex-1 gap-3">
                                                             {/* Checkbox / Toggle */}
-                                                            <div className="w-8 shrink-0 flex justify-center cursor-pointer" onClick={() => isAbsent ? removeAbsent(student.id) : addAbsent(student.id)}>
-                                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                                                                    !isAbsent ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-input bg-background text-transparent'
+                                                            <div className="w-6 shrink-0 flex justify-center">
+                                                                <div className={`w-5 h-5 rounded flex items-center justify-center transition-all duration-200 ${
+                                                                    !isAbsent ? 'bg-emerald-500 text-white scale-100 shadow-sm' : 'border-2 border-muted-foreground/30 bg-background text-transparent group-hover:border-destructive/50'
                                                                 }`}>
-                                                                    <Check className="w-3.5 h-3.5" />
+                                                                    {!isAbsent && <Check className="w-3.5 h-3.5" />}
+                                                                    {isAbsent && <X className="w-3.5 h-3.5 opacity-0 group-hover:opacity-50 text-destructive" />}
                                                                 </div>
                                                             </div>
                                                             
                                                             {/* Info */}
-                                                            <div className="w-12 shrink-0 text-sm font-medium text-muted-foreground ml-2 sm:ml-0">
+                                                            <div className="w-10 shrink-0 text-sm font-bold text-muted-foreground text-right pr-2">
                                                                 {student.roll_number || '-'}
                                                             </div>
-                                                            <div className={`flex-1 text-sm font-medium ${isAbsent ? 'text-destructive line-through opacity-70' : 'text-foreground'}`}>
+                                                            <div className={`flex-1 text-[15px] font-bold transition-colors ${isAbsent ? 'text-destructive' : 'text-foreground'}`}>
                                                                 {student.name}
                                                             </div>
                                                         </div>
-
                                                     </div>
                                                 );
                                             })}
@@ -356,35 +354,34 @@ export default function TakeAttendancePage() {
 
             {/* Confirmation Modal */}
             <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-                <DialogContent className="sm:max-w-md w-[90vw] max-w-[400px]">
+                <DialogContent className="sm:max-w-md w-[90vw] max-w-[400px] rounded-2xl">
                     <DialogHeader>
-                        <DialogTitle>Confirm Attendance</DialogTitle>
-                        <DialogDescription>
-                            Review the list of absent students before submitting.
-                        </DialogDescription>
+                        <DialogTitle>Submit Attendance?</DialogTitle>
                     </DialogHeader>
                     
                     <div className="py-2">
                         <div className="flex justify-between items-center mb-3">
-                            <span className="font-semibold text-sm">Class {selectedClassInfo?.name}</span>
-                            <div className="flex gap-2">
-                                <Badge variant="success">{presentCount} Present</Badge>
-                                <Badge variant="destructive">{absentStudents.length} Absent</Badge>
-                            </div>
+                            <span className="font-semibold text-sm">
+                                {selectedClassInfo?.name} • {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                            <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/10">
+                                {absentStudents.length} students marked absent
+                            </Badge>
                         </div>
                         
-                        <div className="bg-muted/30 rounded-md border max-h-[40vh] overflow-y-auto">
+                        <div className="bg-card rounded-md border max-h-[40vh] overflow-y-auto">
                             {absentStudents.length === 0 ? (
                                 <div className="p-6 text-center text-sm font-medium text-muted-foreground flex flex-col items-center justify-center">
                                     <Check className="w-8 h-8 text-emerald-500 mb-2" />
                                     All students are marked present.
                                 </div>
                             ) : (
-                                <div className="divide-y">
+                                <div className="divide-y divide-border/50">
                                     {students.filter(s => absentStudents.some(abs => abs.id === s.id)).map(student => (
-                                        <div key={student.id} className="p-3 flex justify-between items-center bg-destructive/5 hover:bg-destructive/10 transition-colors">
-                                            <span className="font-medium text-sm text-destructive">{student.name}</span>
-                                            <span className="text-[10px] text-muted-foreground border bg-background/50 px-2 py-0.5 rounded shadow-sm">Roll: {student.roll_number || '-'}</span>
+                                        <div key={student.id} className="p-3 flex gap-3 items-center bg-background hover:bg-muted/50 transition-colors">
+                                            <span className="w-8 shrink-0 text-sm font-bold text-muted-foreground text-right">{student.roll_number || '-'}</span>
+                                            <span className="font-bold text-[15px] text-destructive flex-1">{student.name}</span>
+                                            <X className="w-4 h-4 text-destructive shrink-0" />
                                         </div>
                                     ))}
                                 </div>
