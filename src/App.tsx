@@ -56,8 +56,7 @@ import CCEWorksPage from "./pages/CCEWorksPage";
 import CreateCCEWorkPage from "./pages/CreateCCEWorkPage";
 import CCEWorkDetailPage from "./pages/CCEWorkDetailPage";
 import CCEMarksPage from "./pages/CCEMarksPage";
-import SubjectsPage from "./pages/SubjectsPage";
-import SubjectDetailPage from "./pages/SubjectDetailPage";
+import CCESubjectDashboard from "./pages/CCESubjectDashboard";
 import StudentMarksPage from "./pages/StudentMarksPage";
 import ClassReportPage from "./pages/ClassReportPage";
 import AttendanceReportsPage from "./pages/AttendanceReportsPage";
@@ -432,10 +431,10 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/cce/subjects/:subjectId"
+        path="/cce/subjects/:id"
         element={
           <ProtectedRoute>
-            <SubjectDetailPage />
+            <CCESubjectDashboard />
           </ProtectedRoute>
         }
       />

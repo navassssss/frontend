@@ -76,9 +76,6 @@ export default function CCEWorksPage() {
     const [loading, setLoading] = useState(true);
     const [subjectFilter, setSubjectFilter] = useState<'my' | 'all'>('my');
 
-    const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set());
-    const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
-
     useEffect(() => {
         loadData();
     }, [subjectFilter]);
@@ -91,43 +88,11 @@ export default function CCEWorksPage() {
             setWorks(worksRes.data.works || worksRes.data);
             setSubjectsSummary(worksRes.data.subjects_summary || []);
 
-            // Default to all collapsed
         } catch (error) {
             console.error('Failed to load data', error);
         } finally {
             setLoading(false);
         }
-    };
-
-    const groupByClass = (summaries: SubjectSummary[]) => {
-        return summaries.reduce((acc, summary) => {
-            const className = summary.class_name;
-            if (!acc[className]) acc[className] = [];
-            acc[className].push(summary);
-            return acc;
-        }, {} as Record<string, SubjectSummary[]>);
-    };
-
-    const groupedByClass = groupByClass(subjectsSummary);
-    const sortedClasses = Object.keys(groupedByClass).sort((a, b) => {
-        const numA = parseInt(a.replace(/\D/g, '')) || 0;
-        const numB = parseInt(b.replace(/\D/g, '')) || 0;
-        return numB - numA; // Descending like 10, 09, 08 in image
-    });
-
-    const toggleClass = (className: string) => {
-        const newSet = new Set(expandedClasses);
-        if (newSet.has(className)) newSet.delete(className);
-        else newSet.add(className);
-        setExpandedClasses(newSet);
-    };
-
-    const toggleSubject = (e: React.MouseEvent, subjectId: string) => {
-        e.stopPropagation();
-        const newSet = new Set(expandedSubjects);
-        if (newSet.has(subjectId)) newSet.delete(subjectId);
-        else newSet.add(subjectId);
-        setExpandedSubjects(newSet);
     };
 
     return (
@@ -174,172 +139,61 @@ export default function CCEWorksPage() {
                     </div>
                 </div>
 
-                {/* Accordion list */}
+                {/* Subject Cards Grid */}
                 <div className="space-y-4">
                     {loading ? (
-                        <div className="space-y-4">
-                            {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-3xl animate-pulse border border-slate-100" />)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-32 bg-white rounded-2xl animate-pulse border border-slate-100" />)}
                         </div>
-                    ) : sortedClasses.map(className => {
-                        const classSubjects = groupedByClass[className];
-                        const isExpanded = expandedClasses.has(className);
-                        const classNum = className.replace(/\D/g, '').padStart(2, '0');
-                        const totalClassWorks = classSubjects.reduce((sum, s) => sum + Number(s.total_works || 0), 0);
-                        const completedClassWorks = classSubjects.reduce((sum, s) => sum + Number(s.completed_works || 0), 0);
-                        const classPercent = totalClassWorks > 0 ? Math.round((completedClassWorks / totalClassWorks) * 100) : 0;
-
-                        return (
-                            <div key={className} className={`bg-white rounded-2xl transition-all duration-300 shadow-sm border border-slate-100 cursor-pointer overflow-hidden ${isExpanded ? 'p-3 md:p-4' : 'hover:-translate-y-0.5'}`}>
-
-                                {/* Outer Class Header */}
-                                <div className={`p-4 md:p-4 flex items-center justify-between transition-colors ${!isExpanded && 'hover:bg-slate-50/50'}`} onClick={() => toggleClass(className)}>
-                                    <div className="flex items-center gap-4 md:gap-5">
-                                        <div className="w-[52px] h-[52px] rounded-3xl bg-emerald-100/60 flex items-center justify-center font-black text-emerald-800 text-[18px] shrink-0">
-                                            {classNum}
-                                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {subjectsSummary.map(subject => {
+                                const classPercent = subject.total_works > 0 ? Math.round((subject.completed_works / subject.total_works) * 100) : 0;
+                                
+                                return (
+                                    <div 
+                                        key={subject.subject_id} 
+                                        onClick={() => navigate(`/cce/subjects/${subject.subject_id}`)}
+                                        className="bg-white p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+                                    >
                                         <div>
-                                            <h2 className="text-base font-semibold text-slate-900 tracking-tight">
-                                                Class {className} - {getStage(className)}
-                                            </h2>
-                                            <p className="text-sm text-slate-500 mt-1 tracking-wide">
-                                                {classSubjects.length} Subjects • {totalClassWorks} Total Works • {classPercent}% Complete
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4 md:gap-6">
-                                        {/* Mini Tags */}
-                                        <div className="hidden sm:flex items-center space-x-1.5 mr-2">
-                                            {classSubjects.slice(0, 3).map((s, idx) => (
-                                                <span key={s.subject_id} className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${getSubjectTagStyle(idx)}`}>
-                                                    {s.subject_name.substring(0, 3)}
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                                                    <BookOpen className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md line-clamp-1 max-w-[150px]">
+                                                    {subject.class_name}
                                                 </span>
-                                            ))}
-                                            {classSubjects.length > 3 && (
-                                                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                                                    +{classSubjects.length - 3}
-                                                </span>
-                                            )}
+                                            </div>
+                                            <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">{subject.subject_name}</h3>
+                                            <p className="text-sm text-slate-500 mt-1">{subject.total_works} Assessments Configured</p>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 text-slate-400">
-                                            <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Subjects List */}
-                                <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2 pb-2' : 'grid-rows-[0fr] opacity-0'}`}>
-                                    <div className="overflow-hidden">
-                                        <div className="px-4 md:px-6 space-y-4">
-                                            {classSubjects.map((subject, sIdx) => {
-                                                const isSubjectExpanded = expandedSubjects.has(subject.subject_id);
-                                                const worksForSubject = works.filter(w => w.subjectId === subject.subject_id);
-
-                                                return (
-                                                    <div key={subject.subject_id} className={`bg-slate-50 rounded-3xl border transition-all duration-300 ${isSubjectExpanded ? 'border-slate-200 shadow-sm' : 'border-slate-100 hover:border-slate-200'}`}>
-
-                                                        <div className="p-4 flex items-center justify-between cursor-pointer rounded-3xl transition-colors hover:bg-slate-50/80" onClick={(e) => toggleSubject(e, subject.subject_id)}>
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-11 h-11 rounded-3xl bg-white border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
-                                                                    <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2.5} />
-                                                                </div>
-                                                                <div>
-                                                                    <h3 className="text-base font-semibold text-slate-900 tracking-tight">{subject.subject_name}</h3>
-                                                                    <p className="text-sm text-slate-500 mt-1 line-clamp-1">{subject.total_works} CCE Works Configured</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-white shadow-sm text-emerald-700">
-                                                                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isSubjectExpanded ? 'rotate-180' : ''}`} />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Assessments Table */}
-                                                        {isSubjectExpanded && (
-                                                            <div className="px-2 pb-2 mt-2">
-                                                                        <div className="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                                                                            <div className="hidden sm:grid grid-cols-12 gap-3 p-4 border-b-2 border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
-                                                                                <div className="col-span-1">No.</div>
-                                                                                <div className="col-span-5 md:col-span-4">Assessment Title</div>
-                                                                                <div className="col-span-3 hidden md:block">Tool & Level</div>
-                                                                                <div className="col-span-3 md:col-span-2">Issue Date</div>
-                                                                                <div className="col-span-3 md:col-span-2">Due Date</div>
-                                                                            </div>
-
-                                                                    {worksForSubject.length === 0 ? (
-                                                                        <div className="p-8 text-center text-sm font-semibold text-slate-400">
-                                                                            No assessments created yet.
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="divide-y-2 divide-slate-100">
-                                                                            {worksForSubject.map((work, index) => {
-                                                                                return (
-                                                                                    <div key={work.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-3 p-4 items-start sm:items-center hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => navigate(`/cce/works/${work.id}`)}>
-
-                                                                                        {/* Work Number and Badges for mobile */}
-                                                                                        <div className="sm:hidden flex items-center justify-between w-full mb-2">
-                                                                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Work No. {index + 1}</span>
-                                                                                            <div className="flex gap-2">
-                                                                                                <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
-                                                                                                    {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
-                                                                                                </span>
-                                                                                                <span className="text-[9px] font-black uppercase px-2 py-1 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
-                                                                                                    Lvl {work.level}
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <div className="hidden sm:block col-span-1 text-sm font-bold text-slate-400">
-                                                                                            #{index + 1}
-                                                                                        </div>
-
-                                                                                        <div className="col-span-5 md:col-span-4 w-full">
-                                                                                            <p className="text-sm font-semibold text-slate-900 leading-tight truncate">{work.title}</p>
-                                                                                            <p className="text-[13px] text-slate-500 mt-1 line-clamp-1">{work.description || work.submissionType || 'Internal Assessment'}</p>
-                                                                                        </div>
-
-                                                                                        <div className="col-span-3 hidden md:flex items-center gap-2">
-                                                                                            <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md tracking-wider ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
-                                                                                                {(work.toolMethod || work.submissionType || 'TASK').substring(0, 10)}
-                                                                                            </span>
-                                                                                            <span className="text-[9px] font-black uppercase px-2 py-1 rounded-md tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
-                                                                                                Level {work.level}
-                                                                                            </span>
-                                                                                        </div>
-
-                                                                                        <div className="w-full flex items-center justify-between sm:contents mt-2 sm:mt-0">
-                                                                                            <div className="col-span-3 md:col-span-2 flex flex-col">
-                                                                                                <span className="sm:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Issue Date</span>
-                                                                                                <span className="text-[11px] sm:text-[12px] font-semibold text-slate-700">
-                                                                                                    {work.issuedDate ? format(new Date(work.issuedDate), 'MMM dd, yyyy') : 'No Date'}
-                                                                                                </span>
-                                                                                            </div>
-
-                                                                                            <div className="col-span-3 md:col-span-2 flex flex-col items-end sm:items-start">
-                                                                                                <span className="sm:hidden text-[9px] font-black uppercase text-slate-400 mb-1">Due Date</span>
-                                                                                                <span className="text-[11px] sm:text-[12px] font-semibold text-slate-700">
-                                                                                                    {work.dueDate ? format(new Date(work.dueDate), 'MMM dd, yyyy') : 'No Date'}
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                );
-                                                                            })}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+                                        
+                                        <div className="mt-5">
+                                            <div className="flex justify-between items-end mb-1.5">
+                                                <span className="text-xs font-semibold text-slate-600">Evaluation Progress</span>
+                                                <span className="text-xs font-bold text-emerald-600">{classPercent}%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 rounded-full h-1.5">
+                                                <div 
+                                                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
+                                                    style={{ width: `${classPercent}%` }}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                                );
+                            })}
+                        </div>
+                    )}
+                    
+                    {!loading && subjectsSummary.length === 0 && (
+                        <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200">
+                            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                            <h3 className="text-lg font-semibold text-slate-900">No Subjects Found</h3>
+                            <p className="text-slate-500 mt-1">No subjects match the current filter.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>
