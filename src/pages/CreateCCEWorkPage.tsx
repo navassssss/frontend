@@ -158,7 +158,7 @@ export default function CreateCCEWorkPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    {isPrincipal && (
+                                    {isPrincipal && !subjectIdFromUrl && (
                                         <div className="flex items-center justify-between p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
                                             <div>
                                                 <Label className="text-[14px] font-bold text-slate-800">Show All Subjects</Label>
