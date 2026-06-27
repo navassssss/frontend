@@ -28,6 +28,8 @@ export default function CCEWorksPage() {
     const [loading, setLoading] = useState(true);
     const [subjectFilter, setSubjectFilter] = useState<'my' | 'all'>('my');
     const [searchQuery, setSearchQuery] = useState('');
+    const [classFilter, setClassFilter] = useState('all');
+    const [teacherFilter, setTeacherFilter] = useState('all');
 
     useEffect(() => {
         loadData();
@@ -47,6 +49,9 @@ export default function CCEWorksPage() {
     };
 
     const filteredSubjects = subjectsSummary.filter(sub => {
+        if (classFilter !== 'all' && sub.class_name !== classFilter) return false;
+        if (teacherFilter !== 'all' && (sub.teacher_name || 'Unassigned') !== teacherFilter) return false;
+
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (
@@ -55,6 +60,9 @@ export default function CCEWorksPage() {
             (sub.teacher_name && sub.teacher_name.toLowerCase().includes(q))
         );
     });
+
+    const uniqueClasses = Array.from(new Set(subjectsSummary.map(s => s.class_name))).sort();
+    const uniqueTeachers = Array.from(new Set(subjectsSummary.map(s => s.teacher_name || 'Unassigned'))).sort();
 
     return (
         <AppLayout title="CCE Works">
@@ -101,17 +109,39 @@ export default function CCEWorksPage() {
                             </div>
 
                             {subjectFilter === 'all' && (
-                                <div className="flex-1 w-full sm:w-auto relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Search className="h-4 w-4 text-slate-400" />
+                                <div className="flex flex-col sm:flex-row flex-1 gap-3 w-full sm:w-auto relative">
+                                    <div className="flex-1 relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Search className="h-4 w-4 text-slate-400" />
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search subject, class, or teacher..." 
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
+                                        />
                                     </div>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search subject, class, or teacher..." 
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
-                                    />
+                                    <select
+                                        value={classFilter}
+                                        onChange={(e) => setClassFilter(e.target.value)}
+                                        className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
+                                    >
+                                        <option value="all">All Classes</option>
+                                        {uniqueClasses.map(c => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={teacherFilter}
+                                        onChange={(e) => setTeacherFilter(e.target.value)}
+                                        className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
+                                    >
+                                        <option value="all">All Teachers</option>
+                                        {uniqueTeachers.map(t => (
+                                            <option key={t} value={t}>{t}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             )}
                         </div>
