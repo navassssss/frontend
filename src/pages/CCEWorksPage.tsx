@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Plus,
@@ -74,18 +74,19 @@ export default function CCEWorksPage() {
     const [subjectsSummary, setSubjectsSummary] = useState<SubjectSummary[]>([]);
     const [works, setWorks] = useState<CCEWork[]>([]);
     const [loading, setLoading] = useState(true);
+    const [subjectFilter, setSubjectFilter] = useState<'my' | 'all'>('my');
 
     const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set());
     const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [subjectFilter]);
 
     const loadData = async () => {
         try {
             const [worksRes] = await Promise.all([
-                api.get('/cce/works')
+                api.get(`/cce/works?filter=${subjectFilter}`)
             ]);
             setWorks(worksRes.data.works || worksRes.data);
             setSubjectsSummary(worksRes.data.subjects_summary || []);
@@ -139,12 +140,38 @@ export default function CCEWorksPage() {
                         <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">CCE Works Management</h1>
                         <p className="text-sm text-muted-foreground mt-1">Expand classes to manage subject-specific evaluation rubrics.</p>
                     </div>
-                    <button
-                        onClick={() => navigate('/cce/works/new')}
-                        className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm px-4 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
-                    >
-                        <Plus className="w-4 h-4" strokeWidth={3} /> New Assessment
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        {isPrincipal && (
+                            <div className="flex bg-slate-100/80 p-1 rounded-full border border-slate-200">
+                                <button
+                                    onClick={() => setSubjectFilter('my')}
+                                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                                        subjectFilter === 'my' 
+                                            ? 'bg-white text-emerald-800 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                                >
+                                    My Subjects
+                                </button>
+                                <button
+                                    onClick={() => setSubjectFilter('all')}
+                                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                                        subjectFilter === 'all' 
+                                            ? 'bg-white text-emerald-800 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                                >
+                                    All Subjects
+                                </button>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => navigate('/cce/works/new')}
+                            className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm px-4 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
+                        >
+                            <Plus className="w-4 h-4" strokeWidth={3} /> New Assessment
+                        </button>
+                    </div>
                 </div>
 
                 {/* Accordion list */}
