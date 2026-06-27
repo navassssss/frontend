@@ -26,10 +26,18 @@ export default function CCEWorksPage() {
 
     const [subjectsSummary, setSubjectsSummary] = useState<SubjectSummary[]>([]);
     const [loading, setLoading] = useState(true);
-    const [subjectFilter, setSubjectFilter] = useState<'my' | 'all'>('my');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [classFilter, setClassFilter] = useState('all');
-    const [teacherFilter, setTeacherFilter] = useState('all');
+    const [subjectFilter, setSubjectFilter] = useState<'my' | 'all'>(() => (sessionStorage.getItem('cce_filter') as 'my' | 'all') || 'my');
+    const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('cce_search') || '');
+    const [classFilter, setClassFilter] = useState(() => sessionStorage.getItem('cce_class') || 'all');
+    const [teacherFilter, setTeacherFilter] = useState(() => sessionStorage.getItem('cce_teacher') || 'all');
+
+    // Save filters to sessionStorage when they change
+    useEffect(() => {
+        sessionStorage.setItem('cce_filter', subjectFilter);
+        sessionStorage.setItem('cce_search', searchQuery);
+        sessionStorage.setItem('cce_class', classFilter);
+        sessionStorage.setItem('cce_teacher', teacherFilter);
+    }, [subjectFilter, searchQuery, classFilter, teacherFilter]);
 
     useEffect(() => {
         loadData();
@@ -61,7 +69,14 @@ export default function CCEWorksPage() {
         );
     });
 
-    const uniqueClasses = Array.from(new Set(subjectsSummary.map(s => s.class_name))).sort();
+    const uniqueClasses = Array.from(new Set(subjectsSummary.map(s => s.class_name))).sort((a, b) => {
+        const numA = parseInt(a, 10);
+        const numB = parseInt(b, 10);
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+        return a.localeCompare(b);
+    });
     const uniqueTeachers = Array.from(new Set(subjectsSummary.map(s => s.teacher_name || 'Unassigned'))).sort();
 
     return (
@@ -129,7 +144,7 @@ export default function CCEWorksPage() {
                                     >
                                         <option value="all">All Classes</option>
                                         {uniqueClasses.map(c => (
-                                            <option key={c} value={c}>{c}</option>
+                                            <option key={c} value={c}>{c.match(/^\d+$/) ? `Class ${c}` : c}</option>
                                         ))}
                                     </select>
                                     <select
@@ -174,7 +189,7 @@ export default function CCEWorksPage() {
                                                     <h3 className="text-base font-bold text-slate-900 leading-tight truncate group-hover:text-emerald-700 transition-colors">
                                                         {subject.subject_name}
                                                     </h3>
-                                                    <span className="text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md shrink-0">
+                                                    <span className="text-[10px] font-bold tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-md shrink-0">
                                                         {subject.class_name.match(/^\d+$/) ? `Class ${subject.class_name}` : subject.class_name}
                                                     </span>
                                                 </div>

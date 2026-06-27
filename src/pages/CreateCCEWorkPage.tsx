@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import {
     BookOpen,
@@ -49,11 +49,12 @@ export default function CreateCCEWorkPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const editId = searchParams.get('id');
+    const subjectIdFromUrl = searchParams.get('subject_id');
     const { user } = useAuth();
 
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [formData, setFormData] = useState({
-        subject_id: '',
+        subject_id: subjectIdFromUrl || '',
         level: '',
         week: '',
         title: '',
@@ -118,11 +119,11 @@ export default function CreateCCEWorkPage() {
             if (editId) {
                 await api.put(`/cce/works/${editId}`, formData);
                 toast.success('CCE Work updated successfully');
-                navigate(`/cce/works/${editId}`);
+                navigate(`/cce/works/${editId}`, { replace: true });
             } else {
-                await api.post('/cce/works', formData);
+                const { data } = await api.post('/cce/works', formData);
                 toast.success('CCE Work created successfully');
-                navigate('/cce/works');
+                navigate(`/cce/works/${data.work.id}`, { replace: true });
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || `Failed to ${editId ? 'update' : 'create'} CCE Work`);

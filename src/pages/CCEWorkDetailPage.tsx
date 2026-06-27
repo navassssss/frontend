@@ -419,9 +419,15 @@ export default function CCEWorkDetailPage() {
                     <div>
                         <div className="flex items-center gap-3 mb-3">
                             <button 
-                                onClick={() => navigate('/cce/works')}
+                                onClick={() => {
+                                    if (window.history.length > 2) {
+                                        navigate(-1);
+                                    } else {
+                                        navigate('/cce/works');
+                                    }
+                                }}
                                 className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-200 text-slate-500 transition-colors -ml-2"
-                                title="Back to CCE Works"
+                                title="Back"
                             >
                                 <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
                             </button>
