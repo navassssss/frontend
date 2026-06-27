@@ -190,12 +190,14 @@ export default function AttendancePage() {
             <div className="p-4 lg:p-6 space-y-6">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="text-center md:text-left">
-                        <h1 className="text-2xl font-bold text-foreground">Attendance Overview</h1>
-                        <p className="text-muted-foreground text-[11px]">
-                            {studentId && studentName ? `Viewing records for ${studentName}` : "Manage and view daily attendance"}
-                        </p>
-                    </div>
+                    {studentId && studentName && (
+                        <div className="text-center md:text-left">
+                            <h1 className="text-lg font-bold text-foreground">Attendance Records</h1>
+                            <p className="text-muted-foreground text-[11px]">
+                                Viewing records for {studentName}
+                            </p>
+                        </div>
+                    )}
 
                     {/* Improved Date Navigation */}
                     <div className="flex items-center justify-center bg-card border border-border rounded-xl p-1 shadow-sm mx-auto md:mx-0 w-fit">
@@ -216,15 +218,6 @@ export default function AttendancePage() {
                         </Button>
                     </div>
 
-                    {!studentId && (
-                        <Button
-                            onClick={() => navigate('/attendance/take')}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-105 w-full md:w-auto"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Take New Attendance
-                        </Button>
-                    )}
                 </div>
 
                 <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start flex flex-col gap-6">
@@ -480,13 +473,13 @@ export default function AttendancePage() {
                     {!studentId && classStatuses.length > 0 && (
                         <div className="lg:col-span-4 xl:col-span-3 space-y-3 order-1 lg:order-2 lg:sticky lg:top-6">
                             <h2 className="text-[13px] font-semibold flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-primary" />
-                                Class Status Overview
+                                <CalendarIcon className="w-4 h-4 text-primary" />
+                                Select Class to Mark Attendance
                             </h2>
                             <Card className="h-fit shadow-sm">
                                 <CardHeader className="pb-2">
                                     <div className="flex items-center justify-between">
-                                        <CardTitle className="text-[13px] font-semibold">Today's Progress</CardTitle>
+                                        <CardTitle className="text-[13px] font-semibold">Classes</CardTitle>
                                         <Badge variant="secondary">
                                             {classStatuses.filter(c => c.morningTaken && c.afternoonTaken).length}/{classStatuses.length} Complete
                                         </Badge>
