@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BookOpen, Plus, FileText, BarChart2, ChevronLeft, Calendar, FilePenLine } from 'lucide-react';
+import { BookOpen, Plus, FileText, BarChart2, ChevronLeft, Calendar, FilePenLine, Download } from 'lucide-react';
 import { format } from 'date-fns';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 interface Work {
     id: number;
@@ -100,6 +103,63 @@ export default function CCESubjectDashboard() {
     const formattedClassName = subject.class_name.match(/^\d+$/) 
         ? `Class ${subject.class_name}` 
         : subject.class_name;
+
+    const handleExportExcel = () => {
+        if (!data) return;
+        const headers = ['Roll No.', 'Student Name'];
+        data.works.forEach(w => headers.push(`${w.title} (${w.maxMarks})`));
+        headers.push(`Total Raw (${data.works.reduce((a, b) => a + b.maxMarks, 0)})`, `Converted Marks (${data.subject.max_marks})`, 'Percentage', 'Grade');
+
+        const rows = data.students.map(s => {
+            const row: any[] = [s.roll_number, s.name];
+            let rawTotal = 0;
+            data.works.forEach(w => {
+                const mark = s.marks[w.id];
+                row.push(mark !== undefined ? mark : '-');
+                if (mark !== undefined) rawTotal += mark;
+            });
+            row.push(rawTotal, s.obtained, `${s.percentage}%`, s.grade);
+            return row;
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Performance");
+        XLSX.writeFile(wb, `${data.subject.name}_performance.xlsx`);
+    };
+
+    const handleExportPDF = () => {
+        if (!data) return;
+        const doc = new jsPDF('landscape');
+        
+        doc.text(`${data.subject.name} - Cumulative Performance`, 14, 15);
+        
+        const head = [['Roll No.', 'Student Name']];
+        data.works.forEach(w => head[0].push(`${w.title}\n(${w.maxMarks})`));
+        head[0].push('Total Raw', `Converted\n(${data.subject.max_marks})`, 'Percentage', 'Grade');
+
+        const body = data.students.map(s => {
+            const row: any[] = [s.roll_number, s.name];
+            let rawTotal = 0;
+            data.works.forEach(w => {
+                const mark = s.marks[w.id];
+                row.push(mark !== undefined ? mark : '-');
+                if (mark !== undefined) rawTotal += mark;
+            });
+            row.push(rawTotal, s.obtained, `${s.percentage}%`, s.grade);
+            return row;
+        });
+
+        autoTable(doc, {
+            startY: 20,
+            head,
+            body,
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [10, 108, 91] }
+        });
+
+        doc.save(`${data.subject.name}_performance.pdf`);
+    };
 
     return (
         <AppLayout title={`${subject.name} Dashboard`}>
@@ -264,8 +324,16 @@ export default function CCESubjectDashboard() {
 
                         {/* Roster Table */}
                         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                            <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <div className="p-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <h2 className="font-bold text-slate-900 text-lg">Cumulative Performance</h2>
+                                <div className="flex gap-2">
+                                    <button onClick={handleExportExcel} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-colors">
+                                        <Download className="w-3.5 h-3.5" /> Excel
+                                    </button>
+                                    <button onClick={handleExportPDF} className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg text-xs font-bold transition-colors">
+                                        <Download className="w-3.5 h-3.5" /> PDF
+                                    </button>
+                                </div>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
@@ -273,37 +341,56 @@ export default function CCESubjectDashboard() {
                                         <tr>
                                             <th className="px-6 py-4 rounded-tl-[2rem]">Roll No.</th>
                                             <th className="px-6 py-4">Student Name</th>
-                                            <th className="px-6 py-4 text-center">Marks ({subject.max_marks})</th>
+                                            {works.map(w => (
+                                                <th key={w.id} className="px-4 py-4 text-center whitespace-nowrap">
+                                                    {w.title.length > 10 ? w.title.substring(0, 10) + '...' : w.title}<br/>
+                                                    <span className="text-[10px] opacity-70">({w.maxMarks})</span>
+                                                </th>
+                                            ))}
+                                            <th className="px-6 py-4 text-center whitespace-nowrap">Total Raw</th>
+                                            <th className="px-6 py-4 text-center whitespace-nowrap">Converted<br/><span className="text-[10px] opacity-70">({subject.max_marks})</span></th>
                                             <th className="px-6 py-4 text-center">Percentage</th>
                                             <th className="px-6 py-4 text-center rounded-tr-[2rem]">Grade</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
-                                        {students.map(student => (
-                                            <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
-                                                <td className="px-6 py-4 font-bold text-slate-500">
-                                                    {student.roll_number}
-                                                </td>
-                                                <td className="px-6 py-4 font-bold text-slate-900">
-                                                    {student.name}
-                                                </td>
-                                                <td className="px-6 py-4 text-center font-bold text-slate-700">
-                                                    {student.obtained} / {student.total}
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <span className={`px-2 py-1 rounded-lg font-bold text-xs ${
-                                                        student.percentage >= 50 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
-                                                    }`}>
-                                                        {student.percentage}%
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <span className="font-black text-slate-800 text-base">
-                                                        {student.grade}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {students.map(student => {
+                                            const rawTotal = works.reduce((acc, w) => acc + (student.marks[w.id] || 0), 0);
+                                            const rawMax = works.reduce((acc, w) => acc + w.maxMarks, 0);
+                                            return (
+                                                <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
+                                                    <td className="px-6 py-4 font-bold text-slate-500 whitespace-nowrap">
+                                                        {student.roll_number}
+                                                    </td>
+                                                    <td className="px-6 py-4 font-bold text-slate-900 whitespace-nowrap">
+                                                        {student.name}
+                                                    </td>
+                                                    {works.map(w => (
+                                                        <td key={w.id} className="px-4 py-4 text-center font-semibold text-slate-600 bg-white border-l border-r border-slate-50/50">
+                                                            {student.marks[w.id] !== undefined ? student.marks[w.id] : '-'}
+                                                        </td>
+                                                    ))}
+                                                    <td className="px-6 py-4 text-center font-bold text-slate-700 bg-slate-50/50 border-l border-slate-100">
+                                                        {rawTotal} / {rawMax}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center font-bold text-slate-900 bg-emerald-50/30">
+                                                        {student.obtained} / {student.total}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <span className={`px-2 py-1 rounded-lg font-bold text-xs ${
+                                                            student.percentage >= 50 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                                                        }`}>
+                                                            {student.percentage}%
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <span className="font-black text-slate-800 text-base">
+                                                            {student.grade}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
