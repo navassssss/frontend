@@ -90,7 +90,12 @@ export default function CCEWorksPage() {
                         {isPrincipal ? (
                             <div className="flex bg-slate-100/80 p-1 rounded-full border border-slate-200 shrink-0">
                                 <button
-                                    onClick={() => setSubjectFilter('my')}
+                                    onClick={() => {
+                                        setSubjectFilter('my');
+                                        setClassFilter('all');
+                                        setTeacherFilter('all');
+                                        setSearchQuery('');
+                                    }}
                                     className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                                         subjectFilter === 'my' 
                                             ? 'bg-white text-emerald-800 shadow-sm' 
