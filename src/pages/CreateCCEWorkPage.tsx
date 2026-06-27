@@ -233,12 +233,13 @@ export default function CreateCCEWorkPage() {
                                             <SelectContent>
                                                 {subjects
                                                     .filter(subject => {
+                                                        if (formData.subject_id === subject.id.toString()) return true;
                                                         if (!isPrincipal) return true;
                                                         if (showAllSubjects) return true;
                                                         return subject.teacherName === user?.name;
                                                     })
                                                     .map((subject) => (
-                                                        <SelectItem key={subject.id} value={subject.id} className="font-semibold">
+                                                        <SelectItem key={subject.id} value={subject.id.toString()} className="font-semibold">
                                                             {subject.name} - {subject.className}
                                                         </SelectItem>
                                                     ))}
