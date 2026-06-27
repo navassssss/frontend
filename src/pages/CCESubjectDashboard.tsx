@@ -97,9 +97,9 @@ export default function CCESubjectDashboard() {
         }
     };
 
-    const formattedClassName = subject.class_name.includes('Class') 
-        ? subject.class_name.replace('Class', 'Grade') 
-        : (subject.class_name.match(/^\d+$/) ? `Grade ${subject.class_name}` : subject.class_name);
+    const formattedClassName = subject.class_name.match(/^\d+$/) 
+        ? `Class ${subject.class_name}` 
+        : subject.class_name;
 
     return (
         <AppLayout title={`${subject.name} Dashboard`}>

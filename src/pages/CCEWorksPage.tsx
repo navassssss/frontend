@@ -175,7 +175,7 @@ export default function CCEWorksPage() {
                                                         {subject.subject_name}
                                                     </h3>
                                                     <span className="text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md shrink-0">
-                                                        {subject.class_name.includes('Class') ? subject.class_name.replace('Class', 'Grade') : subject.class_name}
+                                                        {subject.class_name.match(/^\d+$/) ? `Class ${subject.class_name}` : subject.class_name}
                                                     </span>
                                                 </div>
                                                 
