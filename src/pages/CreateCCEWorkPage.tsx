@@ -109,8 +109,8 @@ export default function CreateCCEWorkPage() {
     };
 
     const handleSubmit = async () => {
-        if (!formData.subject_id || !formData.level || !formData.title || !formData.max_marks) {
-            toast.error('Please fill all required fields (Subject, Level, Title, Max Marks)');
+        if (!formData.subject_id || !formData.level || !formData.week || !formData.title || !formData.max_marks) {
+            toast.error('Please fill all required fields (Subject, Level, Week, Title, Max Marks)');
             return;
         }
 
@@ -266,7 +266,7 @@ export default function CreateCCEWorkPage() {
                                             </Select>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Week</Label>
+                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Week *</Label>
                                             <Input
                                                 type="number"
                                                 min="1"
