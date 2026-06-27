@@ -6,7 +6,8 @@ import {
     Award,
     FileText,
     Layers,
-    Settings2
+    Settings2,
+    ArrowLeft
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -142,10 +143,21 @@ export default function CreateCCEWorkPage() {
         );
     }
 
+    const selectedSubject = subjects.find(s => s.id.toString() === formData.subject_id);
+    const backText = selectedSubject ? `${selectedSubject.name} (Subject)` : 'All Assessments';
+
     return (
         <AppLayout title={editId ? "Edit CCE Work" : "Create CCE Work"} showBack={false} hideBottomNav={true}>
-            <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-8 bg-slate-50/50">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
+            <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-4 bg-slate-50/50">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to {backText}
+                </button>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
                     {/* LEFT COLUMN - Main Content */}
                     <div className="lg:col-span-8 space-y-6">
 
