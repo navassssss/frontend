@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Users } from 'lucide-react';
-
+import { FileText, Users, CheckCircle } from 'lucide-react';
 
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
@@ -52,6 +51,7 @@ export default function AttendanceReportsPage() {
 
     const [officialAbsences, setOfficialAbsences] = useState<OfficialAbsence[]>([]);
     const [classAttendance, setClassAttendance] = useState<ClassAttendance[]>([]);
+    const [classStatuses, setClassStatuses] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchReport = async () => {
@@ -70,6 +70,37 @@ export default function AttendanceReportsPage() {
 
         fetchReport();
     }, [session]);
+
+    useEffect(() => {
+        const fetchClassStatuses = async () => {
+            try {
+                const selectedDate = new Date().toISOString().split('T')[0];
+                const { data: classes } = await api.get('/attendance/classes');
+                const { data: attendanceData } = await api.get(`/attendance?date=${selectedDate}`);
+                const attendanceRecords = attendanceData.records || attendanceData;
+
+                const statuses = classes.map((cls: any) => {
+                    const morningRecord = attendanceRecords.find(
+                        (r: any) => r.classId === cls.id && r.session === 'morning'
+                    );
+                    const afternoonRecord = attendanceRecords.find(
+                        (r: any) => r.classId === cls.id && r.session === 'afternoon'
+                    );
+
+                    return {
+                        id: cls.id,
+                        name: cls.name,
+                        morningTaken: !!morningRecord,
+                        afternoonTaken: !!afternoonRecord
+                    };
+                });
+                setClassStatuses(statuses);
+            } catch (error) {
+                console.error('Failed to load class statuses', error);
+            }
+        };
+        fetchClassStatuses();
+    }, []);
 
     return (
         <AppLayout title="Attendance Reports" showBack>
@@ -111,6 +142,44 @@ export default function AttendanceReportsPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Class Status Overview */}
+                {classStatuses.length > 0 && (
+                    <div className="bg-card border rounded-md shadow-sm p-4 md:px-6">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 tracking-tight">
+                                <CheckCircle className="w-4 h-4 text-primary" />
+                                Class Status Overview
+                            </h2>
+                            <Badge variant="secondary" className="text-[10px] font-medium bg-muted/60 text-muted-foreground border-transparent">
+                                {classStatuses.filter(c => c.morningTaken && c.afternoonTaken).length}/{classStatuses.length} Complete
+                            </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {classStatuses.map((cls) => {
+                                const isComplete = cls.morningTaken && cls.afternoonTaken;
+                                const isPartial = (cls.morningTaken || cls.afternoonTaken) && !isComplete;
+
+                                let statusColor = "bg-red-100 text-red-700 border-red-300"; // Missing
+                                if (isComplete) {
+                                    statusColor = "bg-emerald-100 text-emerald-700 border-emerald-300"; // Complete
+                                } else if (isPartial) {
+                                    statusColor = "bg-amber-100 text-amber-700 border-amber-300"; // Partial
+                                }
+
+                                return (
+                                    <div key={cls.id} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold ${statusColor}`}>
+                                        <span>{cls.name}</span>
+                                        <div className="flex gap-1 opacity-90">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${cls.morningTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Morning" />
+                                            <div className={`w-1.5 h-1.5 rounded-full ${cls.afternoonTaken ? 'bg-emerald-600' : 'bg-red-400'}`} title="Afternoon" />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 {/* 6/6 Split Layout for Sections 2 & 3 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
