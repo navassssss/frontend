@@ -43,6 +43,7 @@ interface Subject {
     id: string;
     name: string;
     className: string;
+    departmentName?: string;
     teacherName?: string;
 }
 
@@ -214,7 +215,7 @@ export default function CreateCCEWorkPage() {
                                                     })
                                                     .map((subject) => (
                                                         <SelectItem key={subject.id} value={subject.id.toString()} className="font-semibold">
-                                                            {subject.name} - {subject.className}
+                                                            {subject.name} - {subject.className} {subject.departmentName ? `(${subject.departmentName})` : ''}
                                                         </SelectItem>
                                                     ))}
                                             </SelectContent>

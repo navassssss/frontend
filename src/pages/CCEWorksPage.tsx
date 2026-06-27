@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface SubjectSummary {
     subject_id: string;
     subject_name: string;
+    department_name?: string;
     max_marks: number;
     class_name: string;
     teacher_name?: string;
@@ -198,6 +199,7 @@ export default function CCEWorksPage() {
                                                 <div className="flex items-center justify-between gap-2">
                                                     <h3 className="text-base font-bold text-slate-900 leading-tight truncate group-hover:text-emerald-700 transition-colors">
                                                         {subject.subject_name}
+                                                        {subject.department_name && <span className="text-slate-500 font-medium text-[13px] ml-1.5">({subject.department_name})</span>}
                                                     </h3>
                                                     <span className="text-[10px] font-bold tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-md shrink-0">
                                                         {subject.class_name.match(/^\d+$/) ? `Class ${subject.class_name}` : subject.class_name}

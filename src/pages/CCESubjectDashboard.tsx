@@ -228,7 +228,7 @@ export default function CCESubjectDashboard() {
     };
 
     return (
-        <AppLayout title={`${subject.name} Dashboard`}>
+        <AppLayout title={`${subject.name}${subject.department_name ? ` (${subject.department_name})` : ''} Dashboard`}>
             <div className="p-4 lg:p-6 max-w-5xl mx-auto space-y-5 pb-24 min-h-screen">
                 
                 {/* Compact Header */}
@@ -243,8 +243,9 @@ export default function CCESubjectDashboard() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <BookOpen className="w-5 h-5 text-emerald-600 hidden sm:block" />
-                                <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase">
+                                <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
                                     {subject.name}
+                                    {subject.department_name && <span className="text-lg text-slate-500 font-bold normal-case">({subject.department_name})</span>}
                                 </h1>
                             </div>
                             <p className="text-sm font-bold text-slate-500 mt-0.5 flex items-center gap-2">
