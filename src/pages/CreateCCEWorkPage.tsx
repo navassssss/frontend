@@ -143,47 +143,9 @@ export default function CreateCCEWorkPage() {
     }
 
     return (
-        <AppLayout title={editId ? "Edit CCE Work" : "Create CCE Work"} showBack={false}>
+        <AppLayout title={editId ? "Edit CCE Work" : "Create CCE Work"} showBack={false} hideBottomNav={true}>
             <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-8 bg-slate-50/50">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div>
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-2 transition-colors hover:opacity-80"
-                        >
-                            <span className="text-slate-400 flex items-center gap-1">
-                                &larr; ASSESSMENTS <span className="text-slate-300">/</span>
-                            </span>
-                            <span className="text-[#00a67e]">{editId ? 'EDIT ENTRY' : 'NEW ENTRY'}</span>
-                        </button>
-                        <h1 className="text-3xl md:text-[32px] font-black text-slate-800 tracking-tight leading-none mb-3">
-                            {editId ? 'Edit CCE Work' : 'Create New CCE Work'}
-                        </h1>
-                        <p className="text-sm font-medium text-slate-500 max-w-xl leading-relaxed">
-                            {editId ? 'Update the details for this Continuous and Comprehensive Evaluation task.' : 'Define a new Continuous and Comprehensive Evaluation task. Fill in the curriculum details, schedules, and instructional goals below.'}
-                        </p>
-                    </div>
-
-                    {/* Desktop-only action buttons in header */}
-                    <div className="hidden md:flex items-center gap-3">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="h-[60px] px-6 rounded-full border border-slate-200 bg-white text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors shadow-sm leading-tight text-center"
-                        >
-                            Cancel<br />Changes
-                        </button>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                            className="h-[60px] px-6 rounded-full bg-[#00a67e] hover:bg-[#008f6c] text-white text-[13px] font-black transition-colors shadow-sm leading-tight text-center disabled:opacity-50"
-                        >
-                            {isSubmitting ? 'Saving...' : <>{editId ? 'Save' : 'Create'}<br />CCE Work</>}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
                     {/* LEFT COLUMN - Main Content */}
                     <div className="lg:col-span-8 space-y-6">
 
@@ -214,7 +176,7 @@ export default function CreateCCEWorkPage() {
 
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Subject</Label>
+                                            <Label className="text-[12px] font-bold text-slate-700">Subject *</Label>
                                             <Link
                                                 to="/subjects"
                                                 className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
@@ -227,7 +189,7 @@ export default function CreateCCEWorkPage() {
                                             value={formData.subject_id}
                                             onValueChange={(v) => setFormData({ ...formData, subject_id: v })}
                                         >
-                                            <SelectTrigger className={`h-14 rounded-xl border-0 font-bold transition-colors ${formData.subject_id ? 'bg-[#ff8a4b] text-white' : 'bg-slate-50 text-slate-600'}`}>
+                                            <SelectTrigger className="h-14 bg-slate-50 border-0 rounded-xl font-bold text-slate-700">
                                                 <SelectValue placeholder="Select subject..." />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -249,7 +211,7 @@ export default function CreateCCEWorkPage() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Level *</Label>
+                                            <Label className="text-[12px] font-bold text-slate-700">Level *</Label>
                                             <Select
                                                 value={formData.level}
                                                 onValueChange={(v) => setFormData({ ...formData, level: v })}
@@ -266,7 +228,7 @@ export default function CreateCCEWorkPage() {
                                             </Select>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Week *</Label>
+                                            <Label className="text-[12px] font-bold text-slate-700">Week *</Label>
                                             <Input
                                                 type="number"
                                                 min="1"
@@ -292,7 +254,7 @@ export default function CreateCCEWorkPage() {
 
                                 <div className="space-y-6">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Enter Work Title</Label>
+                                        <Label className="text-[12px] font-bold text-slate-700">Work Title *</Label>
                                         <Input
                                             value={formData.title}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -302,7 +264,7 @@ export default function CreateCCEWorkPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Description (Activity)</Label>
+                                        <Label className="text-[12px] font-bold text-slate-700">Description (Activity)</Label>
                                         <Textarea
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -314,7 +276,7 @@ export default function CreateCCEWorkPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Tool/Method</Label>
+                                            <Label className="text-[12px] font-bold text-slate-700">Tool/Method</Label>
                                             <div className="relative">
                                                 <input
                                                     list="cce-tool-methods"
@@ -331,7 +293,7 @@ export default function CreateCCEWorkPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-2 relative">
-                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Maximum Marks</Label>
+                                            <Label className="text-[12px] font-bold text-slate-700">Maximum Marks *</Label>
                                             <div className="relative">
                                                 <Input
                                                     type="number"
@@ -366,7 +328,7 @@ export default function CreateCCEWorkPage() {
 
                                 <div className="space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Issue Date</Label>
+                                        <Label className="text-[12px] font-bold text-slate-700">Issue Date</Label>
                                         <div className="relative">
                                             <Input
                                                 type="date"
@@ -378,7 +340,7 @@ export default function CreateCCEWorkPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Due Date</Label>
+                                        <Label className="text-[12px] font-bold text-slate-700">Due Date</Label>
                                         <div className="relative">
                                             <Input
                                                 type="date"
@@ -396,9 +358,9 @@ export default function CreateCCEWorkPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <Label className="text-[13px] font-bold text-slate-800">Late Submission</Label>
-                                        {/* <p className="text-[11px] font-medium text-slate-400">
-                                            Allow up to 3 days delay
-                                        </p> */}
+                                        <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                                            Allow submissions after the due date.
+                                        </p>
                                     </div>
                                     <Switch className="data-[state=checked]:bg-[#00a67e] data-[state=checked]:opacity-100 scale-90" defaultChecked />
                                 </div>
@@ -475,8 +437,8 @@ export default function CreateCCEWorkPage() {
                 </div>
             </div>
 
-            {/* Mobile bottom action buttons — inline after fields */}
-            <div className="md:hidden flex gap-3 pb-8">
+            {/* Action buttons — inline after fields */}
+            <div className="flex gap-3 pb-8 lg:pb-0">
                 <button
                     type="button"
                     onClick={() => navigate(-1)}
