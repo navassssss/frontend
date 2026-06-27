@@ -237,7 +237,7 @@ export default function TakeAttendancePage() {
                             disabled={!!editId}
                             onClick={() => setSelectedSession('afternoon')}
                         >
-                            <Sunset className="w-5 h-5 mr-2" />
+                            <Moon className="w-5 h-5 mr-2" />
                             Afternoon
                         </Button>
                     </div>
