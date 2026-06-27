@@ -207,55 +207,11 @@ export default function TakeAttendancePage() {
     const presentCount = selectedClassInfo ? selectedClassInfo.studentCount - absentStudents.length : 0;
 
     return (
-        <AppLayout title="Take Attendance" showBack={false}>
+        <AppLayout title="Take Attendance" showBack={true}>
             <div className="p-4 lg:p-6 space-y-6 pb-24 max-w-2xl mx-auto">
-                {/* Header with Back Button */}
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/attendance')}
-                        className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors shadow-sm"
-                    >
-                        <ChevronRight className="w-5 h-5 text-muted-foreground rotate-180" />
-                    </button>
-                    <div>
-                        <h2 className="text-lg font-bold text-foreground">Attendance Entry</h2>
-                        <p className="text-[11px] text-muted-foreground">Mark student attendance</p>
-                    </div>
-                </div>
-
-                {/* Class & Date Selection in One Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Select Class</Label>
-                        <Select value={selectedClass} onValueChange={setSelectedClass} disabled={!!editId}>
-                            <SelectTrigger className="h-10">
-                                <SelectValue placeholder="Choose class" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {classes.map((cls) => (
-                                    <SelectItem key={cls.id} value={cls.id.toString()}>
-                                        {cls.name} ({cls.studentCount})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Date</Label>
-                        <Input
-                            type="date"
-                            value={selectedDate}
-                            disabled={!!editId}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="h-10 w-full px-2"
-                        />
-                    </div>
-                </div>
-
                 {/* Session Selection */}
                 <div className="space-y-2">
-                    <Label>Session</Label>
+                    <Label className="text-muted-foreground ml-1">Select Session</Label>
                     <div className="grid grid-cols-2 gap-3">
                         <Button
                             variant={selectedSession === 'morning' ? 'default' : 'outline'}
@@ -295,27 +251,25 @@ export default function TakeAttendancePage() {
                             <>
                                 <Card className="border-primary/20 shadow-md">
                                     <CardContent className="p-4 sm:p-6">
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                                             <div>
-                                                <div className="flex items-center gap-2 mb-1">
+                                                <div className="flex items-center gap-2 mb-0.5">
                                                     <Users className="w-5 h-5 text-primary" />
-                                                    <h3 className="text-lg font-bold text-foreground">
-                                                        Class {selectedClassInfo?.name}
+                                                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                                        {selectedClassInfo?.name}
+                                                        <span className="text-muted-foreground font-normal text-sm border-l pl-2 border-border/50">
+                                                            {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        </span>
                                                     </h3>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Uncheck a student to mark them as absent.
-                                                </p>
                                             </div>
-                                            <div className="flex gap-2 bg-muted/50 p-1.5 rounded-lg border">
-                                                <div className="px-3 py-1.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium text-sm flex flex-col items-center min-w-[4rem]">
-                                                    <span className="text-lg font-bold leading-none mb-1">{presentCount}</span>
-                                                    <span className="text-[10px] uppercase tracking-wider">Present</span>
-                                                </div>
-                                                <div className="px-3 py-1.5 rounded-md bg-destructive/10 text-destructive font-medium text-sm flex flex-col items-center min-w-[4rem]">
-                                                    <span className="text-lg font-bold leading-none mb-1">{absentStudents.length}</span>
-                                                    <span className="text-[10px] uppercase tracking-wider">Absent</span>
-                                                </div>
+                                            <div className="flex gap-2">
+                                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 h-7 text-xs">
+                                                    Present <span key={presentCount} className="font-bold ml-1.5 text-sm animate-in zoom-in duration-300 inline-block">{presentCount}</span>
+                                                </Badge>
+                                                <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 h-7 text-xs">
+                                                    Absent <span key={absentStudents.length} className="font-bold ml-1.5 text-sm animate-in zoom-in duration-300 inline-block">{absentStudents.length}</span>
+                                                </Badge>
                                             </div>
                                         </div>
 
