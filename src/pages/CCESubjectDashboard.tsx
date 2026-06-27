@@ -172,7 +172,7 @@ export default function CCESubjectDashboard() {
         });
         
         html += `
-                        <th>Total Raw</th>
+                        <th>Total Raw<br/>(${data.works.reduce((a, b) => a + b.maxMarks, 0)})</th>
                         <th>Converted (${data.subject.max_marks})</th>
                         <th>Percentage</th>
                         <th>Grade</th>
@@ -413,7 +413,7 @@ export default function CCESubjectDashboard() {
                                                     <span className="text-[10px] opacity-70">({w.maxMarks})</span>
                                                 </th>
                                             ))}
-                                            <th className="px-6 py-4 text-center whitespace-nowrap">Total Raw</th>
+                                            <th className="px-6 py-4 text-center whitespace-nowrap">Total Raw<br/><span className="text-[10px] opacity-70">({works.reduce((acc, w) => acc + w.maxMarks, 0)})</span></th>
                                             <th className="px-6 py-4 text-center whitespace-nowrap">Converted<br/><span className="text-[10px] opacity-70">({subject.max_marks})</span></th>
                                             <th className="px-6 py-4 text-center">Percentage</th>
                                             <th className="px-6 py-4 text-center rounded-tr-[2rem]">Grade</th>
