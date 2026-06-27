@@ -86,20 +86,7 @@ export default function CCEWorksPage() {
                 {/* Header Section */}
                 <div className="mb-6 animate-fade-in space-y-4">
                     <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">CCE Works</h1>
-                            <p className="text-sm text-slate-500 mt-1 hidden sm:block">Manage evaluation rubrics across classes.</p>
-                        </div>
-                        <button
-                            onClick={() => navigate('/cce/works/new')}
-                            className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm px-4 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
-                        >
-                            <Plus className="w-4 h-4" strokeWidth={3} /> <span className="hidden sm:inline">New Assessment</span><span className="sm:hidden">New</span>
-                        </button>
-                    </div>
-
-                    {isPrincipal && (
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        {isPrincipal ? (
                             <div className="flex bg-slate-100/80 p-1 rounded-full border border-slate-200 shrink-0">
                                 <button
                                     onClick={() => setSubjectFilter('my')}
@@ -122,43 +109,51 @@ export default function CCEWorksPage() {
                                     All Subjects
                                 </button>
                             </div>
+                        ) : (
+                            <div></div>
+                        )}
+                        <button
+                            onClick={() => navigate('/cce/works/new')}
+                            className="bg-[#0a6c5b] hover:bg-emerald-800 text-white font-semibold text-sm px-4 py-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 gap-2"
+                        >
+                            <Plus className="w-4 h-4" strokeWidth={3} /> <span className="hidden sm:inline">New Assessment</span><span className="sm:hidden">New</span>
+                        </button>
+                    </div>
 
-                            {subjectFilter === 'all' && (
-                                <div className="flex flex-col sm:flex-row flex-1 gap-3 w-full sm:w-auto relative">
-                                    <div className="flex-1 relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Search className="h-4 w-4 text-slate-400" />
-                                        </div>
-                                        <input 
-                                            type="text" 
-                                            placeholder="Search subject, class, or teacher..." 
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
-                                        />
-                                    </div>
-                                    <select
-                                        value={classFilter}
-                                        onChange={(e) => setClassFilter(e.target.value)}
-                                        className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
-                                    >
-                                        <option value="all">All Classes</option>
-                                        {uniqueClasses.map(c => (
-                                            <option key={c} value={c}>{c.match(/^\d+$/) ? `Class ${c}` : c}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={teacherFilter}
-                                        onChange={(e) => setTeacherFilter(e.target.value)}
-                                        className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
-                                    >
-                                        <option value="all">All Teachers</option>
-                                        {uniqueTeachers.map(t => (
-                                            <option key={t} value={t}>{t}</option>
-                                        ))}
-                                    </select>
+                    {isPrincipal && subjectFilter === 'all' && (
+                        <div className="flex flex-col sm:flex-row gap-3 w-full relative">
+                            <div className="flex-1 relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Search className="h-4 w-4 text-slate-400" />
                                 </div>
-                            )}
+                                <input 
+                                    type="text" 
+                                    placeholder="Search subject, class, or teacher..." 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
+                                />
+                            </div>
+                            <select
+                                value={classFilter}
+                                onChange={(e) => setClassFilter(e.target.value)}
+                                className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
+                            >
+                                <option value="all">All Classes</option>
+                                {uniqueClasses.map(c => (
+                                    <option key={c} value={c}>{c.match(/^\d+$/) ? `Class ${c}` : c}</option>
+                                ))}
+                            </select>
+                            <select
+                                value={teacherFilter}
+                                onChange={(e) => setTeacherFilter(e.target.value)}
+                                className="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm outline-none"
+                            >
+                                <option value="all">All Teachers</option>
+                                {uniqueTeachers.map(t => (
+                                    <option key={t} value={t}>{t}</option>
+                                ))}
+                            </select>
                         </div>
                     )}
                 </div>
