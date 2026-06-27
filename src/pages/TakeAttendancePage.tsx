@@ -56,10 +56,11 @@ export default function TakeAttendancePage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const editId = searchParams.get('edit');
+    const prefilledClass = searchParams.get('class');
     const { user } = useAuth();
 
     const [classes, setClasses] = useState<ClassData[]>([]);
-    const [selectedClass, setSelectedClass] = useState<string>('');
+    const [selectedClass, setSelectedClass] = useState<string>(prefilledClass || '');
 
     const [selectedSession, setSelectedSession] = useState<'morning' | 'afternoon'>(getCurrentSession());
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -222,32 +223,34 @@ export default function TakeAttendancePage() {
                     </div>
                 </div>
 
-                {/* Class Selection */}
-                <div className="space-y-2">
-                    <Label>Select Class</Label>
-                    <Select value={selectedClass} onValueChange={setSelectedClass} disabled={!!editId}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Choose a class" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {classes.map((cls) => (
-                                <SelectItem key={cls.id} value={cls.id.toString()}>
-                                    {cls.name} ({cls.studentCount} students)
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                {/* Class & Date Selection in One Row */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Select Class</Label>
+                        <Select value={selectedClass} onValueChange={setSelectedClass} disabled={!!editId}>
+                            <SelectTrigger className="h-10">
+                                <SelectValue placeholder="Choose class" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classes.map((cls) => (
+                                    <SelectItem key={cls.id} value={cls.id.toString()}>
+                                        {cls.name} ({cls.studentCount})
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                {/* Date Selection */}
-                <div className="space-y-2">
-                    <Label>Date</Label>
-                    <Input
-                        type="date"
-                        value={selectedDate}
-                        disabled={!!editId}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                    />
+                    <div className="space-y-2">
+                        <Label>Date</Label>
+                        <Input
+                            type="date"
+                            value={selectedDate}
+                            disabled={!!editId}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="h-10"
+                        />
+                    </div>
                 </div>
 
                 {/* Session Selection */}
