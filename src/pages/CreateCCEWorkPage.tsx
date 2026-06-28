@@ -83,9 +83,9 @@ export default function CreateCCEWorkPage() {
         try {
             const { data } = await api.get(`/cce/works/${editId}`);
             setFormData({
-                subject_id: data.subject?.id || '',
-                level: data.level || '',
-                week: data.week || '',
+                subject_id: data.subjectId?.toString() || data.subject?.id?.toString() || '',
+                level: data.level?.toString() || '',
+                week: data.week?.toString() || '',
                 title: data.title || '',
                 description: data.description || '',
                 tool_method: data.toolMethod || '',

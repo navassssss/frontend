@@ -304,7 +304,8 @@ export default function CCESubjectDashboard() {
                             <div className="p-4 space-y-3 bg-slate-50/50">
                                 {works.map(work => {
                                     const workMarks = students.map(s => s.marks[work.id]).filter(m => m !== undefined && m !== null);
-                                    const average = workMarks.length > 0 ? (workMarks.reduce((a, b) => Number(a) + Number(b), 0) / workMarks.length).toFixed(1) : '-';
+                                    const rawAvg = workMarks.length > 0 ? workMarks.reduce((a, b) => Number(a) + Number(b), 0) / workMarks.length : 0;
+                                    const average = workMarks.length > 0 && work.maxMarks > 0 ? ((rawAvg / work.maxMarks) * 100).toFixed(1) + '%' : '-';
                                     
                                     return (
                                     <div key={work.id} onClick={() => navigate(`/cce/works/${work.id}`)} className="cursor-pointer p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-300 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
