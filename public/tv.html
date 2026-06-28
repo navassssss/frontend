@@ -576,16 +576,16 @@
                     '<div class="welcome-badge">TV Slideshow Running</div>' +
                 '</div>';
             } else if (index === 1) { html = getPodiumHtml("Top performing students", "Current Month", data.studentsMonthly.slice(0,3), 'student'); }
-            else if (index === 2) { html = getPodiumHtml("Top performing students", "All Time", data.studentsOverall.slice(0,3), 'student'); }
+            else if (index === 2) { html = getPodiumHtml("Top performing students", "Current Year", data.studentsOverall.slice(0,3), 'student'); }
             else if (index === 3) { html = getPodiumHtml("Top performing Classes", "Current Month", data.classesMonthly.slice(0,3), 'class'); }
-            else if (index === 4) { html = getPodiumHtml("Top performing Classes", "All Time", data.classesOverall.slice(0,3), 'class'); }
+            else if (index === 4) { html = getPodiumHtml("Top performing Classes", "Current Year", data.classesOverall.slice(0,3), 'class'); }
             else if (index === 5) { 
                 var rows = data.departmentsMonthly.slice(0,10).map(function(d){ return [pad(d.rank), {name: d.department_name, sub:"Academic Department"}, d.student_count, d.points.toLocaleString()]; });
                 html = getTableHtml("Top performing Departments", "Current Month", ["Rank", "Department", "Students Enrolled", "Total Contributed Points"], rows);
             }
             else if (index === 6) { 
                 var rows = data.departmentsOverall.slice(0,10).map(function(d){ return [pad(d.rank), {name: d.department_name, sub:"Academic Department"}, d.student_count, d.points.toLocaleString()]; });
-                html = getTableHtml("Top performing Departments", "All Time", ["Rank", "Department", "Students Enrolled", "Total Contributed Points"], rows);
+                html = getTableHtml("Top performing Departments", "Current Year", ["Rank", "Department", "Students Enrolled", "Total Contributed Points"], rows);
             }
             else if (index === 7) {
                 var rows = data.studentsMonthly.slice(0,10).map(function(s){ return [pad(s.rank), {name: s.name, sub: "ID / "+s.username}, s.class_name, s.points.toLocaleString()]; });
@@ -593,7 +593,7 @@
             }
             else if (index === 8) {
                 var rows = data.studentsOverall.slice(0,10).map(function(s){ return [pad(s.rank), {name: s.name, sub: "ID / "+s.username}, s.class_name, s.points.toLocaleString()]; });
-                html = getTableHtml("Top performing students", "All Time", ["Rank", "Student", "Class", "Star Points"], rows);
+                html = getTableHtml("Top performing students", "Current Year", ["Rank", "Student", "Class", "Star Points"], rows);
             }
             else if (index === 9) {
                 var rows = data.classesMonthly.slice(0,10).map(function(c){ return [pad(c.rank), {name: c.class_name, sub: (c.student_count||0)+" enrolled students"}, (c.average||0).toFixed(2), c.points.toLocaleString()]; });
@@ -601,7 +601,7 @@
             }
             else if (index === 10) {
                 var rows = data.classesOverall.slice(0,10).map(function(c){ return [pad(c.rank), {name: c.class_name, sub: (c.student_count||0)+" enrolled students"}, (c.average||0).toFixed(2), c.points.toLocaleString()]; });
-                html = getTableHtml("Top performing Classes", "All Time", ["Rank", "Class", "Average Score", "Total Star Points"], rows);
+                html = getTableHtml("Top performing Classes", "Current Year", ["Rank", "Class", "Average Score", "Total Star Points"], rows);
             }
             
             viewport.innerHTML = html;
@@ -658,9 +658,6 @@
             var lbl = type === 'class' ? "Avg Star Points" : "Total Star Points";
             
             var html = '<div class="podium-block ' + posClass + '">';
-            if (rank === 1) {
-                html += '<div class="first-crown">' + svgAward + '</div>';
-            }
             html += '<div class="avatar-wrap">' + getAvatarHtml(item, type, posClass) + '<div class="rank-badge">' + rank + '</div></div>';
             html += '<div class="podium-info"><div class="podium-name">' + name + '</div><div class="podium-subinfo">' + sub + '</div></div>';
             
