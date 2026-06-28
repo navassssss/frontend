@@ -192,8 +192,8 @@ export default function CCEWorksPage() {
                                         className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
-                                                <BookOpen className="w-5 h-5" />
+                                            <div className="w-10 h-10 rounded-xl bg-[#0a6c5b] text-white flex items-center justify-center shrink-0 group-hover:bg-emerald-600 transition-colors font-bold text-lg">
+                                                {subject.class_name.match(/^\d+$/) ? subject.class_name : subject.class_name.substring(0, 2).toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0 pt-0.5">
                                                 <div className="flex items-center justify-between gap-2">

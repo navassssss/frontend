@@ -302,8 +302,12 @@ export default function CCESubjectDashboard() {
                             </div>
                         ) : (
                             <div className="p-4 space-y-3 bg-slate-50/50">
-                                {works.map(work => (
-                                    <div key={work.id} className="p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-300 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                {works.map(work => {
+                                    const workMarks = students.map(s => s.marks[work.id]).filter(m => m !== undefined && m !== null);
+                                    const average = workMarks.length > 0 ? (workMarks.reduce((a, b) => Number(a) + Number(b), 0) / workMarks.length).toFixed(1) : '-';
+                                    
+                                    return (
+                                    <div key={work.id} onClick={() => navigate(`/cce/works/${work.id}`)} className="cursor-pointer p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-300 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         <div className="flex-1">
                                             <div className="flex flex-wrap items-center gap-2 mb-1">
                                                 <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${getTypeStyle(work.toolMethod || work.submissionType)}`}>
@@ -333,15 +337,18 @@ export default function CCESubjectDashboard() {
                                                     Evaluated
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => navigate(`/cce/works/${work.id}`)}
-                                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm hover:shadow active:scale-95 flex items-center justify-center"
-                                            >
-                                                Grade
-                                            </button>
+                                            <div className="text-right pl-4 border-l border-slate-100">
+                                                <div className="text-lg font-black text-emerald-600">
+                                                    {average}
+                                                </div>
+                                                <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                                                    Average
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
