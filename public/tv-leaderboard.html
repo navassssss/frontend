@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excellence Leaderboard</title>
+    <!-- Use a Google Font if supported, otherwise fallback to sans-serif -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Vanilla CSS Reset and Base Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #070b15;
+            color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        /* Ambient Background Glows */
+        .ambient-glow-1, .ambient-glow-2 {
+            position: absolute;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(100px);
+            opacity: 0.5;
+            animation: pulse-ambient 8s infinite alternate;
+        }
+        .ambient-glow-1 {
+            top: -20%; left: -10%;
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+        .ambient-glow-2 {
+            bottom: -20%; right: -10%;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        @keyframes pulse-ambient {
+            0% { opacity: 0.3; transform: scale(0.95); }
+            100% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        /* Header */
+        .header {
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 3rem;
+            background-color: rgba(10, 15, 29, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .header-left, .header-right { display: flex; align-items: center; }
+        .header-left { gap: 1.25rem; }
+        .header-right { gap: 2rem; }
+
+        .logo-box {
+            background: linear-gradient(to top right, #00a67e, #00f2ad);
+            padding: 0.75rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(0, 166, 126, 0.3);
+        }
+        .logo-box svg { width: 2.5rem; height: 2.5rem; color: #020617; }
+        
+        .header-title-sub {
+            color: #00f2ad;
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+        .header-title-main {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #f1f5f9;
+            letter-spacing: -0.025em;
+        }
+
+        /* Indicators */
+        .indicators {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.625rem 1.25rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .indicator-dot {
+            height: 0.875rem;
+            border-radius: 9999px;
+            transition: all 0.5s ease;
+        }
+        .indicator-dot.active {
+            width: 2.5rem;
+            background: linear-gradient(to right, #00a67e, #00f2ad);
+        }
+        .indicator-dot.inactive {
+            width: 0.875rem;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Controls */
+        .controls { display: flex; gap: 1rem; }
+        .btn-icon {
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            outline: none;
+        }
+        .btn-icon:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .btn-icon svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
+
+        /* Main Content Viewport */
+        .viewport {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            z-index: 10;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .viewport.transitioning {
+            opacity: 0;
+            transform: scale(0.98) translateY(1rem);
+        }
+
+        /* Slides */
+        .slide { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; }
+        .slide.active { display: flex; animation: slide-in 0.7s ease-out forwards; }
+
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(2rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Welcome Slide */
+        .welcome-slide { text-align: center; max-width: 64rem; }
+        .welcome-icon-wrap {
+            display: inline-flex;
+            padding: 2rem;
+            background: linear-gradient(to top right, #fbbf24, #fde047);
+            border-radius: 2.5rem;
+            box-shadow: 0 0 60px rgba(250, 204, 21, 0.2);
+            animation: float 3s ease-in-out infinite;
+            margin-bottom: 2.5rem;
+        }
+        .welcome-icon-wrap svg { width: 6rem; height: 6rem; color: #020617; }
+        .welcome-sub {
+            color: #34d399; font-size: 1.5rem; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; margin-bottom: 1.5rem;
+        }
+        .welcome-main {
+            font-size: 4.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text; color: transparent;
+        }
+        .welcome-desc {
+            font-size: 1.5rem; color: #94a3b8; font-weight: 500; line-height: 1.6; max-width: 48rem; margin: 0 auto 2rem;
+        }
+        .welcome-badge {
+            padding: 0.875rem 2rem; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.875rem; font-weight: 900; letter-spacing: 0.1em; color: #00f2ad; text-transform: uppercase; border-radius: 9999px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Podium Shared */
+        .podium-container {
+            width: 100%; max-width: 80rem; display: flex; flex-direction: column; align-items: center;
+        }
+        .podium-header { text-align: center; margin-bottom: 3rem; }
+        .podium-title { color: #00f2ad; font-size: 1.5rem; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; }
+        .podium-subtitle { font-size: 3.75rem; font-weight: 900; color: white; }
+        
+        .podium-blocks {
+            width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3rem; padding-top: 3rem;
+        }
+
+        .podium-block { display: flex; flex-direction: column; align-items: center; position: relative; }
+        .podium-block.first { width: 22.5rem; z-index: 20; margin-top: -3rem; }
+        .podium-block.second, .podium-block.third { width: 20rem; }
+
+        .avatar-wrap { position: relative; margin-bottom: 1.5rem; display: flex; justify-content: center; }
+        .avatar {
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: white;
+        }
+        .icon-box {
+            border-radius: 1rem; display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* 1st Place Styles */
+        .first .avatar {
+            width: 11.25rem; height: 11.25rem; border: 4px solid #facc15; font-size: 3rem;
+            background: linear-gradient(to top right, #eab308, #fcd34d); color: #0f172a;
+            box-shadow: 0 0 40px rgba(234, 179, 8, 0.25);
+        }
+        .first .icon-box {
+            width: 8rem; height: 8rem; border: 2px solid rgba(250, 204, 21, 0.5);
+            background: linear-gradient(to top right, rgba(234, 179, 8, 0.2), rgba(251, 191, 36, 0.2));
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.15);
+        }
+        .first .icon-box svg { width: 3.5rem; height: 3.5rem; fill: none; stroke: #facc15; }
+        .first-crown { position: absolute; top: -40px; animation: float 2s infinite ease-in-out; width: 3.5rem; height: 3.5rem; fill: rgba(250,204,21,0.2); stroke: #facc15; }
+        .first .rank-badge { background-color: #facc15; border-color: #070b15; color: #020617; }
+        
+        /* 2nd Place Styles */
+        .second .avatar {
+            width: 9.375rem; height: 9.375rem; border: 4px solid #94a3b8; font-size: 2.25rem;
+            background: linear-gradient(to top right, #334155, #64748b);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .second .icon-box, .third .icon-box {
+            width: 7rem; height: 7rem; border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .second .icon-box svg { width: 3rem; height: 3rem; fill: none; stroke: #6ee7b7; }
+        .second .rank-badge { background-color: #94a3b8; border-color: #070b15; color: #020617; }
+
+        /* 3rd Place Styles */
+        .third .avatar {
+            width: 9.375rem; height: 9.375rem; border: 4px solid rgba(217, 119, 6, 0.8); font-size: 2.25rem;
+            background: linear-gradient(to top right, #92400e, #d97706);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .third .icon-box svg { width: 3rem; height: 3rem; fill: none; stroke: #93c5fd; }
+        .third .rank-badge { background-color: #ea580c; border-color: #070b15; color: #020617; }
+
+        .rank-badge {
+            position: absolute; bottom: -0.5rem; right: -0.5rem; width: 2.5rem; height: 2.5rem;
+            border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center;
+            font-size: 0.875rem; font-weight: 900; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .first .rank-badge { width: 3rem; height: 3rem; border-width: 4px; font-size: 1rem; }
+
+        .podium-info { text-align: center; margin-bottom: 1.25rem; width: 100%; }
+        .podium-name { font-size: 1.5rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 0.5rem; }
+        .first .podium-name { font-size: 1.875rem; color: #facc15; }
+        .second .podium-name { color: #f1f5f9; }
+        .third .podium-name { color: #e2e8f0; }
+        
+        .podium-subinfo { font-size: 0.875rem; color: #94a3b8; font-weight: 700; margin-top: 0.5rem; }
+
+        .podium-base {
+            width: 100%; text-align: center; padding: 3rem 0; border-top: 1px solid;
+            border-top-left-radius: 2rem; border-top-right-radius: 2rem;
+            backdrop-filter: blur(12px);
+        }
+        .first .podium-base {
+            background: linear-gradient(to bottom, rgba(113, 63, 18, 0.2), transparent);
+            border-top: 2px solid rgba(234, 179, 8, 0.5); border-radius: 2.5rem 2.5rem 0 0;
+            padding: 4rem 0; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+        .second .podium-base {
+            background-color: rgba(30, 41, 59, 0.4); border-top-color: rgba(71, 85, 105, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+        .third .podium-base {
+            background-color: rgba(30, 41, 59, 0.3); border-top-color: rgba(51, 65, 85, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .base-score { font-size: 2.25rem; font-weight: 900; }
+        .first .base-score { font-size: 3rem; color: #facc15; }
+        .second .base-score, .third .base-score { color: #cbd5e1; }
+        
+        .base-label { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+        .first .base-label { color: rgba(234, 179, 8, 0.8); }
+        .second .base-label, .third .base-label { color: #94a3b8; }
+
+        .stars-container { display: flex; align-items: center; justify-content: center; gap: 0.25rem; margin-top: 0.75rem; }
+        .stars-container svg { width: 1.25rem; height: 1.25rem; fill: #facc15; stroke: none; }
+        .stars-extra { font-size: 0.75rem; font-weight: 900; color: #facc15; margin-left: 0.375rem; }
+
+        /* Empty Podium */
+        .empty-podium {
+            width: 100%; max-width: 56rem; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 4rem; text-align: center; background-color: rgba(11, 18, 34, 0.8); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); backdrop-filter: blur(12px);
+        }
+        .empty-icon {
+            padding: 1.5rem; background: linear-gradient(to top right, rgba(16, 185, 129, 0.1), rgba(20, 184, 166, 0.05));
+            border-radius: 50%; border: 1px solid rgba(16, 185, 129, 0.2); color: #00f2ad; margin-bottom: 2rem; animation: pulse-ambient 2s infinite;
+        }
+        .empty-icon svg { width: 4rem; height: 4rem; stroke: #00f2ad; fill: none; }
+        .empty-title { font-size: 2.25rem; font-weight: 900; color: white; margin-bottom: 0.75rem; }
+        .empty-desc { font-size: 1.25rem; color: #94a3b8; max-width: 32rem; line-height: 1.6; }
+
+        /* Table View */
+        .table-container {
+            width: 100%; max-width: 80rem; display: flex; flex-direction: column; align-items: center;
+        }
+        .table-split { display: flex; gap: 3rem; width: 100%; align-items: flex-start; }
+        .table-wrapper { flex: 1; width: 100%; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0 0.75rem; }
+        th { 
+            padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 900; 
+            color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
+        th:last-child { text-align: right; }
+        
+        td { 
+            padding: 1.25rem 1.5rem; background-color: rgba(255, 255, 255, 0.02); 
+            border-top: 1px solid rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.02); 
+            backdrop-filter: blur(12px);
+        }
+        td:first-child { border-left: 1px solid rgba(255,255,255,0.02); border-top-left-radius: 1rem; border-bottom-left-radius: 1rem; }
+        td:last-child { border-right: 1px solid rgba(255,255,255,0.02); border-top-right-radius: 1rem; border-bottom-right-radius: 1rem; text-align: right; }
+        
+        tr.top-row td {
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.02));
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        
+        .rank-num { font-size: 1.25rem; font-weight: 900; color: #94a3b8; }
+        tr.top-row .rank-num { color: #00f2ad; }
+        
+        .name-main { font-size: 1.125rem; font-weight: 900; color: #f1f5f9; }
+        tr.top-row .name-main { color: #34d399; }
+        .name-sub { font-size: 0.75rem; font-weight: 700; color: #64748b; margin-top: 0.25rem; }
+        
+        .cell-text { font-size: 1rem; font-weight: 700; color: #cbd5e1; }
+        .score-val { font-size: 1.25rem; font-weight: 900; color: #f8fafc; }
+        tr.top-row .score-val { color: #00f2ad; }
+
+        /* Footer */
+        .footer {
+            z-index: 10; display: flex; align-items: center; justify-content: space-between;
+            padding: 1.5rem 3rem; background-color: rgba(5, 8, 17, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.875rem; color: #64748b;
+        }
+        .footer-right { display: flex; align-items: center; gap: 1.25rem; }
+        .live-status { display: flex; align-items: center; gap: 0.375rem; color: #34d399; }
+        .live-dot { width: 0.625rem; height: 0.625rem; border-radius: 50%; background-color: #34d399; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+        @keyframes ping {
+            75%, 100% { transform: scale(2); opacity: 0; }
+        }
+        
+        /* Icons for SVG injecting */
+        .svg-icon { width: 100%; height: 100%; fill: currentColor; }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-box">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                    <path d="M4 22h16"></path>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                </svg>
+            </div>
+            <div>
+                <div class="header-title-sub">STUDENT STAR SYSTEM</div>
+                <div class="header-title-main">Excellence Leaderboard</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="indicators" id="indicators">
+                <!-- Dots injected via JS -->
+            </div>
+            <div class="controls">
+                <button class="btn-icon" id="btn-play-pause">
+                    <!-- Pause Icon initially -->
+                    <svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
+                    <svg id="icon-play" viewBox="0 0 24 24" style="display:none;"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="btn-icon" id="btn-fullscreen">
+                    <svg id="icon-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    <svg id="icon-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="viewport" id="viewport">
+        <!-- Slide contents injected via JS -->
+    </div>
+
+    <div class="footer">
+        <div>Designed for large ambient displays. Press fullscreen (⛶) for best results.</div>
+        <div class="footer-right">
+            <div class="live-status">
+                <div class="live-dot"></div>
+                Live Synchronized
+            </div>
+            <div id="footer-year"></div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        // Use ES5 syntax for maximum compatibility
+        var slideDuration = 10000;
+        var currentSlide = 0;
+        var displaySlide = 0;
+        var isPlaying = true;
+        var isFullscreen = false;
+        var isTransitioning = false;
+        var slideInterval = null;
+        
+        var data = {
+            studentsMonthly: [], studentsOverall: [],
+            classesMonthly: [], classesOverall: [],
+            departmentsMonthly: [], departmentsOverall: []
+        };
+        var pendingData = null;
+        
+        // SVGs
+        var svgSparkles = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>';
+        var svgAward = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>';
+        var svgStar = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        var svgSchool = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 9 12 5 2 9l10 4 10-4v6"/><path d="M6 10.6V16a6 3 0 0 0 12 0v-5.4"/></svg>';
+        var svgBuilding = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>';
+
+        document.getElementById('footer-year').innerText = "© " + new Date().getFullYear() + " Student Star System";
+
+        // Fetch wrapper using XMLHttpRequest (ES5)
+        function fetchEndpoint(url, callback) {
+            var xhr = new XMLHttpRequest();
+            var token = localStorage.getItem('token') || localStorage.getItem('student_token') || '';
+            // Determine API Base URL dynamically
+            var apiBase = window.location.origin + '/api';
+            // In dev mode it might be different, fallback logic if needed
+            if(window.location.port === '5173') { apiBase = 'http://127.0.0.1:8000/api'; }
+            
+            xhr.open('GET', apiBase + url, true);
+            if(token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+            xhr.setRequestHeader('Accept', 'application/json');
+            
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        callback(null, res);
+                    } catch(e) {
+                        callback(e, null);
+                    }
+                } else {
+                    callback(new Error('Status: ' + xhr.status), null);
+                }
+            };
+            xhr.onerror = function() { callback(new Error('Network Error'), null); };
+            xhr.send();
+        }
+
+        function filterData(raw) {
+            return {
+                studentsMonthly: (raw.studentsMonthly || []).filter(function(s) { return s.points > 0; }),
+                studentsOverall: (raw.studentsOverall || []).filter(function(s) { return s.points > 0; }),
+                classesMonthly: (raw.classesMonthly || []).filter(function(c) { return c.points > 0 || c.average > 0; }),
+                classesOverall: (raw.classesOverall || []).filter(function(c) { return c.points > 0 || c.average > 0; }),
+                departmentsMonthly: (raw.departmentsMonthly || []).filter(function(d) { return d.points > 0; }),
+                departmentsOverall: (raw.departmentsOverall || []).filter(function(d) { return d.points > 0; })
+            };
+        }
+
+        function fetchAllData(callback) {
+            var results = {};
+            var endpoints = [
+                { key: 'studentsMonthly', url: '/leaderboard/students?type=monthly' },
+                { key: 'studentsOverall', url: '/leaderboard/students?type=overall' },
+                { key: 'classesMonthly', url: '/leaderboard/classes?type=monthly' },
+                { key: 'classesOverall', url: '/leaderboard/classes?type=overall' },
+                { key: 'departmentsMonthly', url: '/leaderboard/departments?type=monthly' },
+                { key: 'departmentsOverall', url: '/leaderboard/departments?type=overall' }
+            ];
+            
+            var completed = 0;
+            var hasError = false;
+            
+            for(var i=0; i<endpoints.length; i++) {
+                (function(ep) {
+                    fetchEndpoint(ep.url, function(err, res) {
+                        if (hasError) return;
+                        if (err) {
+                            hasError = true;
+                            callback(err, null);
+                            return;
+                        }
+                        results[ep.key] = res.data || res;
+                        completed++;
+                        if (completed === endpoints.length) {
+                            callback(null, filterData(results));
+                        }
+                    });
+                })(endpoints[i]);
+            }
+        }
+
+        // Init
+        fetchAllData(function(err, res) {
+            if(!err && res) {
+                data = res;
+                renderSlide(0);
+                startSlideshow();
+            } else {
+                console.error("Failed to load initial data", err);
+                // Render empty welcome anyway
+                renderSlide(0);
+                startSlideshow();
+            }
+        });
+
+        function getNextSlide(current, dataState) {
+            var next = current;
+            var totalSlides = 11;
+            
+            for (var i = 0; i < totalSlides; i++) {
+                next = (next + 1) % totalSlides;
+                if (next === 0) return 0;
+                if (next === 1 && dataState.studentsMonthly.length > 0) return 1;
+                if (next === 2 && dataState.studentsOverall.length > 0) return 2;
+                if (next === 3 && dataState.classesMonthly.length > 0) return 3;
+                if (next === 4 && dataState.classesOverall.length > 0) return 4;
+                if (next === 5 && dataState.departmentsMonthly.length > 0) return 5;
+                if (next === 6 && dataState.departmentsOverall.length > 0) return 6;
+                if (next === 7 && dataState.studentsMonthly.length > 0) return 7;
+                if (next === 8 && dataState.studentsOverall.length > 0) return 8;
+                if (next === 9 && dataState.classesMonthly.length > 0) return 9;
+                if (next === 10 && dataState.classesOverall.length > 0) return 10;
+            }
+            return 0;
+        }
+
+        function triggerBackgroundFetch() {
+            fetchAllData(function(err, res) {
+                if(!err && res) {
+                    pendingData = res;
+                }
+            });
+        }
+
+        function startSlideshow() {
+            if (slideInterval) clearInterval(slideInterval);
+            if (!isPlaying) return;
+            
+            slideInterval = setInterval(function() {
+                var viewport = document.getElementById('viewport');
+                viewport.className = 'viewport transitioning';
+                
+                setTimeout(function() {
+                    var nextSlide = getNextSlide(currentSlide, data);
+                    if (nextSlide === 0) {
+                        if (pendingData) {
+                            data = pendingData;
+                            pendingData = null;
+                        }
+                        triggerBackgroundFetch();
+                    }
+                    
+                    currentSlide = nextSlide;
+                    displaySlide = nextSlide;
+                    renderSlide(displaySlide);
+                    
+                    viewport.className = 'viewport';
+                }, 500);
+            }, slideDuration);
+        }
+
+        // Render functions
+        function renderSlide(index) {
+            var viewport = document.getElementById('viewport');
+            var html = '';
+            
+            if (index === 0) {
+                html = '<div class="slide active welcome-slide">' +
+                    '<div class="welcome-icon-wrap">' + svgSparkles + '</div>' +
+                    '<div class="welcome-sub">STUDENT STAR SYSTEM</div>' +
+                    '<div class="welcome-main">Excellence Leaderboard</div>' +
+                    '<div class="welcome-desc">Recognizing student achievement in academics, co-curricular activities, leadership, creativity, and personal growth</div>' +
+                    '<div class="welcome-badge">TV Slideshow Running</div>' +
+                '</div>';
+            } else if (index === 1) { html = getPodiumHtml("Top performing students", "Current Month", data.studentsMonthly.slice(0,3), 'student'); }
+            else if (index === 2) { html = getPodiumHtml("Top performing students", "All Time", data.studentsOverall.slice(0,3), 'student'); }
+            else if (index === 3) { html = getPodiumHtml("Top performing Classes", "Current Month", data.classesMonthly.slice(0,3), 'class'); }
+            else if (index === 4) { html = getPodiumHtml("Top performing Classes", "All Time", data.classesOverall.slice(0,3), 'class'); }
+            else if (index === 5) { 
+                var rows = data.departmentsMonthly.slice(0,10).map(function(d){ return [pad(d.rank), {name: d.department_name, sub:"Academic Department"}, d.student_count, d.points.toLocaleString()]; });
+                html = getTableHtml("Top performing Departments", "Current Month", ["Rank", "Department", "Students Enrolled", "Total Contributed Points"], rows);
+            }
+            else if (index === 6) { 
+                var rows = data.departmentsOverall.slice(0,10).map(function(d){ return [pad(d.rank), {name: d.department_name, sub:"Academic Department"}, d.student_count, d.points.toLocaleString()]; });
+                html = getTableHtml("Top performing Departments", "All Time", ["Rank", "Department", "Students Enrolled", "Total Contributed Points"], rows);
+            }
+            else if (index === 7) {
+                var rows = data.studentsMonthly.slice(0,10).map(function(s){ return [pad(s.rank), {name: s.name, sub: "ID / "+s.username}, s.class_name, s.points.toLocaleString()]; });
+                html = getTableHtml("Top performing students", "Current Month", ["Rank", "Student", "Class", "Star Points"], rows);
+            }
+            else if (index === 8) {
+                var rows = data.studentsOverall.slice(0,10).map(function(s){ return [pad(s.rank), {name: s.name, sub: "ID / "+s.username}, s.class_name, s.points.toLocaleString()]; });
+                html = getTableHtml("Top performing students", "All Time", ["Rank", "Student", "Class", "Star Points"], rows);
+            }
+            else if (index === 9) {
+                var rows = data.classesMonthly.slice(0,10).map(function(c){ return [pad(c.rank), {name: c.class_name, sub: (c.student_count||0)+" enrolled students"}, (c.average||0).toFixed(2), c.points.toLocaleString()]; });
+                html = getTableHtml("Top performing Classes", "Current Month", ["Rank", "Class", "Average Score", "Total Star Points"], rows);
+            }
+            else if (index === 10) {
+                var rows = data.classesOverall.slice(0,10).map(function(c){ return [pad(c.rank), {name: c.class_name, sub: (c.student_count||0)+" enrolled students"}, (c.average||0).toFixed(2), c.points.toLocaleString()]; });
+                html = getTableHtml("Top performing Classes", "All Time", ["Rank", "Class", "Average Score", "Total Star Points"], rows);
+            }
+            
+            viewport.innerHTML = html;
+            updateIndicators(index);
+        }
+
+        function pad(num) {
+            var s = "00" + num;
+            return s.substr(s.length-2);
+        }
+
+        function getIconHtml(type) {
+            if (type === 'class') return svgSchool;
+            if (type === 'department') return svgBuilding;
+            return '';
+        }
+
+        function getAvatarHtml(item, type, position) {
+            if (type === 'student') {
+                var initial = item.name ? item.name.charAt(0).toUpperCase() : 'S';
+                return '<div class="avatar">' + initial + '</div>';
+            }
+            return '<div class="icon-box">' + getIconHtml(type) + '</div>';
+        }
+
+        function getPodiumHtml(title, subtitle, items, type) {
+            if (items.length === 0) {
+                return '<div class="slide active"><div class="empty-podium"><div class="empty-icon">' + svgSparkles + '</div><div class="empty-title">Leaderboard Starting Fresh</div><div class="empty-desc">No active Star Points recorded for this period yet. Earn the first points to claim the top spot!</div></div></div>';
+            }
+
+            var html = '<div class="slide active"><div class="podium-container">';
+            html += '<div class="podium-header"><div class="podium-title">' + title + '</div><div class="podium-subtitle">' + subtitle + '</div></div>';
+            html += '<div class="podium-blocks">';
+
+            if (items.length === 1) {
+                html += renderPodiumBlock(items[0], type, 'first', 1);
+            } else if (items.length === 2) {
+                html += renderPodiumBlock(items[1], type, 'second', 2);
+                html += renderPodiumBlock(items[0], type, 'first', 1);
+            } else {
+                html += renderPodiumBlock(items[1], type, 'second', 2);
+                html += renderPodiumBlock(items[0], type, 'first', 1);
+                html += renderPodiumBlock(items[2], type, 'third', 3);
+            }
+
+            html += '</div></div></div>';
+            return html;
+        }
+
+        function renderPodiumBlock(item, type, posClass, rank) {
+            var name = item.name || item.class_name || item.department_name;
+            var sub = item.class_name || item.department || '';
+            var val = type === 'class' ? (item.average ? item.average.toFixed(1) : '0.0') : item.points.toLocaleString();
+            var lbl = type === 'class' ? "Avg Star Points" : "Total Star Points";
+            
+            var html = '<div class="podium-block ' + posClass + '">';
+            if (rank === 1) {
+                html += '<div class="first-crown">' + svgAward + '</div>';
+            }
+            html += '<div class="avatar-wrap">' + getAvatarHtml(item, type, posClass) + '<div class="rank-badge">' + rank + '</div></div>';
+            html += '<div class="podium-info"><div class="podium-name">' + name + '</div><div class="podium-subinfo">' + sub + '</div></div>';
+            
+            html += '<div class="podium-base"><div class="base-score">' + val + '</div><div class="base-label">' + lbl + '</div>';
+            
+            if (type === 'student' && item.stars > 0) {
+                html += '<div class="stars-container">';
+                var count = Math.min(item.stars, 5);
+                for(var i=0; i<count; i++) { html += svgStar; }
+                if (item.stars > 5) { html += '<span class="stars-extra">+' + (item.stars - 5) + '</span>'; }
+                html += '</div>';
+            }
+            
+            html += '</div></div>';
+            return html;
+        }
+
+        function getTableHtml(title, subtitle, headers, rows) {
+            if (rows.length === 0) {
+                return '<div class="slide active"><div class="empty-podium"><div class="empty-icon">' + svgSparkles + '</div><div class="empty-title">Leaderboard Starting Fresh</div><div class="empty-desc">No active entries recorded for this period yet.</div></div></div>';
+            }
+
+            var html = '<div class="slide active"><div class="table-container">';
+            html += '<div class="podium-header"><div class="podium-title">' + title + '</div><div class="podium-subtitle">' + subtitle + '</div></div>';
+            
+            html += '<div class="table-split">';
+            
+            var splitIdx = rows.length >= 6 ? Math.ceil(rows.length / 2) : rows.length;
+            var table1 = rows.slice(0, splitIdx);
+            var table2 = rows.length >= 6 ? rows.slice(splitIdx) : [];
+
+            html += renderTableWrapper(headers, table1, 0);
+            if (table2.length > 0) {
+                html += renderTableWrapper(headers, table2, splitIdx);
+            }
+
+            html += '</div></div></div>';
+            return html;
+        }
+
+        function renderTableWrapper(headers, rows, offset) {
+            var html = '<div class="table-wrapper"><table><thead><tr>';
+            for(var i=0; i<headers.length; i++) { html += '<th>' + headers[i] + '</th>'; }
+            html += '</tr></thead><tbody>';
+            
+            for(var r=0; r<rows.length; r++) {
+                var isTop = (offset + r) === 0;
+                html += '<tr' + (isTop ? ' class="top-row"' : '') + '>';
+                html += '<td><div class="rank-num">' + rows[r][0] + '</div></td>';
+                html += '<td><div class="name-main">' + rows[r][1].name + '</div><div class="name-sub">' + rows[r][1].sub + '</div></td>';
+                html += '<td><div class="cell-text">' + rows[r][2] + '</div></td>';
+                html += '<td><div class="score-val">' + rows[r][3] + '</div></td>';
+                html += '</tr>';
+            }
+            
+            html += '</tbody></table></div>';
+            return html;
+        }
+
+        function updateIndicators(activeIdx) {
+            var indContainer = document.getElementById('indicators');
+            var html = '';
+            var activeStates = [0];
+            if (data.studentsMonthly.length > 0) activeStates.push(1);
+            if (data.studentsOverall.length > 0) activeStates.push(2);
+            if (data.classesMonthly.length > 0) activeStates.push(3);
+            if (data.classesOverall.length > 0) activeStates.push(4);
+            if (data.departmentsMonthly.length > 0) activeStates.push(5);
+            if (data.departmentsOverall.length > 0) activeStates.push(6);
+            if (data.studentsMonthly.length > 0) activeStates.push(7);
+            if (data.studentsOverall.length > 0) activeStates.push(8);
+            if (data.classesMonthly.length > 0) activeStates.push(9);
+            if (data.classesOverall.length > 0) activeStates.push(10);
+
+            for (var i = 0; i < 11; i++) {
+                if (activeStates.indexOf(i) !== -1) {
+                    var c = (i === activeIdx) ? 'indicator-dot active' : 'indicator-dot inactive';
+                    html += '<div class="' + c + '"></div>';
+                }
+            }
+            indContainer.innerHTML = html;
+        }
+
+        // Controls
+        document.getElementById('btn-play-pause').onclick = function() {
+            isPlaying = !isPlaying;
+            document.getElementById('icon-pause').style.display = isPlaying ? 'block' : 'none';
+            document.getElementById('icon-play').style.display = isPlaying ? 'none' : 'block';
+            if(isPlaying) startSlideshow();
+            else clearInterval(slideInterval);
+        };
+
+        document.getElementById('btn-fullscreen').onclick = function() {
+            var el = document.documentElement;
+            if (!isFullscreen) {
+                if(el.requestFullscreen) { el.requestFullscreen(); }
+                else if(el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+                else if(el.msRequestFullscreen) { el.msRequestFullscreen(); }
+            } else {
+                if(document.exitFullscreen) { document.exitFullscreen(); }
+                else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+                else if(document.msExitFullscreen) { document.msExitFullscreen(); }
+            }
+        };
+
+        document.addEventListener('fullscreenchange', function() { isFullscreen = !!document.fullscreenElement; updateFsIcons(); });
+        document.addEventListener('webkitfullscreenchange', function() { isFullscreen = !!document.webkitFullscreenElement; updateFsIcons(); });
+        document.addEventListener('msfullscreenchange', function() { isFullscreen = !!document.msFullscreenElement; updateFsIcons(); });
+
+        function updateFsIcons() {
+            document.getElementById('icon-maximize').style.display = isFullscreen ? 'none' : 'block';
+            document.getElementById('icon-minimize').style.display = isFullscreen ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
