@@ -254,69 +254,68 @@ export default function StudentCCEPage() {
             <div className="space-y-6 pb-24">
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
-                    <Card variant="stat">
-                        <CardContent className="p-3 text-center">
-                            <p className="text-2xl font-bold text-warning">{pendingWorks.length}</p>
-                            <p className="text-xs text-muted-foreground">Pending</p>
-                        </CardContent>
-                    </Card>
-                    <Card variant="stat">
-                        <CardContent className="p-3 text-center">
-                            <p className="text-2xl font-bold text-success">{submittedWorks.length}</p>
-                            <p className="text-xs text-muted-foreground">Submitted</p>
-                        </CardContent>
-                    </Card>
-                    <Card variant="stat">
-                        <CardContent className="p-3 text-center">
-                            <p className="text-2xl font-bold text-primary">
-                                {totalPossible > 0 ? Math.round((totalMarks / totalPossible) * 100) : 0}%
-                            </p>
-                            <p className="text-xs text-muted-foreground">Overall</p>
-                        </CardContent>
-                    </Card>
+                    <div className="bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-0 rounded-[20px] flex flex-col items-center justify-center p-4">
+                        <p className="text-[28px] font-black text-[#bc792a] leading-none mb-1.5">{pendingWorks.length}</p>
+                        <p className="text-[11px] font-medium text-slate-500">Pending</p>
+                    </div>
+                    <div className="bg-[#fafffe] shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-0 rounded-[20px] flex flex-col items-center justify-center p-4">
+                        <p className="text-[28px] font-black text-[#006050] leading-none mb-1.5">{submittedWorks.length}</p>
+                        <p className="text-[11px] font-medium text-slate-500">Submitted</p>
+                    </div>
+                    <div className="bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-0 rounded-[20px] flex flex-col items-center justify-center p-4">
+                        <p className="text-[28px] font-black text-[#006050] leading-none mb-1.5">
+                            {totalPossible > 0 ? Math.round((totalMarks / totalPossible) * 100) : 0}%
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-500">Overall</p>
+                    </div>
                 </div>
 
                 {/* Subject Cards */}
                 {subjectMarks.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {subjectMarks.map((subject) => (
                             <Card 
                                 key={subject.subjectId} 
                                 variant="elevated"
-                                className="cursor-pointer hover:border-primary/50 transition-colors"
+                                className="cursor-pointer shadow-[0_2px_12px_rgba(0,0,0,0.03)] border-0 rounded-[24px] hover:shadow-md transition-all"
                                 onClick={() => navigate(`/student/cce/${subject.subjectId}`)}
                             >
-                                <CardContent className="p-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                                                <BookOpen className="w-5 h-5" />
+                                <CardContent className="p-5 sm:p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex gap-4">
+                                            <div className="w-[46px] h-[46px] shrink-0 rounded-full bg-[#ebfbf5] text-[#006050] flex items-center justify-center">
+                                                <BookOpen className="w-[22px] h-[22px]" strokeWidth={2} />
                                             </div>
-                                            <div>
-                                                <p className="font-semibold text-foreground leading-tight">{subject.subjectName}</p>
-                                                <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
+                                            <div className="mt-0.5">
+                                                <h3 className="font-bold text-[#002830] text-[16px] leading-tight tracking-tight">
+                                                    {subject.subjectName}
+                                                </h3>
+                                                <p className="text-[13px] font-medium text-slate-500 mt-1">
                                                     {subject.totalWorks} Total Assessments
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <Badge variant={subject.percentage >= 75 ? 'success' : subject.percentage >= 50 ? 'warning' : 'destructive'} className="text-sm px-2.5 py-0.5">
-                                                {subject.convertedMarks} <span className="text-[10px] opacity-70 ml-0.5">/ {subject.finalMaxMarks}</span>
-                                            </Badge>
+                                        <div className="shrink-0 ml-3">
+                                            <div className={`flex flex-col items-center justify-center w-[54px] h-[54px] rounded-full ${subject.percentage >= 75 ? 'bg-[#ebfbf5] text-[#006050]' : subject.percentage >= 50 ? 'bg-[#fff6ee] text-[#993d00]' : 'bg-[#fff0f0] text-[#cc0000]'}`}>
+                                                <span className="font-bold text-[15px] leading-none">{subject.convertedMarks}</span>
+                                                <span className="text-[9px] font-bold opacity-60">/ {subject.finalMaxMarks}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-                                        <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
-                                            <span className="flex items-center gap-1.5">
-                                                <div className="w-2 h-2 rounded-full bg-warning"></div>
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-100/80">
+                                        <div className="flex items-center gap-5 text-[12px] font-medium text-slate-600">
+                                            <span className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-[#bc792a]"></div>
                                                 {subject.pendingWorks} Pending
                                             </span>
-                                            <span className="flex items-center gap-1.5">
-                                                <div className="w-2 h-2 rounded-full bg-success"></div>
+                                            <span className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-[#006050]"></div>
                                                 {subject.totalWorks - subject.pendingWorks} Completed
                                             </span>
                                         </div>
-                                        <span className="text-xs font-semibold text-primary">View details &rarr;</span>
+                                        <span className="text-[12px] font-bold text-[#006050] flex items-center gap-1">
+                                            View details &rarr;
+                                        </span>
                                     </div>
                                 </CardContent>
                             </Card>
