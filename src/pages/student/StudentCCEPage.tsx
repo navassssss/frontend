@@ -10,11 +10,20 @@ import {
     CheckCircle,
     Upload,
     FileText,
-    Download
+    Download,
+    ChevronDown,
+    FileImage,
+    FileSpreadsheet
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
 import StudentLayout from '@/components/student/StudentLayout';
 import { useNavigate } from 'react-router-dom';
@@ -110,8 +119,8 @@ export default function StudentCCEPage() {
     const submittedWorks = works.filter(w => w.status === 'submitted' || w.status === 'evaluated');
     const evaluatedWorks = works.filter(w => w.status === 'evaluated');
 
-    const totalMarks = evaluatedWorks.reduce((sum, w) => sum + (w.marksObtained || 0), 0);
-    const totalPossible = evaluatedWorks.reduce((sum, w) => sum + w.maxMarks, 0);
+    const totalMarks = subjectMarks.reduce((sum, s) => sum + (s.marksObtained || 0), 0);
+    const totalPossible = subjectMarks.reduce((sum, s) => sum + (s.totalMarks || 0), 0);
 
     if (loading) {
         return (
@@ -239,14 +248,21 @@ export default function StudentCCEPage() {
     };
 
     const exportActions = (
-        <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={exportToPDF} className="h-8 border-[#00a67e]/20 text-[#00a67e] hover:bg-[#00a67e]/10">
-                <Download className="w-4 h-4 mr-1" /> PDF
-            </Button>
-            <Button size="sm" variant="outline" onClick={exportToExcel} className="h-8 border-[#00a67e]/20 text-[#00a67e] hover:bg-[#00a67e]/10">
-                <Download className="w-4 h-4 mr-1" /> Excel
-            </Button>
-        </div>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline" className="h-8 border-[#00a67e]/20 text-[#00a67e] hover:bg-[#00a67e]/10">
+                    Export <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={exportToPDF} className="cursor-pointer">
+                    <FileImage className="w-4 h-4 mr-2 text-[#00a67e]" /> PDF Format
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportToExcel} className="cursor-pointer">
+                    <FileSpreadsheet className="w-4 h-4 mr-2 text-[#00a67e]" /> Excel Format
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 
     return (
