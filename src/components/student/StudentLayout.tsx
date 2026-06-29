@@ -69,8 +69,8 @@ export default function StudentLayout({ children, title, showBack = false, actio
         { icon: User, label: 'Profile', path: '/student/profile' },
     ];
 
-    // Mobile bottom nav — Profile removed (accessible via avatar dropdown)
-    const mobileNavItems = allNavItems.filter(item => item.label !== 'Profile');
+    // Mobile bottom nav — Profile and Notices removed
+    const mobileNavItems = allNavItems.filter(item => item.label !== 'Profile' && item.label !== 'Notices');
 
     const isActive = (path: string) => location.pathname === path;
     const initials = student?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'S';
