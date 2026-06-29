@@ -32,6 +32,8 @@ interface CCEWork {
     subjectName: string;
     subjectId: number;
     level: number;
+    week: number;
+    toolMethod: string;
     dueDate: string;
     maxMarks: number;
     submissionType: string;
@@ -156,7 +158,7 @@ export default function StudentCCESubjectDetailPage() {
                                     <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-wider">Pending</p>
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-black">{subject.percentage}%</p>
+                                    <p className="text-2xl font-black">{subject.marksObtained}/{subject.totalMarks}</p>
                                     <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-wider">Raw Score</p>
                                 </div>
                             </div>
@@ -227,6 +229,12 @@ function WorkCard({ work, onFileUpload, uploading }: WorkCardProps) {
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <Badge className={levelColors[work.level as keyof typeof levelColors]}>
                                 L{work.level}
+                            </Badge>
+                            <Badge variant="outline">
+                                Week {work.week}
+                            </Badge>
+                            <Badge variant="secondary">
+                                {work.toolMethod}
                             </Badge>
                             {work.status === 'evaluated' && (
                                 <Badge variant="success">

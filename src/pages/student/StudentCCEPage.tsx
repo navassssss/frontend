@@ -32,6 +32,8 @@ interface CCEWork {
     subjectName: string;
     subjectId: number;
     level: number;
+    week: number;
+    toolMethod: string;
     dueDate: string;
     maxMarks: number;
     submissionType: string;
