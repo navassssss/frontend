@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 import {
     BookOpen,
     Calendar,
@@ -6,7 +9,8 @@ import {
     Clock,
     CheckCircle,
     Upload,
-    FileText
+    FileText,
+    Download
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -116,8 +120,125 @@ export default function StudentCCEPage() {
         );
     }
 
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        
+        doc.setFontSize(16);
+        doc.text("Student CCE Report", 14, 15);
+        
+        doc.setFontSize(10);
+        doc.text(`Name: ${student?.name || 'N/A'}`, 14, 25);
+        doc.text(`Class: ${student?.class || 'N/A'}`, 14, 30);
+        if (student?.department) {
+            doc.text(`Department: ${student.department}`, 14, 35);
+        }
+        
+        const grouped = works.reduce((acc, work) => {
+            if (!acc[work.subjectName]) acc[work.subjectName] = [];
+            acc[work.subjectName].push(work);
+            return acc;
+        }, {} as Record<string, CCEWork[]>);
+        
+        let startY = student?.department ? 45 : 40;
+        
+        Object.keys(grouped).forEach((subjectName) => {
+            const subjectWorks = grouped[subjectName];
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Subject: ${subjectName}`, 14, startY);
+            startY += 5;
+            
+            autoTable(doc, {
+                startY: startY,
+                head: [['Level', 'Week', 'Tool Method', 'Assignment', 'Marks', 'Status']],
+                body: subjectWorks.map(w => [
+                    `L${w.level}`,
+                    `W${w.week}`,
+                    w.toolMethod,
+                    w.title,
+                    w.status === 'evaluated' ? `${w.marksObtained}/${w.maxMarks}` : `-/${w.maxMarks}`,
+                    w.status
+                ]),
+                theme: 'grid',
+                headStyles: { fillColor: [0, 166, 126] },
+                styles: { fontSize: 9 }
+            });
+            
+            const subjectMark = subjectMarks.find(s => s.subjectName === subjectName);
+            startY = (doc as any).lastAutoTable.finalY + 7;
+            
+            if (subjectMark) {
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'italic');
+                doc.text(`Total Marks: ${subjectMark.marksObtained} / ${subjectMark.totalMarks} (${subjectMark.percentage}%)`, 14, startY);
+                startY += 10;
+            }
+        });
+        
+        doc.save(`${student?.name || 'Student'}_CCE_Report.pdf`);
+    };
+
+    const exportToExcel = () => {
+        const rows: any[] = [];
+        
+        rows.push(['Student CCE Report']);
+        rows.push([`Name:`, student?.name || 'N/A']);
+        rows.push([`Class:`, student?.class || 'N/A']);
+        if (student?.department) {
+            rows.push([`Department:`, student.department]);
+        }
+        rows.push([]);
+        
+        const grouped = works.reduce((acc, work) => {
+            if (!acc[work.subjectName]) acc[work.subjectName] = [];
+            acc[work.subjectName].push(work);
+            return acc;
+        }, {} as Record<string, CCEWork[]>);
+        
+        Object.keys(grouped).forEach((subjectName) => {
+            const subjectWorks = grouped[subjectName];
+            rows.push([`Subject: ${subjectName}`]);
+            rows.push(['Level', 'Week', 'Tool Method', 'Assignment', 'Marks Obtained', 'Max Marks', 'Status']);
+            
+            subjectWorks.forEach(w => {
+                rows.push([
+                    w.level,
+                    w.week,
+                    w.toolMethod,
+                    w.title,
+                    w.status === 'evaluated' ? w.marksObtained : 0,
+                    w.maxMarks,
+                    w.status
+                ]);
+            });
+            
+            const subjectMark = subjectMarks.find(s => s.subjectName === subjectName);
+            if (subjectMark) {
+                rows.push(['Total:', '', '', '', subjectMark.marksObtained, subjectMark.totalMarks, `${subjectMark.percentage}%`]);
+            }
+            rows.push([]);
+        });
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'CCE Report');
+        XLSX.writeFile(workbook, `${student?.name || 'Student'}_CCE_Report.xlsx`);
+    };
+
+    const exportActions = (
+        <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={exportToPDF} className="h-8 border-[#00a67e]/20 text-[#00a67e] hover:bg-[#00a67e]/10">
+                <Download className="w-4 h-4 mr-1" /> PDF
+            </Button>
+            <Button size="sm" variant="outline" onClick={exportToExcel} className="h-8 border-[#00a67e]/20 text-[#00a67e] hover:bg-[#00a67e]/10">
+                <Download className="w-4 h-4 mr-1" /> Excel
+            </Button>
+        </div>
+    );
+
     return (
-        <StudentLayout title="CCE Works">
+        <StudentLayout title="CCE Works" actions={exportActions}>
             <div className="space-y-6 pb-24">
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
