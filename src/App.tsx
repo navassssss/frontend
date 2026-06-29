@@ -76,6 +76,7 @@ import StudentLeaderboardPage from "./pages/student/StudentLeaderboardPage";
 import StudentProfilePage from "./pages/student/StudentProfilePage";
 import PublicLeaderboardPage from "./pages/student/PublicLeaderboardPage";
 import StudentCCEPage from "./pages/student/StudentCCEPage";
+import StudentCCESubjectDetailPage from "./pages/student/StudentCCESubjectDetailPage";
 import StudentAttendancePage from "./pages/student/StudentAttendancePage";
 import StudentFeePage from "./pages/student/StudentFeePage";
 import StudentAnnouncementsPage from "./pages/student/StudentAnnouncementsPage";
@@ -590,6 +591,14 @@ function AppRoutes() {
         element={
           <StudentProtectedRoute>
             <StudentCCEPage />
+          </StudentProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/cce/:id"
+        element={
+          <StudentProtectedRoute>
+            <StudentCCESubjectDetailPage />
           </StudentProtectedRoute>
         }
       />
