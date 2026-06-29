@@ -468,7 +468,7 @@ export default function CreateCCEWorkPage() {
                     {isSubmitting && (
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     )}
-                    {isSubmitting ? 'Creating...' : 'Create CCE Work'}
+                    {isSubmitting ? (editId ? 'Saving...' : 'Creating...') : (editId ? 'Save Changes' : 'Create CCE Work')}
                 </button>
             </div>
         </AppLayout>
