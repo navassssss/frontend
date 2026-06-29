@@ -38,6 +38,7 @@ interface CCEWork {
     level: number;
     week: number;
     toolMethod: string;
+    issuedDate: string | null;
     dueDate: string;
     maxMarks: number;
     submissionType: string;
@@ -132,6 +133,7 @@ export default function StudentCCEPage() {
         if (student?.department) {
             doc.text(`Department: ${student.department}`, 14, 35);
         }
+        doc.text(`Generated Date: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, 14, student?.department ? 40 : 35);
         
         const grouped = works.reduce((acc, work) => {
             if (!acc[work.subjectName]) acc[work.subjectName] = [];
@@ -139,7 +141,7 @@ export default function StudentCCEPage() {
             return acc;
         }, {} as Record<string, CCEWork[]>);
         
-        let startY = student?.department ? 45 : 40;
+        let startY = student?.department ? 50 : 45;
         
         Object.keys(grouped).forEach((subjectName) => {
             const subjectWorks = grouped[subjectName];
@@ -151,8 +153,9 @@ export default function StudentCCEPage() {
             
             autoTable(doc, {
                 startY: startY,
-                head: [['Level', 'Week', 'Tool Method', 'Assignment', 'Marks', 'Status']],
+                head: [['Issue Date', 'Level', 'Week', 'Tool Method', 'Assignment', 'Marks', 'Status']],
                 body: subjectWorks.map(w => [
+                    w.issuedDate || 'N/A',
                     `L${w.level}`,
                     `W${w.week}`,
                     w.toolMethod,
@@ -172,6 +175,10 @@ export default function StudentCCEPage() {
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'italic');
                 doc.text(`Total Marks: ${subjectMark.marksObtained} / ${subjectMark.totalMarks} (${subjectMark.percentage}%)`, 14, startY);
+                if (subjectMark.finalMaxMarks) {
+                    doc.text(`Final Converted Marks: ${subjectMark.convertedMarks} / ${subjectMark.finalMaxMarks}`, 14, startY + 5);
+                    startY += 5;
+                }
                 startY += 10;
             }
         });
@@ -188,6 +195,7 @@ export default function StudentCCEPage() {
         if (student?.department) {
             rows.push([`Department:`, student.department]);
         }
+        rows.push([`Generated Date:`, format(new Date(), 'yyyy-MM-dd HH:mm')]);
         rows.push([]);
         
         const grouped = works.reduce((acc, work) => {
@@ -199,10 +207,11 @@ export default function StudentCCEPage() {
         Object.keys(grouped).forEach((subjectName) => {
             const subjectWorks = grouped[subjectName];
             rows.push([`Subject: ${subjectName}`]);
-            rows.push(['Level', 'Week', 'Tool Method', 'Assignment', 'Marks Obtained', 'Max Marks', 'Status']);
+            rows.push(['Issue Date', 'Level', 'Week', 'Tool Method', 'Assignment', 'Marks Obtained', 'Max Marks', 'Status']);
             
             subjectWorks.forEach(w => {
                 rows.push([
+                    w.issuedDate || 'N/A',
                     w.level,
                     w.week,
                     w.toolMethod,
@@ -215,7 +224,10 @@ export default function StudentCCEPage() {
             
             const subjectMark = subjectMarks.find(s => s.subjectName === subjectName);
             if (subjectMark) {
-                rows.push(['Total:', '', '', '', subjectMark.marksObtained, subjectMark.totalMarks, `${subjectMark.percentage}%`]);
+                rows.push(['Total:', '', '', '', '', subjectMark.marksObtained, subjectMark.totalMarks, `${subjectMark.percentage}%`]);
+                if (subjectMark.finalMaxMarks) {
+                    rows.push(['Converted:', '', '', '', '', subjectMark.convertedMarks, subjectMark.finalMaxMarks, '']);
+                }
             }
             rows.push([]);
         });
