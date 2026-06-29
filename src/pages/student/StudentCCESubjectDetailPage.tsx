@@ -124,7 +124,6 @@ export default function StudentCCESubjectDetailPage() {
         <StudentLayout 
             title={subject?.subjectName || 'Assessments'} 
             showBack={true}
-            onBack={() => navigate('/student/cce')}
         >
             <div className="space-y-6 pb-24">
                 
