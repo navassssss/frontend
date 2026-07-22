@@ -18,7 +18,8 @@ import {
     ChevronRight,
     ArrowUpDown,
     Filter,
-    School
+    School,
+    Landmark
 } from 'lucide-react';
 import { AddPaymentModal } from '@/components/fee/AddPaymentModal';
 import * as feeApi from '@/lib/feeApi';
@@ -291,6 +292,15 @@ const FeeManagementPage: React.FC = () => {
                         >
                             <BarChart3 className="w-4 h-4 mr-2" />
                             Reports
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate('/fees/handovers')}
+                            className="shadow-sm"
+                        >
+                            <Landmark className="w-4 h-4 mr-2" />
+                            Handover Manager
                         </Button>
                     </div>
 

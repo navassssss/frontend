@@ -214,3 +214,71 @@ export const getClasses = async () => {
     const response = await api.get('/fees/classes');
     return response.data;
 };
+
+// ==================== Committee Handovers ====================
+
+export interface CommitteeHandoverItem {
+    id: number;
+    handover_date: string;
+    amount: number;
+    recipient_name: string;
+    payment_mode: 'cash' | 'bank_transfer' | 'cheque' | 'upi';
+    reference_number?: string | null;
+    handed_over_by?: number | null;
+    remarks?: string | null;
+    created_at?: string;
+    handed_over_by_user?: {
+        id: number;
+        name: string;
+    } | null;
+}
+
+export interface HandoverSummary {
+    total_collected: number;
+    total_handed_over: number;
+    balance_in_hand: number;
+    total_handovers_count: number;
+    start_date?: string | null;
+    end_date?: string | null;
+}
+
+// Get list of committee handovers
+export const getHandovers = async (params?: { startDate?: string; endDate?: string; paymentMode?: string; search?: string }) => {
+    const queryParams: any = {};
+    if (params?.startDate) queryParams.start_date = params.startDate;
+    if (params?.endDate) queryParams.end_date = params.endDate;
+    if (params?.paymentMode) queryParams.payment_mode = params.paymentMode;
+    if (params?.search) queryParams.search = params.search;
+
+    const response = await api.get('/fees/handovers', { params: queryParams });
+    return response.data;
+};
+
+// Get handover summary stats (Cash collected vs handed over)
+export const getHandoverSummary = async (params?: { startDate?: string; endDate?: string }) => {
+    const queryParams: any = {};
+    if (params?.startDate) queryParams.start_date = params.startDate;
+    if (params?.endDate) queryParams.end_date = params.endDate;
+
+    const response = await api.get('/fees/handovers/summary', { params: queryParams });
+    return response.data;
+};
+
+// Create a new committee handover entry
+export const createHandover = async (data: {
+    handover_date: string;
+    amount: number;
+    recipient_name: string;
+    payment_mode: 'cash' | 'bank_transfer' | 'cheque' | 'upi';
+    reference_number?: string;
+    remarks?: string;
+}) => {
+    const response = await api.post('/fees/handovers', data);
+    return response.data;
+};
+
+// Delete a committee handover entry
+export const deleteHandover = async (id: number) => {
+    const response = await api.delete(`/fees/handovers/${id}`);
+    return response.data;
+};

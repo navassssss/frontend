@@ -65,6 +65,7 @@ import AttendanceReportsPage from "./pages/AttendanceReportsPage";
 import FeeManagementPage from "./pages/FeeManagementPage";
 import FeeReportsPage from "./pages/FeeReportsPage";
 import StudentFeeDetailPage from './pages/StudentFeeDetailPage';
+import { CommitteeHandoverPage } from "./pages/CommitteeHandoverPage";
 
 // Student Pages
 import StudentLoginPage from "./pages/student/StudentLoginPage";
@@ -511,6 +512,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <FeeReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/fees/handovers"
+        element={
+          <ProtectedRoute>
+            <CommitteeHandoverPage />
           </ProtectedRoute>
         }
       />
