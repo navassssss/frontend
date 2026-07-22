@@ -756,18 +756,17 @@ const StudentFeeDetailPage: React.FC = () => {
                         </DialogContent>
                     </Dialog>
 
-                    {checkHasFeeGap() && (
-                        <Button 
-                            variant="destructive" 
-                            size="sm" 
-                            onClick={handleFixFeeGap}
-                            disabled={isFixingGap}
-                            className="gap-1.5 shadow-sm"
-                        >
-                            <Wrench className="w-4 h-4" />
-                            {isFixingGap ? "Fixing Gap..." : "Fix Fee Gap"}
-                        </Button>
-                    )}
+                    <Button 
+                        variant={checkHasFeeGap() ? "destructive" : "outline"} 
+                        size="sm" 
+                        onClick={handleFixFeeGap}
+                        disabled={!checkHasFeeGap() || isFixingGap}
+                        title={checkHasFeeGap() ? "Click to automatically reallocate payments and fix fee gap" : "No fee gap detected"}
+                        className={`gap-1.5 shadow-sm ${!checkHasFeeGap() ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                        <Wrench className="w-4 h-4" />
+                        {isFixingGap ? "Fixing Gap..." : checkHasFeeGap() ? "Fix Fee Gap" : "No Fee Gap"}
+                    </Button>
 
                     <Dialog open={monthlyFeeDialogOpen} onOpenChange={setMonthlyFeeDialogOpen}>
                         <DialogContent>
