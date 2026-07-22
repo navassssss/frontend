@@ -157,7 +157,7 @@ export default function SubjectsPage() {
                 id: s.id,
                 name: s.name || 'Unknown',
                 username: s.roll_number || s.username || '',
-                department: s.department || '',
+                department: typeof s.department === 'object' && s.department !== null ? (s.department.name || '') : (s.department || s.department_name || ''),
             }));
             setClassStudents(arr);
         } catch {

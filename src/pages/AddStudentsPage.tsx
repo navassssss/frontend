@@ -25,10 +25,18 @@ interface StudentRow {
     department?: string;
 }
 
+const getDepartmentName = (dept: any): string => {
+    if (!dept) return '';
+    if (typeof dept === 'string') return dept;
+    if (typeof dept === 'object' && dept.name) return String(dept.name);
+    return '';
+};
+
 export default function AddStudentsPage() {
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [classes, setClasses] = useState<ClassRoom[]>([]);
+    const [departmentsList, setDepartmentsList] = useState<string[]>([]);
     const [students, setStudents] = useState<StudentRow[]>([]);
     const [originalStudents, setOriginalStudents] = useState<StudentRow[]>([]);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -47,6 +55,16 @@ export default function AddStudentsPage() {
                 const classRes = await api.get('/classes');
                 setClasses(classRes.data);
 
+                // Fetch departments list
+                try {
+                    const deptRes = await api.get('/departments');
+                    if (Array.isArray(deptRes.data)) {
+                        setDepartmentsList(deptRes.data.map((d: any) => d.name).filter(Boolean));
+                    }
+                } catch (e) {
+                    console.error("Could not fetch departments", e);
+                }
+
                 // Fetch existing students (large limit to get all for bulk editing)
                 const studentRes = await api.get('/students?per_page=2000');
                 const existingData = studentRes.data.data || studentRes.data;
@@ -56,7 +74,7 @@ export default function AddStudentsPage() {
                     name: s.user?.name || s.name || '',
                     roll_number: s.roll_number || '',
                     class_id: String(s.class_room?.id || s.class_id || ''),
-                    department: s.department || ''
+                    department: getDepartmentName(s.department) || s.department_name || ''
                 }));
 
                 // Apply initial sorting (Ascending)
@@ -314,13 +332,16 @@ export default function AddStudentsPage() {
 
         setIsSaving(true);
         try {
-            const payload = students.map(s => ({
-                id: s.id.startsWith('existing_') ? Number(s.id.replace('existing_', '')) : null,
-                name: s.name,
-                roll_number: s.roll_number,
-                class_id: Number(s.class_id),
-                department: s.department ? s.department.trim() : null
-            }));
+            const payload = students.map(s => {
+                const deptName = getDepartmentName(s.department).trim();
+                return {
+                    id: s.id.startsWith('existing_') ? Number(s.id.replace('existing_', '')) : null,
+                    name: s.name,
+                    roll_number: s.roll_number,
+                    class_id: Number(s.class_id),
+                    department: deptName ? deptName : null
+                };
+            });
 
             await api.post('/students/bulk', { students: payload });
             toast.success("Students saved successfully");
@@ -506,15 +527,16 @@ export default function AddStudentsPage() {
                                             <td className="px-3 py-2 text-[13px]">
                                                 <div className="relative">
                                                     <Input 
-                                                        value={student.department || ''} 
+                                                        value={getDepartmentName(student.department)} 
                                                         onChange={(e) => handleFieldChange(student.id, 'department', e.target.value)}
                                                         placeholder="e.g. Civilizational Studies"
                                                         list="departments-list"
                                                         className={`bg-transparent h-8 px-3 text-[13px] placeholder:text-muted/40 ${hasFieldChanged(student.id, 'department') ? 'border-amber-400 focus-visible:ring-amber-400 bg-amber-50 dark:bg-amber-900/10' : 'border-transparent hover:border-input focus:border-input'}`}
                                                     />
                                                     <datalist id="departments-list">
-                                                        <option value="Civilizational Studies" />
-                                                        <option value="Hadith & Related Sciences" />
+                                                        {Array.from(new Set([...departmentsList, "Civilizational Studies", "Hadith & Related Sciences"])).map((deptName) => (
+                                                            <option key={deptName} value={deptName} />
+                                                        ))}
                                                     </datalist>
                                                 </div>
                                             </td>

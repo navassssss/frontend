@@ -60,7 +60,7 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
             name: user.name,
             email: user.email,
             photo: studentData.photo,
-            department: studentData.department_name || studentData.class?.department,
+            department: studentData.department_name || (typeof studentData.department === 'object' && studentData.department !== null ? studentData.department.name : studentData.department) || studentData.class?.department,
             class: studentData.class?.name || 'Not Assigned',
             rollNumber: studentData.roll_number,
             joinedAt: studentData.joined_at,
