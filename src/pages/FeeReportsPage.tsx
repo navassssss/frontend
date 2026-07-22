@@ -58,8 +58,10 @@ interface DailyCollectionSummary {
     end_date?: string;
     is_range?: boolean;
     total_students: number;
+    total_entries?: number;
     total_amount: number;
     totalStudents: number;
+    totalEntries?: number;
     totalAmount: number;
     payments: {
         paymentId: number;
@@ -262,18 +264,19 @@ const exportDailyToPDF = (report: DailyCollectionSummary) => {
     const titleText = isRange ? 'Collection Report' : 'Daily Collection Report';
     
     let displayDate = '';
+    const dateToFormat = report.date || report.start_date;
     if (isRange && report.start_date && report.end_date) {
         displayDate = `${report.start_date} to ${report.end_date}`;
-    } else if (report.date) {
+    } else if (dateToFormat) {
         try {
-            displayDate = new Date(report.date).toLocaleDateString('en-IN', {
+            displayDate = new Date(dateToFormat).toLocaleDateString('en-IN', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
             });
         } catch {
-            displayDate = report.date;
+            displayDate = dateToFormat;
         }
     }
 
@@ -361,18 +364,19 @@ const exportDailyToExcel = (report: DailyCollectionSummary) => {
     const titleText = isRange ? 'Collection Report' : 'Daily Collection Report';
     
     let displayDate = '';
+    const dateToFormat = report.date || report.start_date;
     if (isRange && report.start_date && report.end_date) {
         displayDate = `${report.start_date} to ${report.end_date}`;
-    } else if (report.date) {
+    } else if (dateToFormat) {
         try {
-            displayDate = new Date(report.date).toLocaleDateString('en-IN', {
+            displayDate = new Date(dateToFormat).toLocaleDateString('en-IN', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
             });
         } catch {
-            displayDate = report.date;
+            displayDate = dateToFormat;
         }
     }
 
@@ -918,6 +922,7 @@ const DailyCollectionReportSection: React.FC = () => {
             const mappedData: DailyCollectionSummary = {
                 ...data,
                 totalStudents: data?.total_students || 0,
+                totalEntries: data?.total_entries ?? (data?.payments?.length || 0),
                 totalAmount: data?.total_amount || 0,
                 payments: data?.payments || [],
             };
@@ -1102,6 +1107,12 @@ const DailyCollectionReportSection: React.FC = () => {
                                         <Users className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-[11px] text-muted-foreground">Students:</span>
                                         <span className="font-semibold">{report.totalStudents}</span>
+                                    </div>
+                                    <div className="hidden sm:block h-4 w-px bg-border" />
+                                    <div className="flex items-center gap-1.5">
+                                        <Receipt className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-[11px] text-muted-foreground">Entries:</span>
+                                        <span className="font-semibold">{report.payments.length}</span>
                                     </div>
                                     <div className="hidden sm:block h-4 w-px bg-border" />
                                     <div className="flex items-center gap-1.5">
