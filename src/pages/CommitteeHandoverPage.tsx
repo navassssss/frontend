@@ -53,7 +53,7 @@ export const CommitteeHandoverPage: React.FC = () => {
     const [formData, setFormData] = useState({
         handover_date: todayStr,
         amount: '',
-        recipient_name: 'Committee Treasurer',
+        recipient_name: 'Manager',
         payment_mode: 'cash' as 'cash' | 'bank_transfer' | 'cheque' | 'upi',
         reference_number: '',
         remarks: '',
@@ -73,10 +73,7 @@ export const CommitteeHandoverPage: React.FC = () => {
                     paymentMode: paymentModeFilter !== 'all' ? paymentModeFilter : undefined,
                     search: searchQuery || undefined,
                 }),
-                feeApi.getHandoverSummary({
-                    startDate: startDate || undefined,
-                    endDate: endDate || undefined,
-                }),
+                feeApi.getHandoverSummary(),
             ]);
 
             setHandovers(listRes.data || []);
@@ -145,7 +142,7 @@ export const CommitteeHandoverPage: React.FC = () => {
             setFormData({
                 handover_date: todayStr,
                 amount: '',
-                recipient_name: 'Committee Treasurer',
+                recipient_name: 'Manager',
                 payment_mode: 'cash',
                 reference_number: '',
                 remarks: '',
@@ -580,7 +577,7 @@ export const CommitteeHandoverPage: React.FC = () => {
                             <div className="space-y-1.5">
                                 <label className="text-xs font-medium text-foreground">Handed Over To (Recipient) *</label>
                                 <Input
-                                    placeholder="e.g. Committee Treasurer / Secretary"
+                                    placeholder="e.g. Manager"
                                     value={formData.recipient_name}
                                     onChange={(e) => setFormData({ ...formData, recipient_name: e.target.value })}
                                     required
