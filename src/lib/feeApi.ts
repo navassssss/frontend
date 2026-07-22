@@ -187,9 +187,19 @@ export const getClassReport = async (classId: number, params?: { month?: number;
     return response.data;
 };
 
-// Get daily collection report
-export const getDailyReport = async (date: string) => {
-    const response = await api.get(`/fees/reports/daily/${date}`);
+// Get daily or date-range collection report
+export const getDailyReport = async (dateOrParams: string | { startDate?: string; endDate?: string; date?: string }) => {
+    const queryParams: any = {};
+    if (typeof dateOrParams === 'string') {
+        queryParams.start_date = dateOrParams;
+        queryParams.end_date = dateOrParams;
+    } else {
+        if (dateOrParams.startDate) queryParams.start_date = dateOrParams.startDate;
+        if (dateOrParams.endDate) queryParams.end_date = dateOrParams.endDate;
+        if (dateOrParams.date && !queryParams.start_date) queryParams.start_date = dateOrParams.date;
+        if (!queryParams.end_date && queryParams.start_date) queryParams.end_date = queryParams.start_date;
+    }
+    const response = await api.get('/fees/reports/daily', { params: queryParams });
     return response.data;
 };
 

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,7 +53,10 @@ interface ClassWiseSummary {
 }
 
 interface DailyCollectionSummary {
-    date: string;
+    date?: string;
+    start_date?: string;
+    end_date?: string;
+    is_range?: boolean;
     total_students: number;
     total_amount: number;
     totalStudents: number;
@@ -63,6 +66,7 @@ interface DailyCollectionSummary {
         studentName: string;
         className: string;
         amount: number;
+        date?: string;
         receiptIssued: boolean;
         remarks: string | null;
         enteredBy: string;
@@ -254,16 +258,28 @@ const exportDailyToPDF = (report: DailyCollectionSummary) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    const displayDate = new Date(report.date).toLocaleDateString('en-IN', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    const isRange = report.is_range || (report.start_date && report.end_date && report.start_date !== report.end_date);
+    const titleText = isRange ? 'Collection Report' : 'Daily Collection Report';
+    
+    let displayDate = '';
+    if (isRange && report.start_date && report.end_date) {
+        displayDate = `${report.start_date} to ${report.end_date}`;
+    } else if (report.date) {
+        try {
+            displayDate = new Date(report.date).toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+        } catch {
+            displayDate = report.date;
+        }
+    }
 
     // Title
     doc.setFontSize(18);
-    doc.text('Daily Collection Report', pageWidth / 2, 20, { align: 'center' });
+    doc.text(titleText, pageWidth / 2, 20, { align: 'center' });
 
     doc.setFontSize(12);
     doc.text(displayDate, pageWidth / 2, 28, { align: 'center' });
@@ -288,21 +304,40 @@ const exportDailyToPDF = (report: DailyCollectionSummary) => {
         doc.setFontSize(12);
         doc.text('Payment Details', 14, (doc as any).lastAutoTable.finalY + 15);
 
+        const headRow = isRange 
+            ? ['Date', 'Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt', 'Remarks']
+            : ['Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt', 'Remarks'];
+
         autoTable(doc, {
             startY: (doc as any).lastAutoTable.finalY + 20,
-            head: [['Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt', 'Remarks']],
-            body: report.payments.map((p) => [
-                p.time,
-                p.studentName,
-                p.className,
-                p.allocations,
-                formatCurrencyPlain(p.amount),
-                p.receiptIssued ? 'Yes' : 'No',
-                p.remarks || '-',
-            ]),
+            head: [headRow],
+            body: report.payments.map((p) => {
+                const row = [
+                    p.time,
+                    p.studentName,
+                    p.className,
+                    p.allocations,
+                    formatCurrencyPlain(p.amount),
+                    p.receiptIssued ? 'Yes' : 'No',
+                    p.remarks || '-',
+                ];
+                if (isRange) {
+                    row.unshift(p.date || '-');
+                }
+                return row;
+            }),
             theme: 'striped',
             headStyles: { fillColor: [34, 197, 94] },
-            columnStyles: {
+            columnStyles: isRange ? {
+                0: { cellWidth: 22 }, // Date
+                1: { cellWidth: 18 }, // Time
+                2: { cellWidth: 35 }, // Name
+                3: { cellWidth: 15 }, // Class
+                4: { cellWidth: 45 }, // Allocations
+                5: { halign: 'right', cellWidth: 20 }, // Amount
+                6: { halign: 'center', cellWidth: 15 }, // Receipt
+                7: { cellWidth: 'auto' }, // Remarks
+            } : {
                 0: { cellWidth: 20 }, // Time
                 1: { cellWidth: 40 }, // Name
                 2: { cellWidth: 15 }, // Class
@@ -314,24 +349,37 @@ const exportDailyToPDF = (report: DailyCollectionSummary) => {
         });
     }
 
-    doc.save(`Daily_Collection_${report.date}.pdf`);
+    const filenameDate = isRange ? `${report.start_date}_to_${report.end_date}` : (report.date || 'report');
+    doc.save(`Collection_Report_${filenameDate}.pdf`);
     toast.success('PDF downloaded successfully');
 };
 
 const exportDailyToExcel = (report: DailyCollectionSummary) => {
     const wb = XLSX.utils.book_new();
 
-    const displayDate = new Date(report.date).toLocaleDateString('en-IN', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    const isRange = report.is_range || (report.start_date && report.end_date && report.start_date !== report.end_date);
+    const titleText = isRange ? 'Collection Report' : 'Daily Collection Report';
+    
+    let displayDate = '';
+    if (isRange && report.start_date && report.end_date) {
+        displayDate = `${report.start_date} to ${report.end_date}`;
+    } else if (report.date) {
+        try {
+            displayDate = new Date(report.date).toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+        } catch {
+            displayDate = report.date;
+        }
+    }
 
     // Summary Sheet
     const summaryData = [
-        ['Daily Collection Report'],
-        ['Date', displayDate],
+        [titleText],
+        ['Period', displayDate],
         [''],
         ['Total Students Paid', report.totalStudents],
         ['Total Amount Collected', report.totalAmount],
@@ -341,23 +389,34 @@ const exportDailyToExcel = (report: DailyCollectionSummary) => {
 
     // Payments Sheet
     if (report.payments.length > 0) {
+        const headRow = isRange 
+            ? ['Date', 'Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt Issued', 'Remarks']
+            : ['Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt Issued', 'Remarks'];
+
         const paymentsData = [
-            ['Time', 'Student Name', 'Class', 'Allocations', 'Amount', 'Receipt Issued', 'Remarks'],
-            ...report.payments.map((p) => [
-                p.time,
-                p.studentName,
-                p.className,
-                p.allocations,
-                p.amount,
-                p.receiptIssued ? 'Yes' : 'No',
-                p.remarks || '',
-            ]),
+            headRow,
+            ...report.payments.map((p) => {
+                const row = [
+                    p.time,
+                    p.studentName,
+                    p.className,
+                    p.allocations,
+                    p.amount,
+                    p.receiptIssued ? 'Yes' : 'No',
+                    p.remarks || '',
+                ];
+                if (isRange) {
+                    row.unshift(p.date || '');
+                }
+                return row;
+            }),
         ];
         const paymentsWs = XLSX.utils.aoa_to_sheet(paymentsData);
         XLSX.utils.book_append_sheet(wb, paymentsWs, 'Payments');
     }
 
-    XLSX.writeFile(wb, `Daily_Collection_${report.date}.xlsx`);
+    const filenameDate = isRange ? `${report.start_date}_to_${report.end_date}` : (report.date || 'report');
+    XLSX.writeFile(wb, `Collection_Report_${filenameDate}.xlsx`);
     toast.success('Excel downloaded successfully');
 };
 
@@ -810,26 +869,52 @@ const ClassWiseReportSection: React.FC = () => {
     );
 };
 
-// ==================== Daily Collection Report ====================
+// ==================== Daily & Range Collection Report ====================
 const DailyCollectionReportSection: React.FC = () => {
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const [startDate, setStartDate] = useState(todayStr);
+    const [endDate, setEndDate] = useState(todayStr);
     const [report, setReport] = useState<DailyCollectionSummary | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         loadReport();
-    }, [selectedDate]);
+    }, [startDate, endDate]);
+
+    const setPresetRange = (preset: 'today' | 'yesterday' | 'week' | 'month') => {
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        
+        if (preset === 'today') {
+            setStartDate(today);
+            setEndDate(today);
+        } else if (preset === 'yesterday') {
+            const y = new Date(now);
+            y.setDate(y.getDate() - 1);
+            const yStr = y.toISOString().split('T')[0];
+            setStartDate(yStr);
+            setEndDate(yStr);
+        } else if (preset === 'week') {
+            const w = new Date(now);
+            w.setDate(w.getDate() - 7);
+            setStartDate(w.toISOString().split('T')[0]);
+            setEndDate(today);
+        } else if (preset === 'month') {
+            const m = new Date(now.getFullYear(), now.getMonth(), 1);
+            setStartDate(m.toISOString().split('T')[0]);
+            setEndDate(today);
+        }
+    };
 
     const loadReport = async () => {
-        if (!selectedDate) {
+        if (!startDate) {
             setReport(null);
             return;
         }
         
         setLoading(true);
         try {
-            const data = await feeApi.getDailyReport(selectedDate);
-            // Map backend response to component format safely
+            const data = await feeApi.getDailyReport({ startDate, endDate: endDate || startDate });
             const mappedData: DailyCollectionSummary = {
                 ...data,
                 totalStudents: data?.total_students || 0,
@@ -838,7 +923,7 @@ const DailyCollectionReportSection: React.FC = () => {
             };
             setReport(mappedData);
         } catch (error) {
-            console.error('Error loading daily report:', error);
+            console.error('Error loading collection report:', error);
         } finally {
             setLoading(false);
         }
@@ -849,7 +934,6 @@ const DailyCollectionReportSection: React.FC = () => {
             await feeApi.toggleReceipt(paymentId);
             toast.success('Receipt status updated');
             
-            // Update the local state instead of reloading entire report
             if (report) {
                 setReport({
                     ...report,
@@ -907,49 +991,92 @@ const DailyCollectionReportSection: React.FC = () => {
         });
     };
 
-    const truncateAllocations = (allocations: string, maxLength: number = 3) => {
-        if (!allocations) return '-';
-        const parts = allocations.split(', ');
-        if (parts.length <= maxLength) return allocations;
-        return parts.slice(0, maxLength).join(', ') + '...';
-    };
-
     const calculateTotal = () => {
         return report?.payments.reduce((sum, p) => sum + p.amount, 0) || 0;
     };
 
     return (
         <div className="space-y-4">
-            {/* Compact Header with Date and Export */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <Input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        max={new Date().toISOString().split('T')[0]}
-                        className="w-auto"
-                    />
+            {/* Header Controls with Date Range and Presets */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-muted/20 p-3 rounded-lg border">
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium mr-1">
+                        <Calendar className="w-4 h-4 text-primary" />
+                        <span>Period:</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            max={todayStr}
+                            className="h-8 text-xs w-[130px] bg-background"
+                        />
+                        <span className="text-xs text-muted-foreground">to</span>
+                        <Input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            max={todayStr}
+                            className="h-8 text-xs w-[130px] bg-background"
+                        />
+                    </div>
+                    
+                    {/* Presets */}
+                    <div className="flex items-center gap-1 ml-1 sm:ml-2">
+                        <Button 
+                            variant={startDate === todayStr && endDate === todayStr ? "default" : "outline"} 
+                            size="sm" 
+                            onClick={() => setPresetRange('today')}
+                            className="h-7 text-[11px] px-2.5"
+                        >
+                            Today
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setPresetRange('yesterday')}
+                            className="h-7 text-[11px] px-2.5 hidden sm:inline-flex"
+                        >
+                            Yesterday
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setPresetRange('week')}
+                            className="h-7 text-[11px] px-2.5"
+                        >
+                            Last 7 Days
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setPresetRange('month')}
+                            className="h-7 text-[11px] px-2.5"
+                        >
+                            This Month
+                        </Button>
+                    </div>
                 </div>
+
                 {!loading && report && report.payments.length > 0 && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => exportDailyToPDF(report)}
-                            className="flex-1 sm:flex-none"
+                            className="h-8 text-xs"
                         >
-                            <Download className="w-4 h-4 mr-1.5" />
+                            <Download className="w-3.5 h-3.5 mr-1.5" />
                             PDF
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => exportDailyToExcel(report)}
-                            className="flex-1 sm:flex-none"
+                            className="h-8 text-xs"
                         >
-                            <FileSpreadsheet className="w-4 h-4 mr-1.5" />
+                            <FileSpreadsheet className="w-3.5 h-3.5 mr-1.5" />
                             Excel
                         </Button>
                     </div>
@@ -966,8 +1093,6 @@ const DailyCollectionReportSection: React.FC = () => {
 
             {!loading && report && (
                 <>
-
-
                     {/* Subtle Stats Card */}
                     <Card className="bg-muted/30">
                         <CardContent className="p-3">
@@ -987,8 +1112,8 @@ const DailyCollectionReportSection: React.FC = () => {
                                         </span>
                                     </div>
                                 </div>
-                                <span className="text-[11px] text-muted-foreground">
-                                    {formatDisplayDate(selectedDate)}
+                                <span className="text-[11px] text-muted-foreground font-medium">
+                                    {startDate === endDate ? formatDisplayDate(startDate) : `${formatDisplayDate(startDate)} — ${formatDisplayDate(endDate)}`}
                                 </span>
                             </div>
                         </CardContent>
@@ -1022,9 +1147,14 @@ const DailyCollectionReportSection: React.FC = () => {
                                         key={payment.paymentId}
                                         className="grid grid-cols-[80px_1fr_80px_2fr_100px_120px] gap-4 p-3 border-b last:border-b-0 hover:bg-muted/20 items-center transition-colors bg-background"
                                     >
-                                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            {payment.time}
+                                        <div className="flex flex-col text-[11px] text-muted-foreground">
+                                            <div className="flex items-center gap-1.5 font-medium text-foreground">
+                                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                                {payment.time}
+                                            </div>
+                                            {startDate !== endDate && payment.date && (
+                                                <span className="text-[10px] text-muted-foreground mt-0.5">{formatDisplayDate(payment.date)}</span>
+                                            )}
                                         </div>
                                         <div>
                                             <p className="font-medium text-sm truncate text-foreground" title={payment.studentName}>
@@ -1105,6 +1235,9 @@ const DailyCollectionReportSection: React.FC = () => {
                                                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                                                     <Clock className="w-4 h-4" />
                                                     <span>{payment.time}</span>
+                                                    {startDate !== endDate && payment.date && (
+                                                        <span className="text-[10px] text-muted-foreground ml-1">({formatDisplayDate(payment.date)})</span>
+                                                    )}
                                                 </div>
                                                 <div className="text-lg font-bold text-green-700 dark:text-green-400">
                                                     {formatCurrency(payment.amount)}
