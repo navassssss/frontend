@@ -161,6 +161,12 @@ export const updateStudentMonthlyFee = async (studentId: number, monthly_fee: nu
     return response.data;
 };
 
+// Reallocate student payments / Fix fee gap
+export const reallocateStudentPayments = async (studentId: number) => {
+    const response = await api.post(`/fees/students/${studentId}/reallocate`);
+    return response.data;
+};
+
 // Get overall summary
 export const getOverallSummary = async (params?: { month?: number; year?: number }) => {
     const queryParams: any = {};

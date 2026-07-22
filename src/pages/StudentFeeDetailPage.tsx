@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,7 @@ import {
     AlertCircle,
     FileText,
     ArrowLeft,
+    Wrench,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 
@@ -88,6 +89,40 @@ const StudentFeeDetailPage: React.FC = () => {
     // Monthly Fee dialog
     const [monthlyFeeDialogOpen, setMonthlyFeeDialogOpen] = useState(false);
     const [newMonthlyFee, setNewMonthlyFee] = useState('');
+    const [isFixingGap, setIsFixingGap] = useState(false);
+
+    // Check if student has a fee gap (a month with balance > 0 followed chronologically by a month with paidAmount > 0)
+    const checkHasFeeGap = () => {
+        if (!monthlyStatus || monthlyStatus.length === 0) return false;
+        const sorted = [...monthlyStatus].sort((a, b) => a.month.localeCompare(b.month));
+        
+        let foundUnpaid = false;
+        for (const m of sorted) {
+            if (m.balance > 0) {
+                foundUnpaid = true;
+            } else if (m.paidAmount > 0 && foundUnpaid) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const handleFixFeeGap = async () => {
+        if (!id) return;
+        const confirmFix = window.confirm("A fee gap was detected (older month is unpaid while a later month was paid). Do you want to automatically reallocate payments chronologically to fix this gap?");
+        if (!confirmFix) return;
+
+        setIsFixingGap(true);
+        try {
+            await feeApi.reallocateStudentPayments(parseInt(id));
+            toast.success("Fee gap fixed and payments reallocated successfully!");
+            await loadData();
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "Failed to fix fee gap");
+        } finally {
+            setIsFixingGap(false);
+        }
+    };
 
     useEffect(() => {
         if (id) {
@@ -557,6 +592,25 @@ const StudentFeeDetailPage: React.FC = () => {
                                 </div>
                             </div>
                         )}
+
+                        {checkHasFeeGap() && (
+                            <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300 animate-fade-in">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                    <span><strong>Fee Gap Detected:</strong> An earlier month has unpaid fees while a later month is marked as paid.</span>
+                                </div>
+                                <Button 
+                                    size="sm" 
+                                    variant="destructive" 
+                                    className="h-7 text-[11px] px-3 font-semibold shrink-0 gap-1 shadow-sm"
+                                    onClick={handleFixFeeGap}
+                                    disabled={isFixingGap}
+                                >
+                                    <Wrench className="w-3.5 h-3.5" />
+                                    {isFixingGap ? "Fixing..." : "Fix Fee Gap"}
+                                </Button>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -701,6 +755,19 @@ const StudentFeeDetailPage: React.FC = () => {
                             </div>
                         </DialogContent>
                     </Dialog>
+
+                    {checkHasFeeGap() && (
+                        <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={handleFixFeeGap}
+                            disabled={isFixingGap}
+                            className="gap-1.5 shadow-sm"
+                        >
+                            <Wrench className="w-4 h-4" />
+                            {isFixingGap ? "Fixing Gap..." : "Fix Fee Gap"}
+                        </Button>
+                    )}
 
                     <Dialog open={monthlyFeeDialogOpen} onOpenChange={setMonthlyFeeDialogOpen}>
                         <DialogContent>
