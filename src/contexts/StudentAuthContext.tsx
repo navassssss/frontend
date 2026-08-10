@@ -32,6 +32,7 @@ export interface Student {
 
 interface StudentAuthContextType {
   student: Student | null;
+  setStudent: React.Dispatch<React.SetStateAction<Student | null>>;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
@@ -154,6 +155,7 @@ export function StudentAuthProvider({ children }: { children: ReactNode }) {
   return (
     <StudentAuthContext.Provider value={{
       student,
+      setStudent,
       isAuthenticated: !!student,
       isLoading,
       login,
