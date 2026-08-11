@@ -259,16 +259,10 @@ const StudentFeeDetailPage: React.FC = () => {
 
     // Set default values when adjust dialog opens
     const handleOpenAdjustDialog = () => {
-        const adjustableMonths = getAdjustableMonths();
-        if (adjustableMonths.length > 0) {
-            const nextMonth = getNextMonth();
-
-            // Find next month in adjustable months, or use first adjustable month
-            const defaultFrom = adjustableMonths.find(m => m.month >= nextMonth)?.month || adjustableMonths[0].month;
-
-            setAdjustFromMonth(defaultFrom);
-            setAdjustToMonth('ongoing'); // Default to ongoing
-        }
+        const now = new Date();
+        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        setAdjustFromMonth(currentMonthStr);
+        setAdjustToMonth('ongoing');
         setAdjustDialogOpen(true);
     };
 
@@ -688,49 +682,45 @@ const StudentFeeDetailPage: React.FC = () => {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <Label>From Month</Label>
-                                        <Select value={adjustFromMonth} onValueChange={setAdjustFromMonth}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {getAdjustableMonths().map((mf) => {
-                                                    let statusLabel = 'Unpaid';
-                                                    if (mf.status === 'paid') statusLabel = 'Paid';
-                                                    else if (mf.status === 'partial') statusLabel = 'Partial';
-
-                                                    return (
-                                                        <SelectItem key={mf.month} value={mf.month}>
-                                                            {formatMonth(mf.month)} ({statusLabel})
-                                                        </SelectItem>
-                                                    );
-                                                })}
-                                            </SelectContent>
-                                        </Select>
+                                        <Input
+                                            type="month"
+                                            value={adjustFromMonth}
+                                            onChange={(e) => setAdjustFromMonth(e.target.value)}
+                                            className="w-full mt-1"
+                                        />
                                     </div>
                                     <div>
-                                        <Label>To Month</Label>
-                                        <Select value={adjustToMonth} onValueChange={setAdjustToMonth}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select" />
+                                        <Label>To Month Option</Label>
+                                        <Select
+                                            value={adjustToMonth === 'ongoing' ? 'ongoing' : 'specific'}
+                                            onValueChange={(val) => {
+                                                if (val === 'ongoing') {
+                                                    setAdjustToMonth('ongoing');
+                                                } else {
+                                                    setAdjustToMonth(adjustFromMonth || getCurrentMonth());
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="mt-1">
+                                                <SelectValue placeholder="Select Option" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="ongoing">
-                                                    Ongoing (All Future Months)
-                                                </SelectItem>
-                                                {getAdjustableMonths().map((mf) => {
-                                                    let statusLabel = 'Unpaid';
-                                                    if (mf.status === 'paid') statusLabel = 'Paid';
-                                                    else if (mf.status === 'partial') statusLabel = 'Partial';
-
-                                                    return (
-                                                        <SelectItem key={mf.month} value={mf.month}>
-                                                            {formatMonth(mf.month)} ({statusLabel})
-                                                        </SelectItem>
-                                                    );
-                                                })}
+                                                <SelectItem value="ongoing">Ongoing (All Future Months)</SelectItem>
+                                                <SelectItem value="specific">Specific End Month</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    {adjustToMonth !== 'ongoing' && (
+                                        <div className="col-span-2">
+                                            <Label>End Month</Label>
+                                            <Input
+                                                type="month"
+                                                value={adjustToMonth === 'ongoing' ? '' : adjustToMonth}
+                                                onChange={(e) => setAdjustToMonth(e.target.value)}
+                                                className="w-full mt-1"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <Label>New Amount (₹)</Label>

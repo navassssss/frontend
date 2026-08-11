@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Award, Plus, Star, Trophy,
-    CheckCircle2, Clock, XCircle, AlertCircle
+    CheckCircle2, Clock, XCircle, AlertCircle, Trash2
 } from 'lucide-react';
 import StudentLayout from '@/components/student/StudentLayout';
 import { format } from 'date-fns';
 import api from '@/lib/api';
 import { useStudentAuth } from '@/contexts/StudentAuthContext';
+import { toast } from 'sonner';
 
 type FilterType = 'all' | 'approved' | 'pending' | 'rejected';
 
@@ -47,6 +48,18 @@ export default function StudentAchievementsPage() {
             finally { setIsLoading(false); }
         })();
     }, []);
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this achievement?')) return;
+        try {
+            await api.delete(`/student/achievements/${id}`);
+            setAchievements(prev => prev.filter(a => a.id !== id));
+            toast.success('Achievement deleted successfully');
+        } catch (err: any) {
+            console.error('Failed to delete achievement:', err);
+            toast.error(err.response?.data?.message || 'Failed to delete achievement');
+        }
+    };
 
     const filtered = achievements.filter(a => filter === 'all' || a.status === filter);
     const totalPoints = student?.totalPoints || 0;
@@ -147,10 +160,21 @@ export default function StudentAchievementsPage() {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-2">
                                                 <p className="font-black text-slate-800 text-sm leading-tight">{achievement.title}</p>
-                                                <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black border shrink-0 ${sc.pill}`}>
-                                                    <StatusIcon className="w-3 h-3" />
-                                                    {achievement.status === 'approved' ? `+${achievement.points}` : sc.label}
-                                                </span>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black border ${sc.pill}`}>
+                                                        <StatusIcon className="w-3 h-3" />
+                                                        {achievement.status === 'approved' ? `+${achievement.points}` : sc.label}
+                                                    </span>
+                                                    {achievement.status !== 'approved' && (
+                                                        <button
+                                                            onClick={() => handleDelete(achievement.id)}
+                                                            className="p-1 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-50 transition-colors"
+                                                            title="Delete Achievement"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                             <p className="text-[12px] text-slate-500 mt-1 line-clamp-2">{achievement.description}</p>
                                             <div className="flex items-center gap-2 mt-2">
