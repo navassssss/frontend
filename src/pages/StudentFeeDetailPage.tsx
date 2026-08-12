@@ -600,7 +600,7 @@ const StudentFeeDetailPage: React.FC = () => {
                             <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300 animate-fade-in">
                                 <div className="flex items-center gap-2">
                                     <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                                    <span><strong>Fee Gap Detected:</strong> An earlier month has unpaid fees while a later month is marked as paid.</span>
+                                    <span><strong>Fee Gap Detected:</strong> Discrepancy detected (e.g. chronological mismatch or unallocated overpayment).</span>
                                 </div>
                                 <Button 
                                     size="sm" 
