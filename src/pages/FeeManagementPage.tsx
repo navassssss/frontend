@@ -36,7 +36,7 @@ interface StudentFeeWithOverview {
     totalPending: number;
     lastPaymentDate: string | null;
     currentMonthStatus: any | null;
-    overallStatus: 'paid' | 'partial' | 'due' | 'overpaid';
+    overallStatus: 'paid' | 'partial' | 'due' | 'overpaid' | 'gap';
 }
 
 // Helper for Title Case
@@ -151,8 +151,10 @@ const FeeManagementPage: React.FC = () => {
 
             // Map API response to component structure
             const studentsWithOverview = response.data.map((student: any) => {
-                let overallStatus: 'paid' | 'partial' | 'due' | 'overpaid' = 'paid';
-                if (student.total_pending > 0) {
+                let overallStatus: 'paid' | 'partial' | 'due' | 'overpaid' | 'gap' = 'paid';
+                if (student.status === 'gap') {
+                    overallStatus = 'gap';
+                } else if (student.total_pending > 0) {
                     overallStatus = 'due';
                 } else if (student.total_pending < 0) {
                     overallStatus = 'overpaid';
@@ -208,26 +210,29 @@ const FeeManagementPage: React.FC = () => {
         setFilteredStudents(result);
     };
 
-    const getStatusBadge = (status: 'paid' | 'partial' | 'due' | 'overpaid') => {
+    const getStatusBadge = (status: 'paid' | 'partial' | 'due' | 'overpaid' | 'gap') => {
         const styles = {
             paid: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
             partial: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800",
             due: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800",
-            overpaid: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
+            overpaid: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
+            gap: "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800"
         };
 
         const icons = {
             paid: <CheckCircle2 className="w-3 h-3 mr-1" />,
             partial: <Clock className="w-3 h-3 mr-1" />,
             due: <AlertCircle className="w-3 h-3 mr-1" />,
-            overpaid: <CheckCircle2 className="w-3 h-3 mr-1" />
+            overpaid: <CheckCircle2 className="w-3 h-3 mr-1" />,
+            gap: <AlertCircle className="w-3 h-3 mr-1" />
         };
 
         const labels = {
             paid: "Paid",
             partial: "Partial",
             due: "Due",
-            overpaid: "Credit"
+            overpaid: "Credit",
+            gap: "Fee Gap"
         };
 
         return (
@@ -338,6 +343,7 @@ const FeeManagementPage: React.FC = () => {
                                 <SelectItem value="partial">Partial</SelectItem>
                                 <SelectItem value="due">Due</SelectItem>
                                 <SelectItem value="overpaid">Overpaid</SelectItem>
+                                <SelectItem value="gap">Fee Gap</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select value={sortOption} onValueChange={(val: any) => setSortOption(val)}>
@@ -390,7 +396,8 @@ const FeeManagementPage: React.FC = () => {
                                     borderLeftColor:
                                         student.overallStatus === 'paid' ? '#16a34a' :
                                             student.overallStatus === 'due' ? '#f59e0b' :
-                                                student.overallStatus === 'overpaid' ? '#3b82f6' : '#9ca3af'
+                                                student.overallStatus === 'overpaid' ? '#3b82f6' :
+                                                    student.overallStatus === 'gap' ? '#e11d48' : '#9ca3af'
                                 }}
                                 onClick={() => navigate(`/fees/${student.id}`)}
                             >
