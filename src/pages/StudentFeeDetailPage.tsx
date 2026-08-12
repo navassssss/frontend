@@ -92,7 +92,7 @@ const StudentFeeDetailPage: React.FC = () => {
     const [isFixingGap, setIsFixingGap] = useState(false);
 
     // Check if student has a fee gap (a month with balance > 0 followed chronologically by a month with paidAmount > 0)
-    // Or if any month has overpayment (paid > expected) while another month has unpaid balance (balance > 0)
+    // Or if any month has overpayment (paid > expected)
     const checkHasFeeGap = () => {
         if (!monthlyStatus || monthlyStatus.length === 0) return false;
         
@@ -107,10 +107,9 @@ const StudentFeeDetailPage: React.FC = () => {
             }
         }
 
-        // Check 2: Overpayment in one month while another month has unpaid balance
+        // Check 2: Overpayment in any month
         const hasOverpaidMonth = monthlyStatus.some(m => m.paidAmount > m.expectedAmount);
-        const hasUnpaidMonth = monthlyStatus.some(m => m.balance > 0);
-        if (hasOverpaidMonth && hasUnpaidMonth) {
+        if (hasOverpaidMonth) {
             return true;
         }
 
