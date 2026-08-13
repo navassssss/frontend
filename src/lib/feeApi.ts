@@ -345,3 +345,8 @@ export const getPayments = async (params?: {
     const response = await api.get('/fees/reports/daily', { params: queryParams });
     return response.data;
 };
+
+export const deleteReceiptBatch = async (batchId: number) => {
+    const response = await api.delete(`/fees/receipt-batches/${batchId}`);
+    return response.data;
+};

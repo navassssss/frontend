@@ -20,6 +20,7 @@ import {
     Filter,
     ChevronLeft,
     ChevronRight,
+    Trash2,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 import { cn } from '@/lib/utils';
@@ -119,6 +120,21 @@ export const ReceiptsManagerPage: React.FC = () => {
             toast.error('Failed to load print batches');
         } finally {
             setLoadingBatches(false);
+        }
+    };
+
+    const handleDeleteBatch = async (batchId: number) => {
+        if (!confirm("Are you sure you want to delete this print batch? Associated payments will become 'Pending Print' again. This does NOT delete the actual payment records.")) {
+            return;
+        }
+
+        try {
+            await feeApi.deleteReceiptBatch(batchId);
+            toast.success("Print batch deleted successfully");
+            loadBatches();
+        } catch (error) {
+            console.error("Failed to delete print batch", error);
+            toast.error("Failed to delete print batch");
         }
     };
 
@@ -447,7 +463,7 @@ export const ReceiptsManagerPage: React.FC = () => {
                                                             {batch.payments_count} Receipts
                                                         </Badge>
                                                     </td>
-                                                    <td className="p-3 text-right">
+                                                    <td className="p-3 text-right flex justify-end gap-2">
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
@@ -456,6 +472,15 @@ export const ReceiptsManagerPage: React.FC = () => {
                                                         >
                                                             <Printer className="w-3.5 h-3.5" />
                                                             Reprint Batch
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => handleDeleteBatch(batch.id)}
+                                                            className="h-8 gap-1 border-destructive text-destructive hover:bg-destructive/10"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            Delete Batch
                                                         </Button>
                                                     </td>
                                                 </tr>
