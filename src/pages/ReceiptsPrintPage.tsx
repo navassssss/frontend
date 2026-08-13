@@ -31,9 +31,21 @@ const getMonthsSummary = (allocations: any[]) => {
         return a.month - b.month;
     });
     
-    // Group by year to format cleanly
-    const formatted = sorted.map(a => `${a.month_name.substring(0, 3)} ${a.year.toString().substring(2)}`);
-    return formatted.join(', ');
+    // Group months by year
+    const groups: { [key: number]: string[] } = {};
+    sorted.forEach(a => {
+        if (!groups[a.year]) {
+            groups[a.year] = [];
+        }
+        groups[a.year].push(a.month_name.substring(0, 3));
+    });
+
+    const parts = Object.keys(groups).map(year => {
+        const months = groups[parseInt(year)];
+        return `${months.join(', ')} – ${year}`;
+    });
+
+    return parts.join('; ');
 };
 
 const toTitleCase = (str: string) => {
@@ -333,6 +345,11 @@ export const ReceiptsPrintPage: React.FC = () => {
                                                     <span className="line">
                                                         <span className="val hand tilt2 vpurpose">{numberToWords(p.paid_amount)}</span>
                                                     </span>
+                                                </div>
+
+                                                {/* Extra empty writing/spacing line */}
+                                                <div className="row">
+                                                    <span className="line"></span>
                                                 </div>
 
                                                 {/* Allocation Months Description Row */}
