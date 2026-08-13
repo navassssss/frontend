@@ -215,23 +215,24 @@ export const ReceiptsPrintPage: React.FC = () => {
                 .receipt-card .numrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 1em; margin-top: .6em; }
                 .receipt-card .numL { display: flex; align-items: flex-end; gap: .45em; }
                 .receipt-card .numR { display: flex; align-items: flex-end; gap: .4em; }
-                .receipt-card .label { font-size: .92em; font-weight: 600; line-height: 1; white-space: nowrap; flex: 0 0 auto; }
+                .receipt-card .label { font-size: .85em; font-weight: 600; line-height: 1; white-space: nowrap; flex: 0 0 auto; }
                 .receipt-card .rednum { color: var(--red); font-size: 1.8em; font-weight: 700; line-height: .8; }
                 .receipt-card .dateval { font-size: 1.25em; font-weight: 600; line-height: 1; position: relative; bottom: .05em; }
 
                 .receipt-card .row { display: flex; align-items: flex-end; gap: .35em; margin-top: .4em; }
                 .receipt-card .line { position: relative; flex: 1 1 auto; min-width: 0; min-height: 1.5em; border-bottom: 1px dotted var(--brd); }
-                .receipt-card .val { position: absolute; bottom: -0.15em; left: .4em; white-space: nowrap; line-height: 1; }
-                .receipt-card .vname { font-size: 1.45em; font-weight: 600; }
-                .receipt-card .vpurpose, .receipt-card .vdesc { font-size: 1.35em; font-weight: 600; }
+                .receipt-card .val { position: absolute; bottom: -0.15em; left: .4em; white-space: nowrap; line-height: 1; overflow: hidden; text-overflow: ellipsis; max-width: 95%; }
+                .receipt-card .vname { font-size: 1.35em; font-weight: 600; }
+                .receipt-card .vpurpose { font-size: 1.1em; font-weight: 600; }
+                .receipt-card .vdesc { font-size: 1.1em; font-weight: 600; }
 
                 .receipt-card .spacer { flex: 1 1 auto; }
 
                 .receipt-card .amtwrap { display: flex; align-items: flex-end; justify-content: space-between; gap: .8em; margin-top: .5em; }
                 .receipt-card .amtL .label { display: block; margin-bottom: .3em; }
-                .receipt-card .amtbox { display: inline-flex; align-items: stretch; border: 1.2px solid var(--brd); border-radius: .3em; overflow: hidden; }
-                .receipt-card .rs { display: flex; align-items: center; justify-content: center; padding: .25em .45em; background: var(--brd); color: #fff; font-size: 1.25em; font-weight: 700; line-height: 1; }
-                .receipt-card .amt { display: flex; align-items: center; min-width: 3.6em; padding: .25em .5em; background: rgba(255,255,255,.65); font-size: 1.45em; font-weight: 700; line-height: 1; }
+                .receipt-card .amtbox { display: inline-flex; align-items: stretch; border: 1.6px solid var(--brd); border-radius: .35em; overflow: hidden; height: 3.2em; }
+                .receipt-card .rs { display: flex; align-items: center; justify-content: center; padding: 0 .7em; background: var(--brd); color: #fff; font-size: 1.35em; font-weight: 800; line-height: 1; }
+                .receipt-card .amt { display: flex; align-items: center; min-width: 4.5em; padding: 0 .7em; background: rgba(255,255,255,.65); font-size: 1.6em; font-weight: 800; line-height: 1; }
 
                 .receipt-card .sigwrap { display: flex; flex-direction: column; align-items: center; }
                 .receipt-card .sigtext { font-size: 1.7em; line-height: .8; margin-bottom: .05em; }
