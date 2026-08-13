@@ -152,14 +152,12 @@ export const ReceiptsPrintPage: React.FC = () => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-sizing: border-box;
-                    padding: 8mm 5mm;
                 }
                 .grid2 {
                     display: grid;
-                    grid-template-columns: repeat(2, 100mm);
-                    grid-template-rows: repeat(3, 74mm);
-                    gap: 6mm 4mm;
+                    grid-template-columns: repeat(2, auto);
+                    grid-template-rows: repeat(3, auto);
+                    gap: 4mm;
                 }
                 .cell {
                     display: flex;
