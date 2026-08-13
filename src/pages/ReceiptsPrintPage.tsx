@@ -366,11 +366,6 @@ export const ReceiptsPrintPage: React.FC = () => {
                                                     </span>
                                                 </div>
 
-                                                {/* Extra empty writing/spacing line */}
-                                                <div className="row">
-                                                    <span className="line"></span>
-                                                </div>
-
                                                 {/* Allocation Months Description Row */}
                                                 <div className="row">
                                                     <span className="line">
@@ -378,6 +373,11 @@ export const ReceiptsPrintPage: React.FC = () => {
                                                             {getMonthsSummary(p.allocations)}
                                                         </span>
                                                     </span>
+                                                </div>
+
+                                                {/* Extra empty writing/spacing line */}
+                                                <div className="row">
+                                                    <span className="line"></span>
                                                 </div>
 
                                                 <div className="spacer" />
