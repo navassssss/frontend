@@ -311,7 +311,15 @@ export const getReceiptBatch = async (batchId: number) => {
     return response.data;
 };
 
-export const getPayments = async (params?: { receipt_issued?: boolean; startDate?: string; endDate?: string }) => {
+export const getPayments = async (params?: { 
+    receipt_issued?: boolean; 
+    startDate?: string; 
+    endDate?: string;
+    search?: string;
+    className?: string;
+    page?: number;
+    per_page?: number;
+}) => {
     const queryParams: any = {};
     if (params?.receipt_issued !== undefined) {
         queryParams.receipt_issued = params.receipt_issued;
@@ -321,6 +329,18 @@ export const getPayments = async (params?: { receipt_issued?: boolean; startDate
     }
     if (params?.endDate) {
         queryParams.end_date = params.endDate;
+    }
+    if (params?.search) {
+        queryParams.search = params.search;
+    }
+    if (params?.className) {
+        queryParams.class_name = params.className;
+    }
+    if (params?.page) {
+        queryParams.page = params.page;
+    }
+    if (params?.per_page) {
+        queryParams.per_page = params.per_page;
     }
     const response = await api.get('/fees/reports/daily', { params: queryParams });
     return response.data;

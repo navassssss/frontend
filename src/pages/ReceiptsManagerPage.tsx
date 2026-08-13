@@ -18,6 +18,8 @@ import {
     CheckCircle2,
     X,
     Filter,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 import { cn } from '@/lib/utils';
@@ -37,6 +39,12 @@ export const ReceiptsManagerPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [loadingPayments, setLoadingPayments] = useState(true);
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalPayments, setTotalPayments] = useState(0);
+    const paymentsPerPage = 20;
+
     // History tab state
     const [batches, setBatches] = useState<feeApi.ReceiptBatch[]>([]);
     const [loadingBatches, setLoadingBatches] = useState(true);
@@ -45,13 +53,18 @@ export const ReceiptsManagerPage: React.FC = () => {
         loadClasses();
     }, []);
 
+    // Reset pagination to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [statusFilter, classFilter, searchQuery]);
+
     useEffect(() => {
         if (activeTab === 'select') {
             loadPayments();
         } else {
             loadBatches();
         }
-    }, [activeTab, statusFilter, classFilter, searchQuery]);
+    }, [activeTab, statusFilter, classFilter, searchQuery, currentPage]);
 
     const loadClasses = async () => {
         try {
@@ -65,32 +78,29 @@ export const ReceiptsManagerPage: React.FC = () => {
     const loadPayments = async () => {
         setLoadingPayments(true);
         try {
-            const params: any = {};
+            const params: any = {
+                page: currentPage,
+                per_page: paymentsPerPage,
+            };
             if (statusFilter === 'pending') {
                 params.receipt_issued = false;
             } else if (statusFilter === 'issued') {
                 params.receipt_issued = true;
             }
 
-            const data = await feeApi.getPayments(params);
-            let results = data.payments || [];
-
-            // Filter locally by class and search query since backend handles primary list
             if (classFilter !== 'all') {
-                results = results.filter((p: any) => p.className === classFilter || (p.student?.class?.name === classFilter));
+                params.className = classFilter;
             }
 
             if (searchQuery) {
-                const query = searchQuery.toLowerCase();
-                results = results.filter((p: any) =>
-                    p.studentName.toLowerCase().includes(query) ||
-                    (p.studentNameMalayalam && p.studentNameMalayalam.includes(query)) ||
-                    (p.admission_no && p.admission_no.toString().includes(query))
-                );
+                params.search = searchQuery;
             }
 
-            setPayments(results);
-            setSelectedIds([]); // Reset selection when filters change
+            const data = await feeApi.getPayments(params);
+            setPayments(data.payments || []);
+            setTotalPages(data.last_page || 1);
+            setTotalPayments(data.total || 0);
+            setSelectedIds([]); // Reset selection when filters or pages change
         } catch (error) {
             console.error('Failed to load payments', error);
             toast.error('Failed to load payments list');
@@ -271,67 +281,101 @@ export const ReceiptsManagerPage: React.FC = () => {
                                 <p className="text-muted-foreground font-medium">No payments match your criteria</p>
                             </div>
                         ) : (
-                            <Card className="overflow-hidden shadow-sm">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm border-collapse text-left">
-                                        <thead>
-                                            <tr className="border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                                <th className="p-3 w-12 text-center">
-                                                    <Checkbox
-                                                        checked={selectedIds.length === payments.length && payments.length > 0}
-                                                        onCheckedChange={handleSelectAll}
-                                                    />
-                                                </th>
-                                                <th className="p-3">Receipt No.</th>
-                                                <th className="p-3">Student Name</th>
-                                                <th className="p-3">Class</th>
-                                                <th className="p-3">Date</th>
-                                                <th className="p-3">Allocations</th>
-                                                <th className="p-3">Amount</th>
-                                                <th className="p-3">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y">
-                                            {payments.map((p) => (
-                                                <tr key={p.paymentId} className="hover:bg-muted/10 transition-colors">
-                                                    <td className="p-3 text-center">
+                            <div className="space-y-4">
+                                <Card className="overflow-hidden shadow-sm">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm border-collapse text-left">
+                                            <thead>
+                                                <tr className="border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                    <th className="p-3 w-12 text-center">
                                                         <Checkbox
-                                                            checked={selectedIds.includes(p.paymentId)}
-                                                            onCheckedChange={(checked) => handleSelectPayment(p.paymentId, !!checked)}
+                                                            checked={selectedIds.length === payments.length && payments.length > 0}
+                                                            onCheckedChange={handleSelectAll}
                                                         />
-                                                    </td>
-                                                    <td className="p-3 font-semibold text-muted-foreground">
-                                                        REC-{p.paymentId.toString().padStart(6, '0')}
-                                                    </td>
-                                                    <td className="p-3">
-                                                        <div>
-                                                            <span className="font-medium text-foreground">{p.studentName}</span>
-                                                            <span className="text-xs text-muted-foreground block">Adm: {p.admission_no || '-'}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-3 text-muted-foreground">Class {p.className}</td>
-                                                    <td className="p-3 text-muted-foreground whitespace-nowrap">{formatDisplayDate(p.date)}</td>
-                                                    <td className="p-3 text-xs max-w-[200px] truncate" title={p.allocations}>
-                                                        {p.allocations || '-'}
-                                                    </td>
-                                                    <td className="p-3 font-bold text-foreground">{formatCurrency(p.amount)}</td>
-                                                    <td className="p-3">
-                                                        {p.receiptIssued ? (
-                                                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1">
-                                                                <CheckCircle2 className="w-3 h-3" /> Printed
-                                                            </Badge>
-                                                        ) : (
-                                                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1">
-                                                                <Clock className="w-3 h-3" /> Pending
-                                                            </Badge>
-                                                        )}
-                                                    </td>
+                                                    </th>
+                                                    <th className="p-3">Receipt No.</th>
+                                                    <th className="p-3">Student Name</th>
+                                                    <th className="p-3">Class</th>
+                                                    <th className="p-3">Date</th>
+                                                    <th className="p-3">Allocations</th>
+                                                    <th className="p-3">Amount</th>
+                                                    <th className="p-3">Status</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </Card>
+                                            </thead>
+                                            <tbody className="divide-y">
+                                                {payments.map((p) => (
+                                                    <tr key={p.paymentId} className="hover:bg-muted/10 transition-colors">
+                                                        <td className="p-3 text-center">
+                                                            <Checkbox
+                                                                checked={selectedIds.includes(p.paymentId)}
+                                                                onCheckedChange={(checked) => handleSelectPayment(p.paymentId, !!checked)}
+                                                            />
+                                                        </td>
+                                                        <td className="p-3 font-semibold text-muted-foreground">
+                                                            REC-{p.paymentId.toString().padStart(6, '0')}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div>
+                                                                <span className="font-medium text-foreground">{p.studentName}</span>
+                                                                <span className="text-xs text-muted-foreground block">Adm: {p.admission_no || '-'}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3 text-muted-foreground">Class {p.className}</td>
+                                                        <td className="p-3 text-muted-foreground whitespace-nowrap">{formatDisplayDate(p.date)}</td>
+                                                        <td className="p-3 text-xs max-w-[200px] truncate" title={p.allocations}>
+                                                            {p.allocations || '-'}
+                                                        </td>
+                                                        <td className="p-3 font-bold text-foreground">{formatCurrency(p.amount)}</td>
+                                                        <td className="p-3">
+                                                            {p.receiptIssued ? (
+                                                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1">
+                                                                    <CheckCircle2 className="w-3 h-3" /> Printed
+                                                                </Badge>
+                                                            ) : (
+                                                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1">
+                                                                    <Clock className="w-3 h-3" /> Pending
+                                                                </Badge>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </Card>
+
+                                {/* Pagination Controls */}
+                                {totalPages > 1 && (
+                                    <div className="flex items-center justify-between px-2 py-4 bg-transparent border-t">
+                                        <div className="text-xs text-muted-foreground font-medium">
+                                            Showing page {currentPage} of {totalPages} ({totalPayments} total payments)
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentPage === 1}
+                                            >
+                                                <ChevronLeft className="h-4 w-4" />
+                                            </Button>
+                                            <div className="text-xs font-semibold px-2 min-w-[2rem] text-center">
+                                                {currentPage}
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                disabled={currentPage === totalPages}
+                                            >
+                                                <ChevronRight className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         )}
 
                         {/* Floating Selection Banner */}
