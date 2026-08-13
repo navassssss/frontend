@@ -32,17 +32,36 @@ const getMonthsSummary = (allocations: any[]) => {
     });
     
     // Group months by year
-    const groups: { [key: number]: string[] } = {};
+    const groups: { [key: number]: { month: number; name: string }[] } = {};
     sorted.forEach(a => {
         if (!groups[a.year]) {
             groups[a.year] = [];
         }
-        groups[a.year].push(a.month_name.substring(0, 3));
+        groups[a.year].push({ month: a.month, name: a.month_name.substring(0, 3) });
     });
 
-    const parts = Object.keys(groups).map(year => {
-        const months = groups[parseInt(year)];
-        return `${months.join(', ')} – ${year}`;
+    const parts = Object.keys(groups).map(yearStr => {
+        const year = parseInt(yearStr);
+        const monthItems = groups[year];
+        
+        // Check if consecutive
+        let isConsecutive = true;
+        for (let i = 1; i < monthItems.length; i++) {
+            if (monthItems[i].month !== monthItems[i-1].month + 1) {
+                isConsecutive = false;
+                break;
+            }
+        }
+
+        // Range representation if >= 4 months
+        if (isConsecutive && monthItems.length >= 4) {
+            const first = monthItems[0].name;
+            const last = monthItems[monthItems.length - 1].name;
+            return `${first} to ${last} – ${year}`;
+        }
+
+        const names = monthItems.map(m => m.name);
+        return `${names.join(', ')} – ${year}`;
     });
 
     return parts.join('; ');
@@ -219,15 +238,15 @@ export const ReceiptsPrintPage: React.FC = () => {
                 .receipt-card .tilt2 { transform: none; }
 
                 .receipt-card .header { text-align: center; line-height: 1; }
-                .receipt-card .h1 { font-size: 1.35em; font-weight: 700; }
-                .receipt-card .h2 { font-size: 1.6em; font-weight: 800; line-height: 1.02; margin-top: .1em; }
-                .receipt-card .hsmall { font-size: .8em; font-weight: 500; margin-top: .15em; }
-                .receipt-card .haddr { font-size: .7em; font-weight: 500; margin-top: .1em; }
+                .receipt-card .h1 { font-size: 1.5em; font-weight: 700; }
+                .receipt-card .h2 { font-size: 1.9em; font-weight: 800; line-height: 1.02; margin-top: .12em; }
+                .receipt-card .hsmall { font-size: .82em; font-weight: 500; margin-top: .3em; }
+                .receipt-card .haddr { font-size: .8em; font-weight: 500; margin-top: .1em; }
 
                 .receipt-card .numrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 1em; margin-top: .6em; }
                 .receipt-card .numL { display: flex; align-items: flex-end; gap: .45em; }
                 .receipt-card .numR { display: flex; align-items: flex-end; gap: .4em; }
-                .receipt-card .label { font-size: .85em; font-weight: 600; line-height: 1; white-space: nowrap; flex: 0 0 auto; }
+                .receipt-card .label { font-size: .9em; font-weight: 600; line-height: 1; white-space: nowrap; flex: 0 0 auto; }
                 .receipt-card .rednum { color: var(--red); font-size: 1.8em; font-weight: 700; line-height: .8; }
                 .receipt-card .dateval { font-size: 1.25em; font-weight: 600; line-height: 1; position: relative; bottom: .05em; }
 
@@ -250,7 +269,7 @@ export const ReceiptsPrintPage: React.FC = () => {
                 .receipt-card .sigtext { font-size: 1.7em; line-height: .8; margin-bottom: .05em; }
 
                 .receipt-card .notice { margin-top: .5em; border: 1px solid var(--brd); border-radius: .4em; padding: .3em .5em; text-align: center; background: rgba(255,255,255,.5); }
-                .receipt-card .notice span { font-size: .8em; font-weight: 600; line-height: 1.2; color: var(--ink-print); }
+                .receipt-card .notice span { font-size: .85em; font-weight: 600; line-height: 1.25; color: var(--ink-print); }
 
                 @media print {
                     @page { size: A4 portrait; margin: 0; }
