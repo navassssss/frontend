@@ -196,10 +196,10 @@ export const ReceiptsPrintPage: React.FC = () => {
 
                 .receipt-card .content { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 5% 7.5% 6.5%; }
                 .receipt-card .mal { color: var(--ink-print); }
-                .receipt-card .hand { font-family: 'Caveat', cursive; color: var(--ink-hand); letter-spacing: .01em; }
-                .receipt-card .sig { font-family: 'Dancing Script', cursive; color: var(--ink-hand); }
-                .receipt-card .tilt { transform: rotate(-1.4deg); }
-                .receipt-card .tilt2 { transform: rotate(-.8deg); }
+                .receipt-card .hand { font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif; color: var(--ink-print); letter-spacing: normal; }
+                .receipt-card .sig { font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif; color: var(--ink-print); }
+                .receipt-card .tilt { transform: none; }
+                .receipt-card .tilt2 { transform: none; }
 
                 .receipt-card .header { text-align: center; line-height: 1; }
                 .receipt-card .h1 { font-size: 1.35em; font-weight: 700; }
