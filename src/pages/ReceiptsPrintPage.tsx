@@ -36,6 +36,13 @@ const getMonthsSummary = (allocations: any[]) => {
     return formatted.join(', ');
 };
 
+const toTitleCase = (str: string) => {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+};
+
 export const ReceiptsPrintPage: React.FC = () => {
     const { batchId } = useParams<{ batchId: string }>();
     const [payments, setPayments] = useState<any[]>([]);
@@ -317,7 +324,7 @@ export const ReceiptsPrintPage: React.FC = () => {
                                                 <div className="row">
                                                     <span className="label mal">{L.donor}</span>
                                                     <span className="line">
-                                                        <span className="val hand tilt vname">{p.student_name}</span>
+                                                        <span className="val hand tilt vname">{toTitleCase(p.student_name)}</span>
                                                     </span>
                                                 </div>
 
