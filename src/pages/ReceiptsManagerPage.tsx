@@ -250,7 +250,7 @@ export const ReceiptsManagerPage: React.FC = () => {
                                 <SelectContent>
                                     <SelectItem value="pending">Pending Print</SelectItem>
                                     <SelectItem value="issued">Printed</SelectItem>
-                                    <SelectItem value="all">All Dues</SelectItem>
+                                    <SelectItem value="all">All Payments</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Select value={classFilter} onValueChange={setClassFilter}>
