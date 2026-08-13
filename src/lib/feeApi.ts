@@ -282,3 +282,46 @@ export const deleteHandover = async (id: number) => {
     const response = await api.delete(`/fees/handovers/${id}`);
     return response.data;
 };
+
+// ==================== Receipt Batches ====================
+
+export interface ReceiptBatch {
+    id: number;
+    generated_at: string;
+    generated_by: number;
+    payments_count: number;
+    generated_by_user?: {
+        id: number;
+        name: string;
+    };
+}
+
+export const getReceiptBatches = async () => {
+    const response = await api.get('/fees/receipt-batches');
+    return response.data;
+};
+
+export const createReceiptBatch = async (data: { payment_ids: number[] }) => {
+    const response = await api.post('/fees/receipt-batches', data);
+    return response.data;
+};
+
+export const getReceiptBatch = async (batchId: number) => {
+    const response = await api.get(`/fees/receipt-batches/${batchId}`);
+    return response.data;
+};
+
+export const getPayments = async (params?: { receipt_issued?: boolean; startDate?: string; endDate?: string }) => {
+    const queryParams: any = {};
+    if (params?.receipt_issued !== undefined) {
+        queryParams.receipt_issued = params.receipt_issued;
+    }
+    if (params?.startDate) {
+        queryParams.start_date = params.startDate;
+    }
+    if (params?.endDate) {
+        queryParams.end_date = params.endDate;
+    }
+    const response = await api.get('/fees/reports/daily', { params: queryParams });
+    return response.data;
+};

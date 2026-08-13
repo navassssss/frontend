@@ -19,7 +19,8 @@ import {
     ArrowUpDown,
     Filter,
     School,
-    Landmark
+    Landmark,
+    Printer
 } from 'lucide-react';
 import { AddPaymentModal } from '@/components/fee/AddPaymentModal';
 import * as feeApi from '@/lib/feeApi';
@@ -306,6 +307,15 @@ const FeeManagementPage: React.FC = () => {
                         >
                             <Landmark className="w-4 h-4 mr-2" />
                             Handover Manager
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate('/fees/receipts')}
+                            className="shadow-sm"
+                        >
+                            <Printer className="w-4 h-4 mr-2" />
+                            Receipts &amp; Batches
                         </Button>
                     </div>
 

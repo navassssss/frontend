@@ -66,6 +66,8 @@ import FeeManagementPage from "./pages/FeeManagementPage";
 import FeeReportsPage from "./pages/FeeReportsPage";
 import StudentFeeDetailPage from './pages/StudentFeeDetailPage';
 import { CommitteeHandoverPage } from "./pages/CommitteeHandoverPage";
+import { ReceiptsManagerPage } from "./pages/ReceiptsManagerPage";
+import { ReceiptsPrintPage } from "./pages/ReceiptsPrintPage";
 
 // Student Pages
 import StudentLoginPage from "./pages/student/StudentLoginPage";
@@ -520,6 +522,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <CommitteeHandoverPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/fees/receipts"
+        element={
+          <ProtectedRoute>
+            <ReceiptsManagerPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/fees/receipts/print/:batchId"
+        element={
+          <ProtectedRoute>
+            <ReceiptsPrintPage />
           </ProtectedRoute>
         }
       />
