@@ -474,13 +474,13 @@ export const ReceiptsManagerPage: React.FC = () => {
                                                             Reprint Batch
                                                         </Button>
                                                         <Button
-                                                            size="sm"
+                                                            size="icon"
                                                             variant="outline"
                                                             onClick={() => handleDeleteBatch(batch.id)}
-                                                            className="h-8 gap-1 border-destructive text-destructive hover:bg-destructive/10"
+                                                            className="h-8 w-8 border-destructive text-destructive hover:bg-destructive/10"
+                                                            title="Delete Batch"
                                                         >
                                                             <Trash2 className="w-3.5 h-3.5" />
-                                                            Delete Batch
                                                         </Button>
                                                     </td>
                                                 </tr>
