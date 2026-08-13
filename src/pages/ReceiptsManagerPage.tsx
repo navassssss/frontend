@@ -465,13 +465,13 @@ export const ReceiptsManagerPage: React.FC = () => {
                                                     </td>
                                                     <td className="p-3 text-right flex justify-end gap-2">
                                                         <Button
-                                                            size="sm"
+                                                            size="icon"
                                                             variant="outline"
                                                             onClick={() => window.open(`/fees/receipts/print/${batch.id}`, '_blank')}
-                                                            className="h-8 gap-1"
+                                                            className="h-8 w-8"
+                                                            title="Reprint Batch"
                                                         >
                                                             <Printer className="w-3.5 h-3.5" />
-                                                            Reprint Batch
                                                         </Button>
                                                         <Button
                                                             size="icon"
