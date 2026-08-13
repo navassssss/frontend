@@ -220,8 +220,8 @@ export const ReceiptsPrintPage: React.FC = () => {
                 .receipt-card .dateval { font-size: 1.25em; font-weight: 600; line-height: 1; position: relative; bottom: .05em; }
 
                 .receipt-card .row { display: flex; align-items: flex-end; gap: .35em; margin-top: .4em; }
-                .receipt-card .line { position: relative; flex: 1 1 auto; min-width: 0; min-height: 1.5em; border-bottom: 1px dotted var(--brd); overflow: hidden; }
-                .receipt-card .val { position: absolute; bottom: .15em; left: .4em; white-space: nowrap; line-height: 1; }
+                .receipt-card .line { position: relative; flex: 1 1 auto; min-width: 0; min-height: 1.5em; border-bottom: 1px dotted var(--brd); }
+                .receipt-card .val { position: absolute; bottom: -0.15em; left: .4em; white-space: nowrap; line-height: 1; }
                 .receipt-card .vname { font-size: 1.45em; font-weight: 600; }
                 .receipt-card .vpurpose, .receipt-card .vdesc { font-size: 1.35em; font-weight: 600; }
 
