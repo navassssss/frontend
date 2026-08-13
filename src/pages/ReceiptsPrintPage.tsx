@@ -30,41 +30,25 @@ const getMonthsSummary = (allocations: any[]) => {
         if (a.year !== b.year) return a.year - b.year;
         return a.month - b.month;
     });
+
+    const count = sorted.length;
+    const suffix = count === 1 ? 'Month' : 'Months';
     
-    // Group months by year
-    const groups: { [key: number]: { month: number; name: string }[] } = {};
-    sorted.forEach(a => {
-        if (!groups[a.year]) {
-            groups[a.year] = [];
-        }
-        groups[a.year].push({ month: a.month, name: a.month_name.substring(0, 3) });
-    });
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    
+    const firstMonthName = first.month_name.substring(0, 3);
+    const lastMonthName = last.month_name.substring(0, 3);
 
-    const parts = Object.keys(groups).map(yearStr => {
-        const year = parseInt(yearStr);
-        const monthItems = groups[year];
-        
-        // Check if consecutive
-        let isConsecutive = true;
-        for (let i = 1; i < monthItems.length; i++) {
-            if (monthItems[i].month !== monthItems[i-1].month + 1) {
-                isConsecutive = false;
-                break;
-            }
-        }
+    if (count === 1) {
+        return `${firstMonthName} ${first.year} (${count} ${suffix})`;
+    }
 
-        // Range representation if >= 4 months
-        if (isConsecutive && monthItems.length >= 4) {
-            const first = monthItems[0].name;
-            const last = monthItems[monthItems.length - 1].name;
-            return `${first} to ${last} – ${year}`;
-        }
+    if (first.year === last.year) {
+        return `${firstMonthName} – ${lastMonthName} ${first.year} (${count} ${suffix})`;
+    }
 
-        const names = monthItems.map(m => m.name);
-        return `${names.join(', ')} – ${year}`;
-    });
-
-    return parts.join('; ');
+    return `${firstMonthName} ${first.year} – ${lastMonthName} ${last.year} (${count} ${suffix})`;
 };
 
 const toTitleCase = (str: string) => {
@@ -354,7 +338,9 @@ export const ReceiptsPrintPage: React.FC = () => {
                                                 <div className="row">
                                                     <span className="label mal">{L.donor}</span>
                                                     <span className="line">
-                                                        <span className="val hand tilt vname">{toTitleCase(p.student_name)}</span>
+                                                        <span className="val hand tilt vname">
+                                                            {toTitleCase(p.student_name)}{p.admission_no ? ` (${p.admission_no})` : ''}
+                                                        </span>
                                                     </span>
                                                 </div>
 
