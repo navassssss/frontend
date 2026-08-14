@@ -49,6 +49,7 @@ export const getStudents = async (params?: {
     per_page?: number;
     search?: string;
     status?: string;
+    isActive?: boolean;
 }): Promise<{
     data: StudentFee[];
     current_page: number;
@@ -68,6 +69,7 @@ export const getStudents = async (params?: {
     if (params?.per_page) queryParams.per_page = params.per_page;
     if (params?.search) queryParams.search = params.search;
     if (params?.status) queryParams.status = params.status;
+    if (params?.isActive !== undefined) queryParams.is_active = params.isActive;
 
     const response = await api.get('/fees/students', { params: queryParams });
     return response.data;
@@ -348,5 +350,10 @@ export const getPayments = async (params?: {
 
 export const deleteReceiptBatch = async (batchId: number) => {
     const response = await api.delete(`/fees/receipt-batches/${batchId}`);
+    return response.data;
+};
+
+export const toggleStudentActive = async (studentId: number, isActive?: boolean) => {
+    const response = await api.post(`/fees/students/${studentId}/toggle-active`, { is_active: isActive });
     return response.data;
 };

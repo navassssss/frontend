@@ -68,6 +68,7 @@ import StudentFeeDetailPage from './pages/StudentFeeDetailPage';
 import { CommitteeHandoverPage } from "./pages/CommitteeHandoverPage";
 import { ReceiptsManagerPage } from "./pages/ReceiptsManagerPage";
 import { ReceiptsPrintPage } from "./pages/ReceiptsPrintPage";
+import { DeactivatedStudentsPage } from "./pages/DeactivatedStudentsPage";
 
 // Student Pages
 import StudentLoginPage from "./pages/student/StudentLoginPage";
@@ -541,6 +542,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/fees/deactivated"
+        element={
+          <ProtectedRoute>
+            <DeactivatedStudentsPage />
+          </ProtectedRoute>
+        }
+      />
+
 
       {/* Public Route - Leaderboard Only */}
       <Route path="/leaderboard" element={<PublicLeaderboardPage />} />

@@ -25,6 +25,7 @@ import {
     FileText,
     ArrowLeft,
     Wrench,
+    Power,
 } from 'lucide-react';
 import * as feeApi from '@/lib/feeApi';
 
@@ -40,6 +41,7 @@ interface StudentFee {
     studentName: string;
     className: string;
     monthlyFee: number;
+    is_active?: boolean;
 }
 
 interface MonthlyFeeStatus {
@@ -155,6 +157,7 @@ const StudentFeeDetailPage: React.FC = () => {
                     studentName: overview.student.name,
                     className: overview.student.class_name,
                     monthlyFee: overview.student.monthly_fee || 0,
+                    is_active: overview.student.is_active,
                 });
             }
 
@@ -264,6 +267,26 @@ const StudentFeeDetailPage: React.FC = () => {
         const now = new Date();
         const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    };
+
+    const handleToggleActive = async () => {
+        if (!studentFee || !id) return;
+        
+        const newStatus = !studentFee.is_active;
+        const confirmMsg = newStatus 
+            ? "Are you sure you want to activate this student?" 
+            : "Are you sure you want to deactivate this student? They will no longer appear in the active fee list or reports.";
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            await feeApi.toggleStudentActive(parseInt(id), newStatus);
+            toast.success(newStatus ? "Student activated successfully" : "Student deactivated successfully");
+            loadData();
+        } catch (error) {
+            console.error("Failed to toggle student active status", error);
+            toast.error("Failed to update student active status");
+        }
     };
 
     // Set default values when adjust dialog opens
@@ -537,7 +560,14 @@ const StudentFeeDetailPage: React.FC = () => {
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h2 className="text-lg font-semibold">{toTitleCase(studentFee.studentName)}</h2>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-semibold">{toTitleCase(studentFee.studentName)}</h2>
+                                    {studentFee.is_active === false && (
+                                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px] h-5 py-0 px-2 font-semibold">
+                                            Deactivated
+                                        </Badge>
+                                    )}
+                                </div>
                                 <p className="text-[11px] text-muted-foreground">Class {studentFee.className}</p>
                             </div>
                             <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-md">
@@ -791,6 +821,21 @@ const StudentFeeDetailPage: React.FC = () => {
                             </div>
                         </DialogContent>
                     </Dialog>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleToggleActive}
+                        className={cn(
+                            "gap-1.5 shadow-sm ml-auto",
+                            studentFee.is_active === false
+                                ? "border-green-600 text-green-600 hover:bg-green-50"
+                                : "border-red-600 text-red-600 hover:bg-red-50"
+                        )}
+                    >
+                        <Power className="w-4 h-4" />
+                        {studentFee.is_active === false ? "Activate Student" : "Deactivate Student"}
+                    </Button>
                 </div>
 
                 {/* Tabs */}
