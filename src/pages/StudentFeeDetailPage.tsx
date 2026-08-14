@@ -157,7 +157,7 @@ const StudentFeeDetailPage: React.FC = () => {
                     studentName: overview.student.name,
                     className: overview.student.class_name,
                     monthlyFee: overview.student.monthly_fee || 0,
-                    is_active: overview.student.is_active,
+                    is_active: overview.student.is_active ?? true,
                 });
             }
 
@@ -272,7 +272,8 @@ const StudentFeeDetailPage: React.FC = () => {
     const handleToggleActive = async () => {
         if (!studentFee || !id) return;
         
-        const newStatus = !studentFee.is_active;
+        const currentActive = studentFee.is_active ?? true;
+        const newStatus = !currentActive;
         const confirmMsg = newStatus 
             ? "Are you sure you want to activate this student?" 
             : "Are you sure you want to deactivate this student? They will no longer appear in the active fee list or reports.";
