@@ -109,10 +109,10 @@ const FeeManagementPage: React.FC = () => {
                 }]
             });
             
-            // 2. Set monthly fee if specified
-            const createdStudent = response.data[0];
-            const monthlyFeeNum = parseFloat(newStudentMonthlyFee);
-            if (createdStudent && createdStudent.id && !isNaN(monthlyFeeNum) && monthlyFeeNum > 0) {
+            // 2. Set monthly fee (and trigger immediate plan generation on the backend)
+            const createdStudent = response.data.data ? response.data.data[0] : response.data[0];
+            const monthlyFeeNum = parseFloat(newStudentMonthlyFee) || 0;
+            if (createdStudent && createdStudent.id) {
                 await api.post(`/fees/students/${createdStudent.id}/monthly-fee`, {
                     monthly_fee: monthlyFeeNum
                 });
