@@ -276,6 +276,17 @@ export const CommitteeHandoverPage: React.FC = () => {
     return (
         <AppLayout title="Committee Handover Manager" showBack onBack={() => navigate('/fees')}>
             <div className="space-y-5 pb-12">
+                {/* Back Button */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/fees')}
+                    className="hidden lg:flex items-center gap-1 -ml-2"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Monthly Donations
+                </Button>
+
                 {/* Header Controls & Navigation */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
