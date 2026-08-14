@@ -16,6 +16,7 @@ import {
     Plus,
     BarChart3,
     ChevronRight,
+    ChevronLeft,
     ArrowUpDown,
     Filter,
     School,
@@ -482,35 +483,36 @@ const FeeManagementPage: React.FC = () => {
                 }
 
                 {/* Pagination Controls */}
-                {
-                    totalPages > 1 && (
-                        <div className="fixed bottom-0 left-0 right-0 p-3 bg-background border-t shadow-lg flex items-center justify-between pb-20 sm:pb-6 z-10 lg:pl-64 gap-2">
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-2 py-4 bg-transparent border-t mt-4">
+                        <div className="text-xs text-muted-foreground font-medium">
+                            Showing page {currentPage} of {totalPages} ({totalStudents} total students)
+                        </div>
+                        <div className="flex items-center gap-1.5">
                             <Button
                                 variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="flex-shrink-0 px-3"
                             >
-                                <span className="hidden sm:inline">Previous</span>
-                                <span className="sm:hidden">Prev</span>
+                                <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                                Page {currentPage} of {totalPages}
-                            </span>
+                            <div className="text-xs font-semibold px-2 min-w-[2rem] text-center">
+                                {currentPage}
+                            </div>
                             <Button
                                 variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="flex-shrink-0 px-3"
                             >
-                                <span className="hidden sm:inline">Next</span>
-                                <span className="sm:hidden">Next</span>
+                                <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
-                    )
-                }
+                    </div>
+                )}
 
                 {/* Add Payment Modal */}
                 <AddPaymentModal
