@@ -22,7 +22,8 @@ import {
     School,
     Landmark,
     Printer,
-    UserX
+    UserX,
+    UserPlus
 } from 'lucide-react';
 import { AddPaymentModal } from '@/components/fee/AddPaymentModal';
 import * as feeApi from '@/lib/feeApi';
@@ -327,6 +328,15 @@ const FeeManagementPage: React.FC = () => {
                         >
                             <UserX className="w-4 h-4 mr-2" />
                             Deactivated Students
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate('/students/new')}
+                            className="shadow-sm"
+                        >
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Add Student
                         </Button>
                     </div>
 
