@@ -29,6 +29,8 @@ import { AddPaymentModal } from '@/components/fee/AddPaymentModal';
 import * as feeApi from '@/lib/feeApi';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import api from '@/lib/api';
 
 interface StudentFeeWithOverview {
     id: string;
@@ -71,6 +73,64 @@ const FeeManagementPage: React.FC = () => {
 
     // Overall status counts
     const [statusCounts, setStatusCounts] = useState({ paid: 0, partial: 0, due: 0, overpaid: 0 });
+
+    // Custom Add Student Dialog State
+    const [addStudentOpen, setAddStudentOpen] = useState(false);
+    const [newStudentName, setNewStudentName] = useState('');
+    const [newStudentRoll, setNewStudentRoll] = useState('');
+    const [newStudentClass, setNewStudentClass] = useState('');
+    const [newStudentDept, setNewStudentDept] = useState('');
+    const [newStudentMonthlyFee, setNewStudentMonthlyFee] = useState('0');
+    const [savingStudent, setSavingStudent] = useState(false);
+
+    const handleAddStudentSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newStudentName || !newStudentClass) {
+            toast.error('Please enter student name and class');
+            return;
+        }
+
+        setSavingStudent(true);
+        try {
+            // 1. Create student
+            const response = await api.post('/students/bulk', {
+                students: [{
+                    name: newStudentName,
+                    roll_number: newStudentRoll || null,
+                    class_id: Number(newStudentClass),
+                    department: newStudentDept ? newStudentDept.trim() : null
+                }]
+            });
+            
+            // 2. Set monthly fee if specified
+            const createdStudent = response.data[0];
+            const monthlyFeeNum = parseFloat(newStudentMonthlyFee);
+            if (createdStudent && createdStudent.id && !isNaN(monthlyFeeNum) && monthlyFeeNum > 0) {
+                await api.post(`/fees/students/${createdStudent.id}/monthly-fee`, {
+                    monthly_fee: monthlyFeeNum
+                });
+            }
+
+            toast.success('Student registered successfully');
+            setAddStudentOpen(false);
+            
+            // Reset fields
+            setNewStudentName('');
+            setNewStudentRoll('');
+            setNewStudentClass('');
+            setNewStudentDept('');
+            setNewStudentMonthlyFee('0');
+            
+            // Refresh
+            setCurrentPage(1);
+            loadData();
+        } catch (error: any) {
+            console.error('Failed to register student', error);
+            toast.error(error?.response?.data?.message || 'Failed to register student');
+        } finally {
+            setSavingStudent(false);
+        }
+    };
 
     const isFirstRun = React.useRef(true);
 
@@ -332,7 +392,7 @@ const FeeManagementPage: React.FC = () => {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate('/students/new')}
+                            onClick={() => setAddStudentOpen(true)}
                             className="shadow-sm"
                         >
                             <UserPlus className="w-4 h-4 mr-2" />
@@ -530,6 +590,76 @@ const FeeManagementPage: React.FC = () => {
                     onOpenChange={setPaymentModalOpen}
                     onPaymentAdded={() => loadData(currentPage)}
                 />
+
+                {/* Custom Add Student Dialog */}
+                <Dialog open={addStudentOpen} onOpenChange={setAddStudentOpen}>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Register New Student</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleAddStudentSubmit} className="space-y-4 pt-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-muted-foreground">Full Name *</label>
+                                <Input
+                                    value={newStudentName}
+                                    onChange={(e) => setNewStudentName(e.target.value)}
+                                    placeholder="Enter full name"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-muted-foreground">Admission No.</label>
+                                    <Input
+                                        value={newStudentRoll}
+                                        onChange={(e) => setNewStudentRoll(e.target.value)}
+                                        placeholder="e.g. 1045"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-muted-foreground">Class *</label>
+                                    <Select value={newStudentClass} onValueChange={setNewStudentClass} required>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select class" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {classes.map((cls) => (
+                                                <SelectItem key={cls.id} value={cls.id}>
+                                                    {cls.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-muted-foreground">Department (Optional)</label>
+                                    <Input
+                                        value={newStudentDept}
+                                        onChange={(e) => setNewStudentDept(e.target.value)}
+                                        placeholder="e.g. Civilizational"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-muted-foreground">Monthly Fee (₹)</label>
+                                    <Input
+                                        type="number"
+                                        value={newStudentMonthlyFee}
+                                        onChange={(e) => setNewStudentMonthlyFee(e.target.value)}
+                                        placeholder="0"
+                                    />
+                                </div>
+                            </div>
+
+                            <Button type="submit" className="w-full mt-2" disabled={savingStudent}>
+                                {savingStudent ? 'Registering...' : 'Register Student'}
+                            </Button>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div >
         </AppLayout >
     );
