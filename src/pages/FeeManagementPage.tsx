@@ -81,6 +81,10 @@ const FeeManagementPage: React.FC = () => {
     const [newStudentClass, setNewStudentClass] = useState('');
     const [newStudentDept, setNewStudentDept] = useState('');
     const [newStudentMonthlyFee, setNewStudentMonthlyFee] = useState('0');
+    const [newStudentStartMonth, setNewStudentStartMonth] = useState(() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    });
     const [savingStudent, setSavingStudent] = useState(false);
 
     const handleAddStudentSubmit = async (e: React.FormEvent) => {
@@ -93,12 +97,14 @@ const FeeManagementPage: React.FC = () => {
         setSavingStudent(true);
         try {
             // 1. Create student
+            const joinedAtDate = newStudentStartMonth ? `${newStudentStartMonth}-01` : null;
             const response = await api.post('/students/bulk', {
                 students: [{
                     name: newStudentName,
                     roll_number: newStudentRoll || null,
                     class_id: Number(newStudentClass),
-                    department: newStudentDept ? newStudentDept.trim() : null
+                    department: newStudentDept ? newStudentDept.trim() : null,
+                    joined_at: joinedAtDate
                 }]
             });
             
@@ -619,18 +625,19 @@ const FeeManagementPage: React.FC = () => {
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-semibold text-muted-foreground">Class *</label>
-                                    <Select value={newStudentClass} onValueChange={setNewStudentClass} required>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select class" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {classes.map((cls) => (
-                                                <SelectItem key={cls.id} value={cls.id}>
-                                                    {cls.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <select
+                                        value={newStudentClass}
+                                        onChange={(e) => setNewStudentClass(e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        required
+                                    >
+                                        <option value="" disabled className="text-muted-foreground">Select class</option>
+                                        {classes.map((cls) => (
+                                            <option key={cls.id} value={cls.id} className="text-foreground bg-background">
+                                                {cls.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
@@ -652,6 +659,16 @@ const FeeManagementPage: React.FC = () => {
                                         placeholder="0"
                                     />
                                 </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-muted-foreground">Starting Month for Donation *</label>
+                                <Input
+                                    type="month"
+                                    value={newStudentStartMonth}
+                                    onChange={(e) => setNewStudentStartMonth(e.target.value)}
+                                    required
+                                />
                             </div>
 
                             <Button type="submit" className="w-full mt-2" disabled={savingStudent}>
